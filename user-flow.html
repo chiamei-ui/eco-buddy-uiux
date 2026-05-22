@@ -583,7 +583,7 @@
     <div class="section-label orange">B &nbsp;底部 Tab 導覽</div>
     <div class="tab-nav">
       <div class="tab-nav-label">BOTTOM TAB BAR</div>
-      <div class="tab-item active"><span class="emoji">🐾</span> 寵物（P1）</div>
+      <div class="tab-item active"><span class="emoji">🐾</span> 夥伴（P1）</div>
       <div class="tab-item"><span class="emoji">🛒</span> 商店（P4）</div>
       <div class="tab-item"><span class="emoji">📖</span> 圖鑑（P7）</div>
       <div class="tab-item"><span class="emoji">✅</span> 任務（P5）</div>
@@ -595,18 +595,18 @@
 
   <!-- ──────────── ZONE C: P1 寵物首頁 HUB ──────────── -->
   <div class="section">
-    <div class="section-label orange">C &nbsp;P1 寵物首頁（核心 Hub）</div>
+    <div class="section-label orange">C &nbsp;P1 夥伴首頁（核心 Hub）</div>
 
     <div class="row center">
       <div class="node primary wide">
         <div class="node-id">P1 · TAB 主頁</div>
-        <div class="node-title">🐾 寵物首頁</div>
+        <div class="node-title">🐾 夥伴首頁</div>
         <div class="node-desc">
           <b>角色展示區</b>：Rive 動畫 120×120<br>
           <b>屬性條</b>：HP / 潔淨 / 心情 即時顯示<br>
-          <b>食物四格</b>：本週格（橘）/ 過期格 / 鎖定格<br>
-          <b>免費道具按鈕</b>（今日剩餘次數 Badge）<br>
-          <b>道具包入口</b>（庫存數量 Badge）<br>
+          <b>食物 / 道具 Sub-Tab</b>：食物四格（本週橘 / 過期 / 鎖定）· 道具 Tab = P9 背包入口<br>
+          <b>食物格數字 Badge</b>：該食物定期配給累積數量；每次餵食 -1；配給間隔待訂<br>
+          <b>免費道具按鈕</b>：右上角橘色數字 Badge 顯示今日剩餘次數（上限 5 次）<br>
           右上頭像 → P8 我的
         </div>
         <span class="node-tag tag-tab">預設首頁</span>
@@ -647,17 +647,17 @@
         </div>
 
         <div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
-          <div class="path-label">免費道具按鈕</div>
+          <div class="path-label">免費道具按鈕<br>（右上橘色次數 Badge）</div>
           <div style="color:var(--gray-400);font-size:16px;">↓</div>
           <div class="node secondary" style="min-width:140px;">
             <div class="node-id">P6</div>
             <div class="node-title">🎁 廣告 → 開箱</div>
-            <div class="node-desc">看廣告抽道具<br>每日上限 5 次</div>
+            <div class="node-desc">看廣告抽道具<br>每日上限 5 次<br>Badge = 剩餘次數</div>
           </div>
         </div>
 
         <div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
-          <div class="path-label">道具包入口</div>
+          <div class="path-label">食物區「道具」Sub-Tab</div>
           <div style="color:var(--gray-400);font-size:16px;">↓</div>
           <div class="node secondary" style="min-width:140px;">
             <div class="node-id">P9</div>
@@ -753,15 +753,16 @@
       <div style="font-size:10px;font-weight:800;color:var(--gray-700);margin-bottom:8px;letter-spacing:0.05em;">🗓 食物四格邏輯（P1 → P3 入口）</div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;">
         <div style="background:#FFF5F0;border:2px solid var(--orange);border-radius:8px;padding:8px 12px;font-size:10px;">
-          <b style="color:var(--orange);">本週格</b><br>橘色高亮 · 可餵食
+          <b style="color:var(--orange);">本週格</b><br>橘色高亮 · 可餵食<br>右上 Badge = 配給累積數量<br>每次餵食 -1
         </div>
         <div style="background:var(--gray-100);border:1px solid var(--gray-300);border-radius:8px;padding:8px 12px;font-size:10px;opacity:0.85;">
-          <b>過期格</b><br>半透明 · 仍可餵
+          <b>過期格</b><br>半透明 · 仍可餵<br>Badge 同樣顯示剩餘數量
         </div>
         <div style="background:var(--gray-100);border:1px dashed var(--gray-300);border-radius:8px;padding:8px 12px;font-size:10px;opacity:0.5;">
-          <b>🔒 未到週次</b><br>鎖定 · 不可點
+          <b>🔒 未到週次</b><br>鎖定 · 不可點<br>Badge 隱藏
         </div>
       </div>
+      <div style="margin-top:8px;font-size:9px;color:var(--gray-400);font-weight:600;">※ 配給間隔時間 TBD · 數量歸零後需等下次配給才可餵食</div>
     </div>
   </div>
 
