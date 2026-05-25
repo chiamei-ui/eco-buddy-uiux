@@ -6,41 +6,25 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **ECO BUDDY** — 養成遊戲角色遊戲化 UI/UX 設計專案。聚焦各遊戲畫面（主頁、背包、商店等）的介面設計。
 
-> 舊 Rive 動畫預覽工具計畫已封存至 `archive/rive-plan/`。
+> 舊 Rive 動畫預覽工具計畫已封存至 `archive/rive-plan/`，程式碼封存至 `archive/rive-previewer/`。
 
-當前狀態：方向確認中。詳見 [implementation_plan.md](implementation_plan.md) 與 [task.md](task.md)。
-
-## Commands
-
-工作目錄在 `rive-previewer/`：
-
-```bash
-npm run dev       # Vite dev server (HMR)
-npm run build     # tsc + vite build（會做型別檢查）
-npm run lint      # ESLint flat config
-npm run preview   # 預覽 production build
-```
-
-無獨立測試指令（目前專案無測試框架）。
+當前狀態：UI/UX 設計階段。詳見 [implementation_plan.md](implementation_plan.md) 與 [task.md](task.md)。
 
 ## Architecture
 
 ```
 eco-buddy/
-├── rive-previewer/        # 主要 Web App（唯一含 package.json 的模組）
-│   ├── src/
-│   │   ├── main.tsx       # React root
-│   │   └── App.tsx        # 根元件（目前為 boilerplate）
-│   ├── vite.config.ts
-│   └── eslint.config.js   # ESLint v9 flat config（非 .eslintrc）
+├── archive/
+│   ├── rive-plan/         # 封存：舊 Rive 預覽工具計畫
+│   └── rive-previewer/    # 封存：舊 Rive 預覽工具程式碼
 ├── openspec/              # Change management（用 /opsx:* 指令操作）
 ├── character/             # 設計師角色素材
+├── assets/                # 設計資源
 ├── ECOCO_DESIGN.md        # 品牌設計規範（所有 UI 工作的唯一依據）
 ├── implementation_plan.md # 4-phase 路線圖
-└── task.md                # Phase 逐項任務清單
+├── task.md                # Phase 逐項任務清單
+└── user-flow.md           # 使用者流程圖（v1.5）
 ```
-
-**Tech stack**: React 19 + TypeScript 6 (strict) + Vite 8 + 原生 CSS（無 Tailwind）。
 
 ## Design System
 
