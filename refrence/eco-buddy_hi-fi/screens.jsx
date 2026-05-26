@@ -719,7 +719,7 @@ const ShopPurchaseModal = ({ item, state, onClose, onConfirm }) => {
         </div>
       </div>
 
-      <SystemToast text={toast} onClose={() => setToast(null)} />
+      <SystemToast text={toast} onClose={() => setToast(null)} bottom />
     </div>
   );
 };
@@ -968,7 +968,7 @@ const P6Ads = ({ setScreen, state, dispatch }) => {
 };
 
 /* ═══════════════ P7 · Dex ═══════════════ */
-const P7Dex = ({ setScreen, state }) => {
+const P7Dex = ({ setScreen, state, dispatch, onOpenPicker }) => {
   const months = [
   { m: 1, filled: true, icon: '🐢', code: '07' },
   { m: 2, filled: true, icon: '🐢', code: '13' },
@@ -988,7 +988,7 @@ const P7Dex = ({ setScreen, state }) => {
 
   return (
     <div className="screen p7">
-      <StatusBar light />
+      <StatusBar />
       <div className="header">
         <h2>圖鑑</h2>
         <div className="en">DEX · 2026</div>
@@ -1000,7 +1000,7 @@ const P7Dex = ({ setScreen, state }) => {
           <span className="text">月底前 <b>5 天</b> · 6 月份角色尚未選入年度</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 10 }}>
-          <button className="btn-primary" style={{ padding: '8px 18px', fontSize: 13, boxShadow: 'none' }} onClick={() => setScreen('p10')}>選擇 6 月角色</button>
+          <button className="btn-primary" style={{ padding: '8px 18px', fontSize: 13, boxShadow: 'none' }} onClick={() => onOpenPicker && onOpenPicker()}>選擇 6 月角色</button>
           <div className="swap-pill" onClick={() => setScreen('p11')} style={{ cursor: 'pointer' }}>🎫 剩餘更換 3 次</div>
         </div>
       </div>
@@ -1013,9 +1013,9 @@ const P7Dex = ({ setScreen, state }) => {
         {months.map((mo) =>
         <div key={mo.m} className={`year-cell ${mo.filled ? 'filled' : ''} ${mo.current ? 'current' : ''} ${mo.locked ? 'locked' : ''}`}>
             <span className="month">{String(mo.m).padStart(2, '0')}</span>
-            {mo.filled && <><span className="icon">{mo.icon}</span><span style={{ fontSize: 9, opacity: .7 }}>#{mo.code}</span></>}
+            {mo.filled && <><span className="icon">{mo.icon}</span><span style={{ fontSize: 9, opacity: .6 }}>#{mo.code}</span></>}
             {mo.current && <span style={{ fontSize: 20, marginTop: 4 }}>?</span>}
-            {mo.locked && <span style={{ fontSize: 14, marginTop: 4, opacity: .4 }}>🔒</span>}
+            {mo.locked && <span style={{ fontSize: 14, marginTop: 4, opacity: .3 }}>🔒</span>}
           </div>
         )}
       </div>
@@ -1034,12 +1034,13 @@ const P7Dex = ({ setScreen, state }) => {
               {s.legendary && <span className="rarity">✦ 傳說</span>}
             </> : <>
               <img className="turtle" src="assets/sea-turtle.svg" alt="" />
-              <span className="name" style={{ opacity: .5 }}>??? ???</span>
+              <span className="name" style={{ opacity: .4 }}>??? ???</span>
               <span className="lock" style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)' }}>🔒</span>
             </>}
           </div>
         )}
       </div>
+
     </div>);
 
 };
@@ -1278,14 +1279,18 @@ const P9bToolAnim = ({ setScreen }) => {
 
 };
 
-/* ═══════════════ P10 · Month picker ═══════════════ */
-const P10Picker = ({ setScreen, state, dispatch }) => {
+/* ═══════════════ P10 · Month picker (overlay on P7) ═══════════════ */
+const P10Picker = ({ setScreen, state, dispatch, onClose }) => {
   const [selected, setSelected] = useState(null);
   const states = state.dexStates;
 
+  const handleClose = () => {
+    if (onClose) onClose();
+    else setScreen('p7');
+  };
+
   return (
     <div className="screen p10">
-      <StatusBar light />
       <div className="sheet">
         <div className="title">
           <h3>選擇你的 6 月夥伴</h3>
@@ -1308,8 +1313,8 @@ const P10Picker = ({ setScreen, state, dispatch }) => {
           )}
         </div>
         <div className="actions">
-          <button className="later" onClick={() => setScreen('p7')}>稍後再選</button>
-          <button className="confirm" disabled={!selected} onClick={() => {dispatch({ type: 'LOCK_DEX', code: selected });setScreen('p7');}}>確認鎖入</button>
+          <button className="later" onClick={handleClose}>稍後再選</button>
+          <button className="confirm" disabled={!selected} onClick={() => {dispatch({ type: 'LOCK_DEX', code: selected });handleClose();}}>確認鎖入</button>
         </div>
       </div>
     </div>);
@@ -1317,57 +1322,142 @@ const P10Picker = ({ setScreen, state, dispatch }) => {
 };
 
 /* ═══════════════ P11 · Swap pack purchase ═══════════════ */
-const P11Pack = ({ setScreen }) =>
-<div className="screen p11">
-    <StatusBar />
-    <NavBack onClick={() => setScreen('p7')} />
-    <div className="header">
-      <h2 style={{ marginTop: 8 }}>更換次數包</h2>
-      <p>用於修改年度圖鑑已鎖入的格子</p>
-    </div>
-    <div className="stash">
-      <span className="ticket">🎫</span>
-      <div>
-        <b>3</b><span style={{ fontSize: 11, color: '#666', marginLeft: 4, fontWeight: 700 }}>次</span>
-        <div className="label">目前可用更換次數</div>
-      </div>
-    </div>
-    <div className="packs">
-      <div className="pack-card">
-        <h3>標準包</h3>
-        <div className="qty">10<span> 次</span></div>
-        <div className="desc">適合偶爾調整年度收藏</div>
-        <div className="price-row">
-          <b>NT$ 99</b>
-          <button className="buy">購買</button>
+const SWAP_PACKS = [
+  { id: 'swap-10', name: '標準包',   qty: 10, desc: '適合偶爾調整年度收藏',          price: 99,  featured: false },
+  { id: 'swap-50', name: '進階包',   qty: 50, desc: '換到滿意為止 · 平均 NT$6/次',   price: 299, featured: true  },
+];
+
+const P11PurchaseModal = ({ item, onClose, onConfirm }) => {
+  const [payFailDemo, setPayFailDemo] = useState(false);
+  const [toast, setToast] = useState(null);
+
+  const handleConfirm = () => {
+    if (payFailDemo) {
+      setToast(DIALOGUES.sys.p4.payFail);
+      setPayFailDemo(false);
+      return;
+    }
+    onConfirm();
+  };
+
+  return (
+    <div className="modal-backdrop" onClick={onClose}>
+      <div className="modal" onClick={(e) => e.stopPropagation()}>
+        <div className="preview" style={{ fontSize: 36 }}>🎫</div>
+        <h3>{item.name}</h3>
+        <p>{item.qty} 次更換 · {item.desc}</p>
+        <div className="pay-row active" style={{ marginBottom: 14, cursor: 'default' }}>
+          <span className="lhs">
+            <span style={{ fontSize: 16 }}>💳</span>
+            Apple / Google Pay
+            <span style={{ color: 'var(--ecoco-orange)' }}>✓</span>
+          </span>
+          <span className="rhs">NT$ {item.price}</span>
+        </div>
+        <label className="p4-demo-row">
+          <input type="checkbox" checked={payFailDemo} onChange={(e) => setPayFailDemo(e.target.checked)} />
+          <span>DEMO · 模擬付款失敗</span>
+        </label>
+        <div className="modal-actions">
+          <button onClick={onClose} style={{ background: 'var(--gray-light)', color: '#666' }}>取消</button>
+          <button onClick={handleConfirm} style={{ background: 'var(--ecoco-orange)', color: '#fff' }}>確認購買</button>
         </div>
       </div>
-      <div className="pack-card featured">
-        <div className="ribbon">划算 5 折</div>
-        <h3>進階包</h3>
-        <div className="qty">50<span> 次</span></div>
-        <div className="desc">換到滿意為止 · 平均 NT$6/次</div>
-        <div className="price-row">
-          <b>NT$ 299</b>
-          <button className="buy">購買</button>
+      <SystemToast text={toast} onClose={() => setToast(null)} bottom />
+    </div>
+  );
+};
+
+const P11SuccessModal = ({ item, onClose }) => (
+  <div className="modal-backdrop" onClick={onClose}>
+    <div className="modal" onClick={(e) => e.stopPropagation()} style={{ textAlign: 'center' }}>
+      <div style={{ fontSize: 56, marginBottom: 4, lineHeight: 1 }}>🎫</div>
+      <div style={{
+        display: 'inline-flex', alignItems: 'center', gap: 4,
+        background: '#E8F9EE', color: '#1A7A46', borderRadius: 999,
+        padding: '4px 14px', fontSize: 12, fontWeight: 800, marginBottom: 12,
+      }}>✓ 購買成功</div>
+      <h3 style={{ fontSize: 17, fontWeight: 900, marginBottom: 4 }}>{item.name}</h3>
+      <p style={{ fontSize: 13, color: '#888', marginBottom: 16 }}>已新增 {item.qty} 次更換次數</p>
+      <div style={{
+        background: '#F7F9FC', borderRadius: 12, padding: '12px 16px', fontSize: 13, marginBottom: 20,
+        display: 'flex', justifyContent: 'space-between', color: '#555',
+      }}>
+        <span>付款方式</span>
+        <span style={{ fontWeight: 700 }}>💳 Apple / Google Pay</span>
+      </div>
+      <button onClick={onClose} style={{
+        width: '100%', background: 'var(--ecoco-orange)', color: '#fff',
+        border: 'none', borderRadius: 999, padding: '13px 0', fontWeight: 800, fontSize: 14, cursor: 'pointer',
+      }}>完成</button>
+    </div>
+  </div>
+);
+
+const P11Pack = ({ setScreen }) => {
+  const [purchasing, setPurchasing] = useState(null);
+  const [successItem, setSuccessItem] = useState(null);
+
+  return (
+    <div className="screen p11">
+      <StatusBar />
+      <NavBack onClick={() => setScreen('p7')} light />
+      <div className="header">
+        <h2 style={{ marginTop: 8 }}>更換次數包</h2>
+        <p>用於修改年度圖鑑已鎖入的格子</p>
+      </div>
+      <div className="stash">
+        <span className="ticket">🎫</span>
+        <div>
+          <b>3</b><span style={{ fontSize: 11, color: '#666', marginLeft: 4, fontWeight: 700 }}>次</span>
+          <div className="label">目前可用更換次數</div>
         </div>
       </div>
-      <div className="pack-card" style={{ opacity: .6 }}>
-        <div className="ribbon" style={{ background: '#888' }}>Phase 2</div>
-        <h3>年度通行證</h3>
-        <div className="qty" style={{ color: '#666' }}>無限<span> 次</span></div>
-        <div className="desc">整年無限更換 + 每月免費解鎖 1 個未觸發狀態</div>
-        <div className="price-row">
-          <b style={{ color: '#999' }}>NT$ 999</b>
-          <button className="buy" style={{ background: '#999' }}>即將推出</button>
+      <div className="packs">
+        {SWAP_PACKS.map((pack) => (
+          <div key={pack.id} className={`pack-card ${pack.featured ? 'featured' : ''}`}>
+            {pack.featured && <div className="ribbon">划算 5 折</div>}
+            <h3>{pack.name}</h3>
+            <div className="qty">{pack.qty}<span> 次</span></div>
+            <div className="desc">{pack.desc}</div>
+            <div className="price-row">
+              <b>NT$ {pack.price}</b>
+              <button className="buy" onClick={() => setPurchasing(pack)}>購買</button>
+            </div>
+          </div>
+        ))}
+        <div className="pack-card" style={{ opacity: .6 }}>
+          <div className="ribbon" style={{ background: '#888' }}>Phase 2</div>
+          <h3>年度通行證</h3>
+          <div className="qty" style={{ color: '#666' }}>無限<span> 次</span></div>
+          <div className="desc">整年無限更換 + 每月免費解鎖 1 個未觸發狀態</div>
+          <div className="price-row">
+            <b style={{ color: '#999' }}>NT$ 999</b>
+            <button className="buy" style={{ background: '#999' }}>即將推出</button>
+          </div>
         </div>
       </div>
+      <div style={{ padding: '16px 18px 80px', fontSize: 11, color: '#888', lineHeight: 1.6 }}>
+        ※ 更換次數永久有效，不會過期。<br />
+        ※ 購買即扣款 · 不退費。
+      </div>
+
+      {purchasing && (
+        <P11PurchaseModal
+          item={purchasing}
+          onClose={() => setPurchasing(null)}
+          onConfirm={() => { setSuccessItem(purchasing); setPurchasing(null); }}
+        />
+      )}
+      {successItem && (
+        <P11SuccessModal
+          item={successItem}
+          onClose={() => setSuccessItem(null)}
+        />
+      )}
     </div>
-    <div style={{ padding: '16px 18px 80px', fontSize: 11, color: '#888', lineHeight: 1.6 }}>
-      ※ 更換次數永久有效，不會過期。<br />
-      ※ 購買即扣款 · 不退費。
-    </div>
-  </div>;
+  );
+};
 
 
 /* ═══════════════ P0 · 一般模式-首頁 ═══════════════ */
@@ -1398,7 +1488,7 @@ Object.assign(window, {
   P1Home, P2Scan, P2bResult, P3Feeding,
   P4Shop, P5Missions, P6Ads, P7Dex,
   P8Profile, P9Bag, P9bToolAnim,
-  P10Picker, P11Pack,
+  P10Picker, P11Pack, P11PurchaseModal, P11SuccessModal,
   PNormalHome,
   ShopPurchaseModal, ShopSuccessModal, PointsSourceSheet,
 });

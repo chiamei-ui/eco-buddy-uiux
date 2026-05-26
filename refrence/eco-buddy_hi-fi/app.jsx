@@ -246,6 +246,10 @@ const App = () => {
   }, [tweaks.bagEmpty]);
 
   // push toast simulation on P1
+  const [snackMsg, setSnackMsg] = useState(null);
+  const showSnack = useCallback((msg) => setSnackMsg(msg), []);
+
+  const [dexPickerOpen, setDexPickerOpen] = useState(false);
   const [pushVisible, setPushVisible] = useState(false);
   const pushTextMap = {
     none: null,
@@ -288,11 +292,11 @@ const App = () => {
       case 'p4':  return <P4Shop setScreen={setScreen} state={effectiveState} dispatch={dispatch} />;
       case 'p5':  return <P5Missions setScreen={setScreen} state={effectiveState} dispatch={dispatch} />;
       case 'p6':  return <P6Ads setScreen={setScreen} state={effectiveState} dispatch={dispatch} payload={screenPayload} />;
-      case 'p7':  return <P7Dex setScreen={setScreen} state={effectiveState} />;
+      case 'p7':  return <P7Dex setScreen={setScreen} state={effectiveState} dispatch={dispatch} onOpenPicker={() => setDexPickerOpen(true)} />;
       case 'p8':  return <P8Profile setScreen={setScreen} state={effectiveState} />;
       case 'p9':  return <P9Bag setScreen={setScreen} state={effectiveState} dispatch={dispatch} />;
       case 'p9b': return <P9bToolAnim setScreen={setScreen} />;
-      case 'p10': return <P10Picker setScreen={setScreen} state={effectiveState} dispatch={dispatch} />;
+      case 'p10': return <P7Dex setScreen={setScreen} state={effectiveState} dispatch={dispatch} onOpenPicker={() => setDexPickerOpen(true)} />;
       case 'p11': return <P11Pack setScreen={setScreen} />;
       case 'p12': return <P12RefillResult setScreen={setScreen} state={effectiveState} dispatch={dispatch} payload={screenPayload} />;
       default: return null;
@@ -314,6 +318,14 @@ const App = () => {
           <div className="iphone-screen">
             <div className="iphone-notch"></div>
             {renderScreen()}
+            {(dexPickerOpen || screen === 'p10') && (
+              <P10Picker
+                setScreen={setScreen}
+                state={effectiveState}
+                dispatch={dispatch}
+                onClose={() => { setDexPickerOpen(false); if (screen === 'p10') setScreen('p7'); }}
+              />
+            )}
             {tabbarActive && <TabBar active={tabbarActive} onNav={navFromTabbar} />}
             {pushVisible && pushTextMap[tweaks.pushOnP1] && (
               <PushToast
@@ -322,6 +334,7 @@ const App = () => {
                 onClose={()=>setPushVisible(false)}
               />
             )}
+            <SnackBar msg={snackMsg} onClose={()=>setSnackMsg(null)} />
           </div>
         </div>
       </div>
@@ -341,7 +354,7 @@ const App = () => {
         </div>
 
         <div className="stage-title" style={{padding:'0 4px'}}>Tweaks · 即時調整</div>
-        <InlineTweaks tweaks={tweaks} setTweak={setTweak} state={state} dispatch={dispatch} setScreen={setScreen} />
+        <InlineTweaks tweaks={tweaks} setTweak={setTweak} state={state} dispatch={dispatch} setScreen={setScreen} showSnack={showSnack} />
       </div>
 
       <DragGhost drag={dragManager.drag} hover={dragManager.hover} />
@@ -350,7 +363,7 @@ const App = () => {
 };
 
 /* Tweaks inline panel inside the right rail (always visible, not host-driven) */
-const InlineTweaks = ({ tweaks, setTweak, dispatch, setScreen }) => {
+const InlineTweaks = ({ tweaks, setTweak, dispatch, setScreen, showSnack }) => {
   return (
     <div style={{
       background:'rgba(255,255,255,0.04)',
@@ -391,6 +404,7 @@ const InlineTweaks = ({ tweaks, setTweak, dispatch, setScreen }) => {
           <button onClick={()=>setScreen('p10')} style={tweakBtn}>▶ 月末選擇</button>
           <button onClick={()=>setScreen('push')} style={tweakBtn}>▶ 推播範例</button>
           <button onClick={()=>setScreen('p4')} style={tweakBtn}>▶ P4 商店（唯一金流）</button>
+          <button onClick={()=>showSnack('積分已更新！本週回收 3 瓶，下次回收可獲雙倍積分 🎉')} style={{...tweakBtn, gridColumn:'1/-1'}}>▶ 測試 Snack Bar</button>
         </div>
       </div>
     </div>

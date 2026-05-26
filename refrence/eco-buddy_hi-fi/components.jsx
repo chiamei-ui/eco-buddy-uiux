@@ -57,7 +57,7 @@ const SpeechBubble = ({ text, error=false, style, onClose }) => (
 );
 
 /* ───────── System Toast (iOS/Android-style 中性 toast, 用於 P2 等無角色場景) ───────── */
-const SystemToast = ({ text, onClose, duration=2800 }) => {
+const SystemToast = ({ text, onClose, duration=2800, bottom=false }) => {
   useEffect(()=>{
     if(!text) return;
     const t = setTimeout(onClose, duration);
@@ -65,7 +65,7 @@ const SystemToast = ({ text, onClose, duration=2800 }) => {
   }, [text, duration]);
   if(!text) return null;
   return (
-    <div className="sys-toast" role="status" aria-live="polite">
+    <div className={`sys-toast${bottom ? ' bottom' : ''}`} role="status" aria-live="polite">
       <div className="sys-toast-inner">
         <svg className="sys-toast-icon" viewBox="0 0 20 20" width="16" height="16" aria-hidden="true">
           <circle cx="10" cy="10" r="9" fill="none" stroke="currentColor" strokeWidth="1.6"/>
@@ -155,10 +155,27 @@ const ValueRise = ({ value, color, top, left }) => (
   <div className="value-rise" style={{top, left, color: color || '#FF4D63'}}>{value}</div>
 );
 
+/* ───────── Snack Bar (底部系統提示，導覽列上方 10px，10 秒自動消失) ───────── */
+const SnackBar = ({ msg, onClose }) => {
+  useEffect(()=>{
+    if(!msg) return;
+    const t = setTimeout(onClose, 10000);
+    return ()=>clearTimeout(t);
+  }, [msg, onClose]);
+  if(!msg) return null;
+  return (
+    <div className="snackbar" role="status" aria-live="polite">
+      <span className="snackbar-msg">{msg}</span>
+      <button className="snackbar-close" onClick={onClose} aria-label="關閉">✕</button>
+    </div>
+  );
+};
+
 /* ───────── Export to window ───────── */
 Object.assign(window, {
   StatusBar, StatPip, TurtleImg, TabBar,
   SpeechBubble, PushToast, ScanBtnIcon, AdsBtnIcon,
   SystemToast, SystemAlert,
   ModeToggle, ModeChip, AvatarButton, ValueRise,
+  SnackBar,
 });
