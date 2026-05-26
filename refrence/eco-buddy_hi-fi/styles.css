@@ -120,6 +120,9 @@ img,svg{display:block;}
   backdrop-filter:none;
 }
 
+/* ───── P0 一般模式-首頁 ───── */
+.p0{ background:#F2F2F2; overflow:hidden; }
+
 /* ───── P1 buddy home ───── */
 .p1{
   background:url('assets/bg.svg') center / cover no-repeat, #FFE9B7;
@@ -261,7 +264,7 @@ img,svg{display:block;}
   0%{transform:scale(1);}25%{transform:scale(1.06) rotate(-3deg);}50%{transform:scale(0.96) translateY(4px);}75%{transform:scale(1.08);}100%{transform:scale(1);}
 }
 
-.side-actions{position:absolute;right:6px;bottom:280px;display:flex;flex-direction:column;gap:6px;z-index:5;}
+.side-actions{position:absolute;right:16px;bottom:300px;display:flex;flex-direction:column;gap:6px;z-index:5;}
 .side-action{
   background:transparent;border:0;padding:0;cursor:pointer;
   display:block;
@@ -278,6 +281,8 @@ img,svg{display:block;}
   padding:14px 16px 16px;
   box-shadow:0 -10px 30px rgba(0,0,0,0.06);
   position:absolute;left:0;right:0;bottom:84px;
+  height:190px;
+  overflow:hidden;
   z-index:3;
 }
 .dock-tabs{display:flex;gap:8px;margin-bottom:8px;}

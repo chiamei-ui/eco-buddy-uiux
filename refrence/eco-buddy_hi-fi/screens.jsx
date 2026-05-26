@@ -105,7 +105,9 @@ const P1Home = ({ state, dispatch, setScreen, dragManager, payload }) => {
       <div className="p1-header">
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <img src="assets/logo-ecobuddy.svg" alt="ecoBUDDY" className="ecobuddy-logo" />
-          <ModeChip mode="game" />
+          <button style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }} onClick={() => setScreen('p0')}>
+            <img src="assets/btn/normal-mode.svg" alt="一般模式" height="26" draggable="false" />
+          </button>
         </div>
         <AvatarButton onClick={() => setScreen('p8')} />
       </div>
@@ -200,7 +202,7 @@ const P1Home = ({ state, dispatch, setScreen, dragManager, payload }) => {
             ) :
             <div style={{ gridColumn: '1/-1', padding: '18px', textAlign: 'center', color: '#888', fontSize: 13 }}>
                 還沒有道具～<br />
-                <button onClick={() => setScreen('p6')} style={{ marginTop: 8, background: 'var(--ecoco-orange)', color: '#fff', padding: '8px 18px', borderRadius: 999, fontWeight: 700, fontSize: 12 }}>看廣告領取</button>
+                <button onClick={() => setP6SheetOpen(true)} style={{ marginTop: 8, background: 'var(--ecoco-orange)', color: '#fff', padding: '8px 18px', borderRadius: 999, fontWeight: 700, fontSize: 12 }}>看廣告領取</button>
               </div>
             }
           </div>
@@ -1085,6 +1087,7 @@ const P8Profile = ({ setScreen, state }) => {
 /* ═══════════════ P9 · Bag ═══════════════ */
 const P9Bag = ({ setScreen, state, dispatch, dragManager }) => {
   const [tab, setTab] = useState('free');
+  const [p6SheetOpen, setP6SheetOpen] = useState(false);
   const tools = state.tools;
   const filtered = tools.filter((t) => tab === 'free' ? !t.permanent : tab === 'paid' ? t.permanent : true);
 
@@ -1119,7 +1122,7 @@ const P9Bag = ({ setScreen, state, dispatch, dragManager }) => {
           <h3>{DIALOGUES.err.bagEmpty}</h3>
           <p>看廣告抽道具，或到商店逛逛</p>
           <div className="empty-actions">
-            <button className="btn-primary" style={{ padding: '10px 20px', fontSize: 13 }} onClick={() => setScreen('p6')}>看廣告</button>
+            <button className="btn-primary" style={{ padding: '10px 20px', fontSize: 13 }} onClick={() => setP6SheetOpen(true)}>看廣告</button>
             <button className="btn-ghost" style={{ padding: '10px 20px', fontSize: 13 }} onClick={() => setScreen('p4')}>去商店</button>
           </div>
         </div> :
@@ -1144,6 +1147,29 @@ const P9Bag = ({ setScreen, state, dispatch, dragManager }) => {
       <div style={{ padding: '0 18px 90px', marginTop: 'auto' }}>
         <button className="btn-primary" style={{ width: '100%' }} onClick={() => setScreen('p1')}>前往夥伴頁使用</button>
       </div>
+      {p6SheetOpen && (
+        <div className="p6-confirm-backdrop" onClick={() => setP6SheetOpen(false)}>
+          <div className="p6-confirm-sheet" onClick={e => e.stopPropagation()}>
+            <div className="sheet-grip" />
+            <h3 style={{ fontSize: 18, fontWeight: 900, textAlign: 'center', marginBottom: 6 }}>免費道具</h3>
+            <div style={{ textAlign: 'center', color: 'var(--gray-text)', fontSize: 13, marginBottom: 20 }}>
+              {state.adRemaining > 0
+                ? `今日剩 ${state.adRemaining} 次 · 觀看 30 秒影片即可獲得`
+                : DIALOGUES.err.adsDaily}
+            </div>
+            {state.adRemaining > 0 && (
+              <button className="btn-primary" style={{ width: '100%' }}
+                onClick={() => { setP6SheetOpen(false); setScreen('p6', { fromSheet: true }); }}>
+                觀看影片
+              </button>
+            )}
+            <button className="btn-ghost" style={{ width: '100%', marginTop: 8 }}
+              onClick={() => setP6SheetOpen(false)}>
+              取消
+            </button>
+          </div>
+        </div>
+      )}
     </div>);
 
 };
@@ -1260,11 +1286,35 @@ const P11Pack = ({ setScreen }) =>
   </div>;
 
 
+/* ═══════════════ P0 · 一般模式-首頁 ═══════════════ */
+const PNormalHome = ({ setScreen }) => (
+  <div className="screen p0">
+    <img src="assets/p0-normal-home.png" alt="一般模式首頁" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} draggable="false" />
+    {/* 透明 hitbox 蓋在「遊戲」按鈕上（Figma: x=187, y=58, w=66, h=26 / 393×852） */}
+    <button
+      onClick={() => setScreen('p1')}
+      style={{
+        position: 'absolute',
+        top: `${(58 / 852) * 100}%`,
+        left: `${(187 / 393) * 100}%`,
+        width: `${(66 / 393) * 100}%`,
+        height: `${(26 / 852) * 100}%`,
+        background: 'transparent',
+        border: 'none',
+        cursor: 'pointer',
+      }}
+      aria-label="切換遊戲模式"
+    />
+  </div>
+);
+
+
 /* ───── Export ───── */
 Object.assign(window, {
   P1Home, P2Scan, P2bResult, P3Feeding,
   P4Shop, P5Missions, P6Ads, P7Dex,
   P8Profile, P9Bag, P9bToolAnim,
   P10Picker, P11Pack,
+  PNormalHome,
   ShopPurchaseModal, PointsSourceSheet,
 });

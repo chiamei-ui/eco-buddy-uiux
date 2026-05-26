@@ -139,7 +139,8 @@ const DragGhost = ({ drag, hover }) => {
 /* ───────── Screen nav (left rail) ───────── */
 const SCREENS = [
   { code:'A',  id:'push',  label:'推播觸發', section:'入口' },
-  { code:'P1', id:'p1',    label:'夥伴首頁 · Hub', section:'主流程' },
+  { code:'P0', id:'p0',    label:'一般模式-首頁', section:'主流程' },
+  { code:'P1', id:'p1',    label:'夥伴首頁 · Hub' },
   { code:'P2', id:'p2',    label:'掃描 QR Code' },
   { code:'P2b',id:'p2b',   label:'回收結果頁' },
   { code:'P3', id:'p3',    label:'餵食動畫流程' },
@@ -276,6 +277,7 @@ const App = () => {
   const renderScreen = () => {
     switch(screen){
       case 'push': return <PushDemo setScreen={setScreen} />;
+      case 'p0':  return <PNormalHome setScreen={setScreen} />;
       case 'p1':  return <P1Home state={effectiveState} dispatch={dispatch} setScreen={setScreen} dragManager={dragManager} payload={screenPayload} />;
       case 'p2':  return <P2Scan setScreen={setScreen} dispatch={dispatch} />;
       case 'p2b': return <P2bResult setScreen={setScreen} dispatch={dispatch} state={effectiveState} />;
