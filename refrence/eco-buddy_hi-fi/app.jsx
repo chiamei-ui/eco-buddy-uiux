@@ -211,13 +211,9 @@ const PushDemo = ({ setScreen }) => {
 
 /* ───────── Top-level App ───────── */
 const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
-  "hp": 78,
-  "clean": 62,
-  "mood": 45,
-  "stock": "normal",
-  "bagEmpty": false,
-  "pushOnP1": "none",
-  "showAllUnlocked": false
+  "p2DemoType": "recycle",
+  "p2ErrKind": null,
+  "p2bQuotaFull": false
 }/*EDITMODE-END*/;
 
 const App = () => {
@@ -229,48 +225,9 @@ const App = () => {
   }, []);
   const [state, dispatch] = useReducer(stateReducer, DEFAULT_STATE);
   const [tweaks, setTweak] = useTweaks(TWEAK_DEFAULTS);
-  const [pushKey, setPushKey] = useState(0);
   const dragManager = useDragManager();
 
-  // sync tweak values into state
-  useEffect(()=>{
-    dispatch({type:'RESET_STATS', stats:{hp:tweaks.hp, clean:tweaks.clean, mood:tweaks.mood}});
-  }, [tweaks.hp, tweaks.clean, tweaks.mood]);
-  useEffect(()=>{
-    if (tweaks.stock === 'empty') dispatch({type:'SET_STOCK', stocks:[0,0,0,0]});
-    else if (tweaks.stock === 'low') dispatch({type:'SET_STOCK', stocks:[1,2,1,0]});
-    else dispatch({type:'SET_STOCK', stocks:[2,12,2,0]});
-  }, [tweaks.stock]);
-  useEffect(()=>{
-    if (tweaks.bagEmpty) dispatch({type:'CLEAR_BAG'});
-  }, [tweaks.bagEmpty]);
-
-  // push toast simulation on P1
-  const [snackMsg, setSnackMsg] = useState(null);
-  const showSnack = useCallback((msg) => setSnackMsg(msg), []);
-
   const [dexPickerOpen, setDexPickerOpen] = useState(false);
-  const [pushVisible, setPushVisible] = useState(false);
-  const pushTextMap = {
-    none: null,
-    hp: { msg:'快去回收！海龜餓壞了 🥺' },
-    clean: { msg:'🛁 我想洗澡澡～' },
-    mood: { msg:'好無聊喔，快來陪我玩！' },
-    expire: { msg:'⏰ 你的逗貓棒還剩 6 小時！' },
-  };
-  useEffect(()=>{
-    if (screen === 'p1' && tweaks.pushOnP1 !== 'none') {
-      setPushVisible(true);
-    } else setPushVisible(false);
-  }, [screen, tweaks.pushOnP1, pushKey]);
-
-  // show all unlocked dex tweak
-  const effectiveState = useMemo(()=>{
-    if (tweaks.showAllUnlocked) {
-      return {...state, dexStates: state.dexStates.map(s=>({...s, unlocked:true}))};
-    }
-    return state;
-  }, [state, tweaks.showAllUnlocked]);
 
   // map screen → tabbar active id (only show on tab pages)
   const tabbarActive = {
@@ -285,20 +242,20 @@ const App = () => {
     switch(screen){
       case 'push': return <PushDemo setScreen={setScreen} />;
       case 'p0':  return <PNormalHome setScreen={setScreen} />;
-      case 'p1':  return <P1Home state={effectiveState} dispatch={dispatch} setScreen={setScreen} dragManager={dragManager} payload={screenPayload} />;
-      case 'p2':  return <P2Scan setScreen={setScreen} dispatch={dispatch} />;
-      case 'p2b': return <P2bResult setScreen={setScreen} dispatch={dispatch} state={effectiveState} />;
+      case 'p1':  return <P1Home state={state} dispatch={dispatch} setScreen={setScreen} dragManager={dragManager} payload={screenPayload} />;
+      case 'p2':  return <P2Scan setScreen={setScreen} dispatch={dispatch} tweaks={tweaks} setTweak={setTweak} />;
+      case 'p2b': return <P2bResult setScreen={setScreen} dispatch={dispatch} state={state} tweaks={tweaks} setTweak={setTweak} />;
       case 'p3':  return <P3Feeding setScreen={setScreen} dispatch={dispatch} />;
-      case 'p4':  return <P4Shop setScreen={setScreen} state={effectiveState} dispatch={dispatch} />;
-      case 'p5':  return <P5Missions setScreen={setScreen} state={effectiveState} dispatch={dispatch} />;
-      case 'p6':  return <P6Ads setScreen={setScreen} state={effectiveState} dispatch={dispatch} payload={screenPayload} />;
-      case 'p7':  return <P7Dex setScreen={setScreen} state={effectiveState} dispatch={dispatch} onOpenPicker={() => setDexPickerOpen(true)} />;
-      case 'p8':  return <P8Profile setScreen={setScreen} state={effectiveState} />;
-      case 'p9':  return <P9Bag setScreen={setScreen} state={effectiveState} dispatch={dispatch} />;
+      case 'p4':  return <P4Shop setScreen={setScreen} state={state} dispatch={dispatch} />;
+      case 'p5':  return <P5Missions setScreen={setScreen} state={state} dispatch={dispatch} />;
+      case 'p6':  return <P6Ads setScreen={setScreen} state={state} dispatch={dispatch} payload={screenPayload} />;
+      case 'p7':  return <P7Dex setScreen={setScreen} state={state} dispatch={dispatch} onOpenPicker={() => setDexPickerOpen(true)} />;
+      case 'p8':  return <P8Profile setScreen={setScreen} state={state} />;
+      case 'p9':  return <P9Bag setScreen={setScreen} state={state} dispatch={dispatch} />;
       case 'p9b': return <P9bToolAnim setScreen={setScreen} />;
-      case 'p10': return <P7Dex setScreen={setScreen} state={effectiveState} dispatch={dispatch} onOpenPicker={() => setDexPickerOpen(true)} />;
+      case 'p10': return <P7Dex setScreen={setScreen} state={state} dispatch={dispatch} onOpenPicker={() => setDexPickerOpen(true)} />;
       case 'p11': return <P11Pack setScreen={setScreen} />;
-      case 'p12': return <P12RefillResult setScreen={setScreen} state={effectiveState} dispatch={dispatch} payload={screenPayload} />;
+      case 'p12': return <P12RefillResult setScreen={setScreen} state={state} dispatch={dispatch} payload={screenPayload} />;
       default: return null;
     }
   };
@@ -321,20 +278,12 @@ const App = () => {
             {(dexPickerOpen || screen === 'p10') && (
               <P10Picker
                 setScreen={setScreen}
-                state={effectiveState}
+                state={state}
                 dispatch={dispatch}
                 onClose={() => { setDexPickerOpen(false); if (screen === 'p10') setScreen('p7'); }}
               />
             )}
             {tabbarActive && <TabBar active={tabbarActive} onNav={navFromTabbar} />}
-            {pushVisible && pushTextMap[tweaks.pushOnP1] && (
-              <PushToast
-                title="ECO BUDDY"
-                msg={pushTextMap[tweaks.pushOnP1].msg}
-                onClose={()=>setPushVisible(false)}
-              />
-            )}
-            <SnackBar msg={snackMsg} onClose={()=>setSnackMsg(null)} />
           </div>
         </div>
       </div>
@@ -354,7 +303,7 @@ const App = () => {
         </div>
 
         <div className="stage-title" style={{padding:'0 4px'}}>Tweaks · 即時調整</div>
-        <InlineTweaks tweaks={tweaks} setTweak={setTweak} state={state} dispatch={dispatch} setScreen={setScreen} showSnack={showSnack} />
+        <InlineTweaks tweaks={tweaks} setTweak={setTweak} setScreen={setScreen} />
       </div>
 
       <DragGhost drag={dragManager.drag} hover={dragManager.hover} />
@@ -363,48 +312,63 @@ const App = () => {
 };
 
 /* Tweaks inline panel inside the right rail (always visible, not host-driven) */
-const InlineTweaks = ({ tweaks, setTweak, dispatch, setScreen, showSnack }) => {
+const P2_ERR_OPTIONS = [
+  { id:'qrBlur',    label:'無法辨識' },
+  { id:'qrExpired', label:'已過期' },
+  { id:'qrUsed',    label:'已使用' },
+  { id:'camDenied', label:'相機權限' },
+  { id:'netFail',   label:'網路失敗' },
+];
+
+const InlineTweaks = ({ tweaks, setTweak, setScreen }) => {
   return (
     <div style={{
       background:'rgba(255,255,255,0.04)',
       border:'1px solid rgba(255,255,255,0.08)',
       borderRadius:20,padding:16,color:'#fff',
     }}>
-      <div style={tweakLabel}>HP 生命值</div>
-      <SliderRow value={tweaks.hp} onChange={v=>setTweak('hp',v)} />
+      <div style={tweakLabel}>P2 · 模擬掃碼來源</div>
+      <Segmented
+        value={tweaks.p2DemoType || 'recycle'}
+        onChange={v => setTweak({ p2DemoType: v, p2ErrKind: null })}
+        options={[{v:'recycle',l:'♻️ 收瓶機'},{v:'refill',l:'💧 補充站'}]}
+      />
+      <div style={{fontSize:10,color:'rgba(255,255,255,0.3)',marginTop:4,lineHeight:1.4}}>
+        同一入口：收瓶機 / 補充站 QR 自動識別後路由
+      </div>
 
-      <div style={tweakLabel}>潔淨度</div>
-      <SliderRow value={tweaks.clean} onChange={v=>setTweak('clean',v)} />
+      <div style={tweakLabel}>P2 · 錯誤情境（系統 toast）</div>
+      <div style={{display:'flex',flexWrap:'wrap',gap:4}}>
+        {P2_ERR_OPTIONS.map(o => (
+          <button key={o.id}
+            onClick={() => setTweak('p2ErrKind', tweaks.p2ErrKind === o.id ? null : o.id)}
+            style={{
+              background: tweaks.p2ErrKind === o.id ? 'var(--ecoco-orange)' : 'rgba(255,255,255,0.08)',
+              color:'#fff', padding:'6px 10px', borderRadius:6, fontSize:11, fontWeight:600, cursor:'pointer',
+            }}>
+            {o.label}
+          </button>
+        ))}
+      </div>
 
-      <div style={tweakLabel}>心情值</div>
-      <SliderRow value={tweaks.mood} onChange={v=>setTweak('mood',v)} />
+      <div style={{marginTop:10,paddingTop:10,borderTop:'1px solid rgba(255,255,255,0.08)'}}>
+        <div style={tweakLabel}>P2b · 週配額情境</div>
+        <Segmented
+          value={tweaks.p2bQuotaFull ? 'full' : 'normal'}
+          onChange={v => setTweak('p2bQuotaFull', v === 'full')}
+          options={[{v:'normal',l:'配額未滿'},{v:'full',l:'本週已領完'}]}
+        />
+      </div>
 
-      <div style={tweakLabel}>食物欄存量</div>
-      <Segmented value={tweaks.stock} onChange={v=>setTweak('stock',v)}
-        options={[{v:'normal',l:'正常'},{v:'low',l:'低'},{v:'empty',l:'歸零'}]} />
-
-      <div style={tweakLabel}>道具背包</div>
-      <Segmented value={tweaks.bagEmpty?'empty':'full'} onChange={v=>setTweak('bagEmpty', v==='empty')}
-        options={[{v:'full',l:'有道具'},{v:'empty',l:'空背包'}]} />
-
-      <div style={tweakLabel}>P1 推播提示</div>
-      <Segmented value={tweaks.pushOnP1} onChange={v=>setTweak('pushOnP1',v)}
-        options={[{v:'none',l:'無'},{v:'hp',l:'HP低'},{v:'clean',l:'潔淨低'},{v:'mood',l:'心情低'},{v:'expire',l:'過期'}]} />
-
-      <div style={tweakLabel}>圖鑑全解鎖</div>
-      <Segmented value={tweaks.showAllUnlocked?'on':'off'} onChange={v=>setTweak('showAllUnlocked', v==='on')}
-        options={[{v:'off',l:'Phase 1'},{v:'on',l:'全部'}]} />
-
-      <div style={{marginTop:14,paddingTop:14,borderTop:'1px solid rgba(255,255,255,0.1)'}}>
+      <div style={{marginTop:10,paddingTop:10,borderTop:'1px solid rgba(255,255,255,0.08)'}}>
         <div style={tweakLabel}>快速跳轉</div>
         <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:6}}>
-          <button onClick={()=>setScreen('p2')} style={tweakBtn}>▶ 掍描條碼（統一入口）</button>
+          <button onClick={()=>setScreen('p2')} style={tweakBtn}>▶ 掃描條碼（統一入口）</button>
           <button onClick={()=>setScreen('p12')} style={tweakBtn}>▶ 補充站消費結果</button>
           <button onClick={()=>setScreen('p6')} style={tweakBtn}>▶ 廣告開箱</button>
           <button onClick={()=>setScreen('p10')} style={tweakBtn}>▶ 月末選擇</button>
           <button onClick={()=>setScreen('push')} style={tweakBtn}>▶ 推播範例</button>
           <button onClick={()=>setScreen('p4')} style={tweakBtn}>▶ P4 商店（唯一金流）</button>
-          <button onClick={()=>showSnack('積分已更新！本週回收 3 瓶，下次回收可獲雙倍積分 🎉')} style={{...tweakBtn, gridColumn:'1/-1'}}>▶ 測試 Snack Bar</button>
         </div>
       </div>
     </div>
@@ -414,12 +378,6 @@ const InlineTweaks = ({ tweaks, setTweak, dispatch, setScreen, showSnack }) => {
 const tweakLabel = { fontSize:11, color:'rgba(255,255,255,0.55)', fontWeight:600, marginBottom:6, marginTop:10, letterSpacing:'.04em' };
 const tweakBtn = { background:'rgba(255,255,255,0.08)', color:'#fff', padding:'8px 6px', borderRadius:8, fontSize:11, fontWeight:600, textAlign:'left', cursor:'pointer' };
 
-const SliderRow = ({ value, onChange }) => (
-  <div style={{display:'flex',alignItems:'center',gap:8}}>
-    <input type="range" min="0" max="100" value={value} onChange={e=>onChange(+e.target.value)} style={{flex:1, accentColor:'var(--ecoco-orange)'}} />
-    <span style={{fontFamily:'var(--font-en)',fontSize:13,fontWeight:800,color:'#fff',minWidth:30,textAlign:'right'}}>{value}</span>
-  </div>
-);
 const Segmented = ({ value, onChange, options }) => (
   <div style={{display:'flex',background:'rgba(0,0,0,0.3)',borderRadius:8,padding:2,gap:2}}>
     {options.map(o=>(

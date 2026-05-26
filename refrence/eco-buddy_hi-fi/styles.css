@@ -264,7 +264,7 @@ img,svg{display:block;}
   0%{transform:scale(1);}25%{transform:scale(1.06) rotate(-3deg);}50%{transform:scale(0.96) translateY(4px);}75%{transform:scale(1.08);}100%{transform:scale(1);}
 }
 
-.side-actions{position:absolute;right:16px;bottom:300px;display:flex;flex-direction:column;gap:6px;z-index:5;}
+.side-actions{position:absolute;right:16px;bottom:280px;display:flex;flex-direction:column;gap:6px;z-index:5;}
 .side-action{
   background:transparent;border:0;padding:0;cursor:pointer;
   display:block;
@@ -275,22 +275,32 @@ img,svg{display:block;}
 .side-action img{width:64px;height:auto;display:block;}
 
 /* food/item dock */
-.dock{
-  background:#fff;
-  border-radius:24px 24px 0 0;
-  padding:14px 16px 16px;
-  box-shadow:0 -10px 30px rgba(0,0,0,0.06);
-  position:absolute;left:0;right:0;bottom:84px;
-  height:190px;
-  overflow:hidden;
+.dock-shell{
+  position:absolute;left:12px;right:12px;bottom:84px;
   z-index:3;
+  display:flex;flex-direction:column;gap:4px;
 }
-.dock-tabs{display:flex;gap:8px;margin-bottom:8px;}
+.dock-tabs{
+  display:flex;gap:8px;
+  padding:8px 16px;
+  background:#fff;
+  border-radius:14px 14px 0 0;
+  width:fit-content;
+}
 .dock-tab{
-  padding:6px 18px;border-radius:999px;font-size:13px;font-weight:700;
-  color:var(--gray-text);background:transparent;
+  padding:5px 16px;border-radius:999px;font-size:14px;font-weight:700;
+  color:var(--gray-text);background:transparent;cursor:pointer;
+  transition:background .15s,color .15s;
 }
 .dock-tab.active{background:var(--ecoco-orange);color:#fff;}
+.dock{
+  background:#fff;
+  border-radius:0 20px 0 0;
+  padding:14px 16px 16px;
+  box-shadow:0 -4px 20px rgba(0,0,0,0.06);
+  height:150px;
+  overflow:hidden;
+}
 .dock-title{font-size:14px;font-weight:700;color:#222;}
 .dock-hint{font-size:11px;color:var(--gray-text);margin-bottom:8px;}
 .dock-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
@@ -352,22 +362,24 @@ img,svg{display:block;}
 
 /* ───── P2 scan camera ───── */
 .p2{background:#000;color:#fff;}
-.p2 .p2-label{
-  position:absolute;top:60px;left:50%;transform:translateX(-50%);z-index:10;
-  display:flex;align-items:center;gap:8px;
-  background:rgba(255,80,0,0.85);backdrop-filter:blur(8px);
-  padding:6px 14px;border-radius:999px;
-  font-size:13px;font-weight:700;color:#fff;
-  box-shadow:0 6px 16px rgba(255,80,0,0.35);
-}
-.p2 .p2-label .dot{width:8px;height:8px;border-radius:50%;background:#fff;animation:pulse-dot 1.5s infinite;}
 .p2 .camera{
   position:absolute;inset:0;
   background:
     linear-gradient(135deg, #1a1a1a, #2a2a2a),
     radial-gradient(circle at 30% 40%, rgba(255,255,255,0.05), transparent 60%);
-  display:flex;align-items:center;justify-content:center;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
   overflow:hidden;
+  gap:0;
+}
+.p2 .p2-title{
+  position:relative;z-index:2;
+  color:#fff;font-size:26px;font-weight:900;text-align:center;
+  margin:0 0 8px;letter-spacing:-.01em;
+}
+.p2 .p2-hint{
+  position:relative;z-index:2;
+  color:#fff;font-size:13px;font-weight:500;text-align:center;
+  margin:0 0 24px;
 }
 .p2 .qr-frame{
   position:relative;width:240px;height:240px;
@@ -395,31 +407,23 @@ img,svg{display:block;}
 @keyframes scan{
   0%{top:18px;}50%{top:calc(100% - 20px);}100%{top:18px;}
 }
-.p2 .hint{position:absolute;bottom:200px;left:0;right:0;text-align:center;color:#fff;font-size:14px;}
-.p2 .hint-sub{position:absolute;bottom:178px;left:0;right:0;text-align:center;color:rgba(255,255,255,0.55);font-size:11px;}
-.p2 .demo-pick{
-  position:absolute;bottom:120px;left:18px;right:18px;
-  background:rgba(255,255,255,0.08);backdrop-filter:blur(6px);
-  border:1px solid rgba(255,255,255,0.12);
-  border-radius:14px;padding:8px 10px;
+.p2 .p2-scanning-status{
+  position:relative;z-index:2;
+  color:#fff;font-size:15px;font-weight:600;text-align:center;
+  margin-top:28px;letter-spacing:.02em;
+  display:flex;align-items:baseline;gap:1px;
 }
-.p2 .demo-pick .demo-label{
-  font-family:var(--font-en);font-size:9px;font-weight:800;letter-spacing:.14em;
-  color:rgba(255,255,255,0.55);margin-bottom:6px;text-align:center;
+.p2 .scan-dots{display:inline-flex;gap:1px;margin-left:2px;}
+.p2 .scan-dots span{
+  animation:dot-wave 1.2s ease-in-out infinite;
+  opacity:0.2;
 }
-.p2 .demo-pick .demo-toggle{display:flex;gap:6px;}
-.p2 .demo-pick .demo-toggle button{
-  flex:1;background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.7);
-  padding:8px 6px;border-radius:8px;font-size:11.5px;font-weight:700;
-  border:1px solid transparent;
-}
-.p2 .demo-pick .demo-toggle button.active{
-  background:var(--ecoco-orange);color:#fff;border-color:var(--ecoco-orange);
-  box-shadow:0 4px 12px rgba(255,80,0,0.4);
-}
-.p2 .scanning-btn{
-  position:absolute;bottom:60px;left:50%;transform:translateX(-50%);
-  background:var(--ecoco-orange);color:#fff;padding:12px 28px;border-radius:999px;font-weight:700;
+.p2 .scan-dots span:nth-child(1){animation-delay:0s;}
+.p2 .scan-dots span:nth-child(2){animation-delay:0.2s;}
+.p2 .scan-dots span:nth-child(3){animation-delay:0.4s;}
+@keyframes dot-wave{
+  0%,60%,100%{opacity:0.2;transform:translateY(0);}
+  30%{opacity:1;transform:translateY(-3px);}
 }
 
 /* ───── P2b 回收結果頁（滿版·對齊 P12）───── */
@@ -512,21 +516,6 @@ img,svg{display:block;}
 }
 .p2b .footer{padding:14px 18px 18px;display:flex;flex-direction:column;gap:8px;margin-top:auto;}
 .p2b .footer .btn-primary{width:100%;}
-.p2b .demo-pick{padding:0 18px 22px;}
-.p2b .demo-pick .demo-label{
-  font-family:var(--font-en);font-size:9px;font-weight:800;letter-spacing:.14em;
-  color:#aaa;margin-bottom:6px;text-align:center;
-}
-.p2b .demo-pick .demo-toggle{display:flex;gap:6px;}
-.p2b .demo-pick .demo-toggle button{
-  flex:1;background:#F0F3F7;color:#666;
-  padding:8px 6px;border-radius:8px;font-size:11.5px;font-weight:700;
-  border:1px solid transparent;
-}
-.p2b .demo-pick .demo-toggle button.active{
-  background:var(--ecoco-orange);color:#fff;border-color:var(--ecoco-orange);
-  box-shadow:0 4px 12px rgba(255,80,0,0.3);
-}
 .btn-primary{
   background:var(--ecoco-orange);color:#fff;font-weight:700;
   padding:14px;border-radius:999px;font-size:15px;
@@ -1189,20 +1178,6 @@ img,svg{display:block;}
 .sys-alert-btn.destructive{color:#FF3B30;}
 .sys-alert-btn:active{background:rgba(60,60,67,0.08);}
 
-/* P2 error-state demo segment */
-.p2 .demo-pick.with-err{bottom:108px;}
-.p2 .demo-pick .demo-divider{height:1px;background:rgba(255,255,255,0.12);margin:8px 0;}
-.p2 .demo-pick .err-row{display:flex;gap:6px;flex-wrap:wrap;}
-.p2 .demo-pick .err-row button{
-  flex:1 1 calc(33% - 4px);min-width:0;
-  background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.7);
-  padding:6px 4px;border-radius:7px;font-size:10.5px;font-weight:600;
-  border:1px solid transparent;letter-spacing:.02em;
-}
-.p2 .demo-pick .err-row button.active{
-  background:#FF453A;color:#fff;border-color:#FF453A;
-  box-shadow:0 3px 10px rgba(255,69,58,0.4);
-}
 
 /* ───── Snack Bar (底部系統提示 — 導覽列上方 10px, z-index 35 在 tabbar 之下) ───── */
 .snackbar{

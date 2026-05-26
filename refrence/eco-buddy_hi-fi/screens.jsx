@@ -180,11 +180,12 @@ const P1Home = ({ state, dispatch, setScreen, dragManager, payload }) => {
         </div>
       </div>
 
-      <div className="dock">
+      <div className="dock-shell">
         <div className="dock-tabs">
           <button className={`dock-tab ${dockTab === 'food' ? 'active' : ''}`} onClick={() => setDockTab('food')}>食物欄</button>
           <button className={`dock-tab ${dockTab === 'tools' ? 'active' : ''}`} onClick={() => setDockTab('tools')}>道具包</button>
         </div>
+        <div className="dock">
         {dockTab === 'food' ? <>
           <div className="dock-title">本週食物</div>
           <div className="dock-hint">每週限量配額，拖曳至角色即可餵食</div>
@@ -212,6 +213,7 @@ const P1Home = ({ state, dispatch, setScreen, dragManager, payload }) => {
             }
           </div>
         </>}
+        </div>
       </div>
       {p6SheetOpen && (
         <div className="p6-confirm-backdrop" onClick={() => setP6SheetOpen(false)}>
@@ -300,19 +302,10 @@ const ToolCell = ({ tool, dragManager, onDrop }) => {
 
 
 /* ═══════════════ P2 · Scan camera (統一掃碼：收瓶機 / 補充站) ═══════════════ */
-const P2Scan = ({ setScreen, dispatch }) => {
-  const [demoType, setDemoType] = useState('recycle'); // recycle → P2b；refill → P12
-  const [errKind, setErrKind] = useState(null); // null = 正常掃描成功；其他 → 顯示系統 toast 不路由
+const P2Scan = ({ setScreen, dispatch, tweaks = {}, setTweak = () => {} }) => {
+  const demoType = tweaks.p2DemoType || 'recycle';
+  const errKind = tweaks.p2ErrKind || null;
   const [toast, setToast] = useState(null);
-
-  // 錯誤情境（P2 畫面無角色，採系統 toast 中性語氣）
-  const errOptions = [
-    { id:'qrBlur',    label:'無法辨識' },
-    { id:'qrExpired', label:'已過期' },
-    { id:'qrUsed',    label:'已使用' },
-    { id:'camDenied', label:'相機權限' },
-    { id:'netFail',   label:'網路失敗' },
-  ];
 
   useEffect(() => {
     if (errKind) {
@@ -333,14 +326,12 @@ const P2Scan = ({ setScreen, dispatch }) => {
     <div className="screen p2">
       <StatusBar light />
 
-      <SystemToast text={toast} onClose={() => setToast(null)} />
+      <SystemToast text={toast} onClose={() => setToast(null)} bottom />
 
       <NavBack onClick={() => setScreen('p1')} light />
-      <div className="p2-label">
-        <span className="dot"></span>
-        <span>掃描條碼</span>
-      </div>
       <div className="camera">
+        <h1 className="p2-title">掃描條碼</h1>
+        <p className="p2-hint">將機台螢幕 QR Code 對準框內</p>
         <div className="qr-frame">
           <span className="c3"></span><span className="c4"></span>
           {/* fake QR */}
@@ -366,36 +357,20 @@ const P2Scan = ({ setScreen, dispatch }) => {
           </svg>
           <div className="scan-line"></div>
         </div>
-      </div>
-      <div className="hint">將機台螢幕 QR Code 對準框內</div>
-      <div className="hint-sub">同一入口：收瓶機 / 補充站 QR 自動識別後路由</div>
-
-      <div className="demo-pick with-err">
-        <div className="demo-label">DEMO · 模擬掃碼來源</div>
-        <div className="demo-toggle">
-          <button className={!errKind && demoType === 'recycle' ? 'active' : ''} onClick={() => { setErrKind(null); setDemoType('recycle'); }}>♻️ 收瓶機 → P2b</button>
-          <button className={!errKind && demoType === 'refill' ? 'active' : ''} onClick={() => { setErrKind(null); setDemoType('refill'); }}>💧 補充站 → P12</button>
-        </div>
-        <div className="demo-divider"></div>
-        <div className="demo-label">DEMO · 錯誤情境（系統 toast）</div>
-        <div className="err-row">
-          {errOptions.map(o => (
-            <button key={o.id} className={errKind === o.id ? 'active' : ''}
-              onClick={() => { setToast(null); setErrKind(errKind === o.id ? null : o.id); }}>
-              {o.label}
-            </button>
-          ))}
+        <div className="p2-scanning-status">
+          {errKind
+            ? '請重新對準'
+            : <>辨識中<span className="scan-dots"><span>.</span><span>.</span><span>.</span></span></>
+          }
         </div>
       </div>
-
-      <button className="scanning-btn">{errKind ? '請重新對準' : '辨識中…'}</button>
     </div>);
 
 };
 
 /* ═══════════════ P2b · 回收結果頁（滿版·對齊 P12）═══════════════ */
-const P2bResult = ({ setScreen, dispatch }) => {
-  const [quotaFull, setQuotaFull] = useState(false);
+const P2bResult = ({ setScreen, dispatch, tweaks = {}, setTweak = () => {} }) => {
+  const quotaFull = tweaks.p2bQuotaFull || false;
 
   const handleFeed = () => {
     dispatch({ type: 'COLLECT_BATCH', quotaFull: false });
@@ -460,14 +435,6 @@ const P2bResult = ({ setScreen, dispatch }) => {
             <div className="nwp-time-label">開搶時間</div>
             <div className="nwp-time-val">週一 00:00</div>
           </div>
-        </div>
-      </div>
-
-      <div className="demo-pick">
-        <div className="demo-label">DEMO · 週配額情境</div>
-        <div className="demo-toggle">
-          <button className={!quotaFull ? 'active' : ''} onClick={() => setQuotaFull(false)}>配額未滿（有食物）</button>
-          <button className={quotaFull ? 'active' : ''} onClick={() => setQuotaFull(true)}>本週已領完</button>
         </div>
       </div>
 
