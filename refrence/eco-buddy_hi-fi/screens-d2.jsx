@@ -17,36 +17,28 @@ const P12RefillResult = ({ setScreen, state, dispatch, payload }) => {
   const session = payload?.session || REFILL_SESSION;
   const [phase, setPhase] = useState('counting'); // counting | done
   const [happy, setHappy] = useState(false);
-  const [hpDisplay, setHpDisplay] = useState(state.stats.hp);
-  const [cleanDisplay, setCleanDisplay] = useState(state.stats.clean);
-  const hpStart = useRef(state.stats.hp).current;
-  const cleanStart = useRef(state.stats.clean).current;
-  const hpTarget = Math.min(100, hpStart + session.hp);
-  const cleanTarget = Math.min(100, cleanStart + session.clean);
+  const [valueRises, setValueRises] = useState([]);
+
+  const addRise = (txt, pos, color) => {
+    const id = Math.random();
+    setValueRises((prev) => [...prev, { id, txt, top: pos.y, left: pos.x, color }]);
+    setTimeout(() => setValueRises((prev) => prev.filter((v) => v.id !== id)), 1400);
+  };
 
   useEffect(() => {
     // 沒有金流：僅把現實購買回饋的 HP/潔淨度寫入 state
     dispatch({ type: 'REFILL_RESULT', hpGain: session.hp, cleanGain: session.clean });
-    const dur = 1400;
-    const start = Date.now();
-    const iv = setInterval(() => {
-      const t = Math.min(1, (Date.now() - start) / dur);
-      const ease = 1 - Math.pow(1 - t, 3);
-      setHpDisplay(Math.round(hpStart + (hpTarget - hpStart) * ease));
-      setCleanDisplay(Math.round(cleanStart + (cleanTarget - cleanStart) * ease));
-      if (t >= 1) {
-        clearInterval(iv);
-        setTimeout(() => setPhase('done'), 200);
-      }
-    }, 33);
-    return () => clearInterval(iv);
+    const t = setTimeout(() => setPhase('done'), 1600);
+    return () => clearTimeout(t);
   }, []);
 
-  // 計數結束 → 角色開心反應（沿用既有 touched 點擊反應動畫，1s 後自動回 Idle）
+  // 計數結束 → 角色開心反應 + 數值浮起動畫
   useEffect(() => {
     if (phase === 'done') {
       setHappy(true);
-      const t = setTimeout(() => setHappy(false), 1000);
+      addRise(`+${session.hp} HP`, { x: 40, y: 50 }, '#FF4D63');
+      setTimeout(() => addRise(`+${session.clean} 潔淨`, { x: 140, y: 70 }, '#1F3DBF'), 250);
+      const t = setTimeout(() => setHappy(false), 2500);
       return () => clearTimeout(t);
     }
   }, [phase]);
@@ -55,7 +47,7 @@ const P12RefillResult = ({ setScreen, state, dispatch, payload }) => {
     <div className="screen p12">
       <StatusBar />
 
-      {/* Hero — 結構對齊 P2b */}
+      {/* Hero — 白底 */}
       <div className="hero">
         <div className="eyebrow">REFILL COMPLETE · 補充站消費</div>
         <h2>本次補充站消費完成！</h2>
@@ -87,35 +79,15 @@ const P12RefillResult = ({ setScreen, state, dispatch, payload }) => {
         </div>
       </div>
 
-      {/* 角色 + 雙數值動畫 */}
+      {/* 角色 IP 放大 + P1 風格數值浮起 + 對話框 */}
       <div className="result-body">
         <div className="turtle-row">
-          <TurtleImg className={happy ? 'touched' : ''} style={{ width: 130 }} />
-          {happy && <SpeechBubble text="香噴噴～感謝你帶我去補充站！" style={{ top: 12, right: -8 }} />}
-        </div>
-
-        <div className="bars">
-          <div className="bar-card hp-card">
-            <div className="bar-head">
-              <span className="lbl">❤️ HP</span>
-              <span className="val"><b>{hpDisplay}</b>/100</span>
-            </div>
-            <div className="bar">
-              <div className="fill" style={{ width: `${hpDisplay}%` }}></div>
-              <div className="from-mark" style={{ left: `${hpStart}%` }}></div>
-            </div>
-            <div className="gain">+{session.hp}</div>
-          </div>
-          <div className="bar-card clean-card">
-            <div className="bar-head">
-              <span className="lbl">✨ 潔淨</span>
-              <span className="val"><b>{cleanDisplay}</b>/100</span>
-            </div>
-            <div className="bar">
-              <div className="fill" style={{ width: `${cleanDisplay}%` }}></div>
-              <div className="from-mark" style={{ left: `${cleanStart}%` }}></div>
-            </div>
-            <div className="gain">+{session.clean}</div>
+          <div style={{ position: 'relative', display: 'inline-block' }}>
+            <TurtleImg className={happy ? 'touched' : ''} style={{ width: 180 }} />
+            {happy && <SpeechBubble text="香噴噴～感謝你帶我去補充站！" style={{ top: -72, right: -40 }} />}
+            {valueRises.map((v) =>
+              <div key={v.id} className="value-rise" style={{ top: v.top, left: v.left, color: v.color }}>{v.txt}</div>
+            )}
           </div>
         </div>
       </div>

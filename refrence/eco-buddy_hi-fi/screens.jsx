@@ -964,32 +964,42 @@ const P7Dex = ({ setScreen, state, dispatch, onOpenPicker }) => {
       <div className="year-banner">
         <div className="countdown-row">
           <span className="dot"></span>
-          <span className="text">月底前 <b>5 天</b> · 6 月份角色尚未選入年度</span>
+          <span className="text">6 月份角色尚未選入年度，尚可更換 <b>{state.swapLeft} 次</b></span>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 10 }}>
-          <button className="btn-primary" style={{ padding: '8px 18px', fontSize: 13, boxShadow: 'none' }} onClick={() => onOpenPicker && onOpenPicker()}>選擇 6 月角色</button>
-          <div className="swap-pill" onClick={() => setScreen('p11')} style={{ cursor: 'pointer' }}>🎫 剩餘更換 3 次</div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 10 }}>
+          <button className="btn-primary" style={{ flex: 1, padding: '9px 0', fontSize: 13, boxShadow: 'none' }} onClick={() => onOpenPicker && onOpenPicker()}>選擇 6 月角色</button>
+          <button className="swap-pill" onClick={() => setScreen('p11')} style={{ flex: 1, padding: '9px 0', fontSize: 13, cursor: 'pointer', background: 'none', border: '2px solid var(--ecoco-yellow)', color: '#1a1a1a', fontWeight: 800, borderRadius: 999, textAlign: 'center' }}>增加更換次數</button>
         </div>
       </div>
 
       <div className="section-h">
-        <span>年度收藏 · 12 / 月</span>
-        <span className="meta">每月限選 1 個</span>
+        <div className="section-h-row">
+          <span>年度收藏</span>
+          <span className="meta">{months.filter(m => m.filled).length} / 12 月</span>
+        </div>
+      </div>
+      <div className="section-progress">
+        <div className="fill" style={{ width: `${(months.filter(m => m.filled).length / 12) * 100}%` }} />
       </div>
       <div className="year-grid">
         {months.map((mo) =>
-        <div key={mo.m} className={`year-cell ${mo.filled ? 'filled' : ''} ${mo.current ? 'current' : ''} ${mo.locked ? 'locked' : ''}`}>
+        <div key={mo.m} className={`year-cell ${mo.filled ? 'filled' : ''} ${mo.current ? 'current' : ''} ${mo.locked ? 'locked' : ''}`} onClick={mo.current ? () => onOpenPicker && onOpenPicker() : undefined} style={mo.current ? { cursor: 'pointer' } : undefined}>
             <span className="month">{String(mo.m).padStart(2, '0')}</span>
-            {mo.filled && <><span className="icon">{mo.icon}</span><span style={{ fontSize: 9, opacity: .6 }}>#{mo.code}</span></>}
-            {mo.current && <span style={{ fontSize: 20, marginTop: 4 }}>?</span>}
-            {mo.locked && <span style={{ fontSize: 14, marginTop: 4, opacity: .3 }}>🔒</span>}
+            {mo.filled && <><span className="icon">{mo.icon}</span><span style={{ fontSize: 9, opacity: .55 }}>#{mo.code}</span></>}
+            {mo.current && <span style={{ fontSize: 22, marginTop: 4 }}>?</span>}
+            {mo.locked && <span style={{ fontSize: 18, marginTop: 4, opacity: .18 }}>?</span>}
           </div>
         )}
       </div>
 
       <div className="section-h">
-        <span>本月解鎖 · 6 月小海龜</span>
-        <span className="meta">{states.filter((s) => s.unlocked).length}/9</span>
+        <div className="section-h-row">
+          <span>本月解鎖 · 6 月小海龜</span>
+          <span className="meta">{states.filter((s) => s.unlocked).length} / 9</span>
+        </div>
+      </div>
+      <div className="section-progress">
+        <div className="fill" style={{ width: `${(states.filter(s => s.unlocked).length / 9) * 100}%` }} />
       </div>
       <div className="month-grid" style={{ paddingBottom: 100 }}>
         {states.map((s) =>
@@ -1001,7 +1011,7 @@ const P7Dex = ({ setScreen, state, dispatch, onOpenPicker }) => {
               {s.legendary && <span className="rarity">✦ 傳說</span>}
             </> : <>
               <img className="turtle" src="assets/sea-turtle.svg" alt="" />
-              <span className="name" style={{ opacity: .4 }}>??? ???</span>
+              <span className="name">??? ???</span>
               <span className="lock" style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)' }}>🔒</span>
             </>}
           </div>
@@ -1262,6 +1272,7 @@ const P10Picker = ({ setScreen, state, dispatch, onClose }) => {
         <div className="title">
           <h3>選擇你的 6 月夥伴</h3>
           <p>從本月觸發過的狀態中挑一個鎖入年度圖鑑</p>
+          <p style={{ marginTop: 6, fontSize: 12, color: 'var(--ecoco-orange)', fontWeight: 700 }}>尚可更換 {state.swapLeft} 次</p>
         </div>
         <div className="grid">
           {states.map((s) =>

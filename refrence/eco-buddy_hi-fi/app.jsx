@@ -6,6 +6,7 @@ const DEFAULT_STATE = {
   stats: { hp: 78, clean: 62, mood: 45 },
   points: 1280,
   adRemaining: 3,
+  swapLeft: 3,
   pity: 1,
   food: [
     { id:'hotdog-w1', name:'熱狗堡', emoji:'🌭', stock:2, state:'has' },
