@@ -500,6 +500,7 @@ const P3Feeding = ({ setScreen, dispatch }) => {
 const P4Shop = ({ setScreen, state, dispatch }) => {
   const [tab, setTab] = useState('food');
   const [purchasing, setPurchasing] = useState(null);
+  const [successItem, setSuccessItem] = useState(null);
   const [showPointSrc, setShowPointSrc] = useState(false);
   const cats = [
   { id: 'food', label: '食物' },
@@ -587,7 +588,21 @@ const P4Shop = ({ setScreen, state, dispatch }) => {
           item={purchasing}
           state={state}
           onClose={() => setPurchasing(null)}
-          onConfirm={() => { dispatch({ type: 'BUY', item: purchasing }); setPurchasing(null); }}
+          onConfirm={(method) => {
+            const item = purchasing;
+            dispatch({ type: 'BUY', item });
+            setPurchasing(null);
+            setSuccessItem({ ...item, paidWith: method });
+          }}
+        />
+      }
+
+      {successItem &&
+        <ShopSuccessModal
+          item={successItem}
+          state={state}
+          onClose={() => setSuccessItem(null)}
+          onGoToBag={() => { setSuccessItem(null); setScreen('p9'); }}
         />
       }
 
@@ -621,7 +636,7 @@ const ShopPurchaseModal = ({ item, state, onClose, onConfirm }) => {
       setPayFailDemo(false);
       return;
     }
-    onConfirm();
+    onConfirm(method);
   };
 
   return (
@@ -667,6 +682,59 @@ const ShopPurchaseModal = ({ item, state, onClose, onConfirm }) => {
       </div>
 
       <SystemToast text={toast} onClose={() => setToast(null)} />
+    </div>
+  );
+};
+
+/* ----- P4 helper: 購買成功 Modal ----- */
+const ShopSuccessModal = ({ item, state, onClose, onGoToBag }) => {
+  return (
+    <div className="modal-backdrop" onClick={onClose}>
+      <div className="modal" onClick={(e) => e.stopPropagation()} style={{ textAlign: 'center' }}>
+        <div style={{ fontSize: 56, marginBottom: 4, lineHeight: 1 }}>{item.emoji}</div>
+        <div style={{
+          display: 'inline-flex', alignItems: 'center', gap: 4,
+          background: '#E8F9EE', color: '#1A7A46', borderRadius: 999,
+          padding: '4px 14px', fontSize: 12, fontWeight: 800, marginBottom: 12,
+        }}>✓ 購買成功</div>
+        <h3 style={{ fontSize: 17, fontWeight: 900, marginBottom: 4 }}>{item.name}</h3>
+        <p style={{ fontSize: 13, color: '#888', marginBottom: 16 }}>{item.desc}</p>
+        <div style={{
+          background: '#F7F9FC', borderRadius: 12, padding: '12px 16px',
+          fontSize: 13, marginBottom: 20,
+          display: 'flex', flexDirection: 'column', gap: 6,
+        }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', color: '#555' }}>
+            <span>付款方式</span>
+            <span style={{ fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+              {item.paidWith === 'points'
+                ? <><img src="assets/icon-ecoco-point.svg" alt="" width="14" height="14" />ECOCO 點數</>
+                : '💳 Apple / Google Pay'}
+            </span>
+          </div>
+          {item.paidWith === 'points' && (
+            <div style={{ display: 'flex', justifyContent: 'space-between', color: '#555' }}>
+              <span>剩餘點數</span>
+              <span style={{ fontWeight: 800, color: 'var(--ecoco-orange)', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                <img src="assets/icon-ecoco-point.svg" alt="" width="14" height="14" />
+                {(state.points - item.price).toLocaleString()} pt
+              </span>
+            </div>
+          )}
+        </div>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button onClick={onGoToBag} style={{
+            flex: 1, background: 'var(--ecoco-orange)', color: '#fff',
+            border: 'none', borderRadius: 999, padding: '13px 0',
+            fontWeight: 800, fontSize: 14, cursor: 'pointer',
+          }}>去背包查看</button>
+          <button onClick={onClose} style={{
+            flex: 1, background: 'var(--gray-light)', color: '#555',
+            border: 'none', borderRadius: 999, padding: '13px 0',
+            fontWeight: 700, fontSize: 14, cursor: 'pointer',
+          }}>繼續逛</button>
+        </div>
+      </div>
     </div>
   );
 };
@@ -1316,5 +1384,5 @@ Object.assign(window, {
   P8Profile, P9Bag, P9bToolAnim,
   P10Picker, P11Pack,
   PNormalHome,
-  ShopPurchaseModal, PointsSourceSheet,
+  ShopPurchaseModal, ShopSuccessModal, PointsSourceSheet,
 });
