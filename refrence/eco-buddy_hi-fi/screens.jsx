@@ -186,15 +186,20 @@ const P1Home = ({ state, dispatch, setScreen, dragManager, payload }) => {
           <button className={`dock-tab ${dockTab === 'tools' ? 'active' : ''}`} onClick={() => setDockTab('tools')}>道具包</button>
         </div>
         {dockTab === 'food' ? <>
-          <div className="dock-title">本月食物</div>
-          <div className="dock-hint">依週次解鎖，快將食物拖曳餵食給夥伴吧！
-</div>
+          <div className="dock-title">本週食物</div>
+          <div className="dock-hint">每週限量配額，拖曳至角色即可餵食</div>
           <div className="dock-grid">
             {state.food.map((f, i) => <FoodCell key={f.id} food={f} dragManager={dragManager} onDrop={onDrop} index={i} showBubble={showBubble} />
             )}
           </div>
         </> : <>
-          <div className="dock-title">道具背包</div>
+          <div className="dock-title" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <span>道具背包</span>
+            <button onClick={() => setScreen('p9')} style={{
+              fontSize: 12, fontWeight: 700, color: 'var(--ecoco-blue)',
+              background: 'none', border: 'none', cursor: 'pointer', padding: 0,
+            }}>管理 ›</button>
+          </div>
           <div className="dock-hint">拖到角色身上即可使用 · 24 小時內有效</div>
           <div className="dock-grid">
             {state.tools.length ? state.tools.map((t, i) =>
@@ -213,14 +218,20 @@ const P1Home = ({ state, dispatch, setScreen, dragManager, payload }) => {
           <div className="p6-confirm-sheet" onClick={e => e.stopPropagation()}>
             <div className="sheet-grip" />
             <h3 style={{ fontSize: 18, fontWeight: 900, textAlign: 'center', marginBottom: 6 }}>免費道具</h3>
-            <div style={{ textAlign: 'center', color: 'var(--gray-text)', fontSize: 13, marginBottom: 20 }}>
+            <div style={{ textAlign: 'center', color: 'var(--gray-text)', fontSize: 13, marginBottom: 12 }}>
               {state.adRemaining > 0
                 ? `今日剩 ${state.adRemaining} 次 · 觀看 30 秒影片即可獲得`
                 : DIALOGUES.err.adsDaily}
             </div>
+            <div className="pity-bar" style={{ marginBottom: 6 }}>
+              {[0, 1, 2, 3].map((i) =>
+                <div key={i} className={`seg ${i < (state.pity || 0) ? 'fill' : ''}`}></div>
+              )}
+            </div>
+            <div style={{ textAlign: 'center', color: 'var(--gray-text)', fontSize: 11, marginBottom: 20 }}>連 3 次未抽到零食 → 第 4 次必給</div>
             {state.adRemaining > 0 && (
               <button className="btn-primary" style={{ width: '100%' }}
-                onClick={() => { setP6SheetOpen(false); setScreen('p6', { fromSheet: true }); }}>
+                onClick={() => { setP6SheetOpen(false); setScreen('p6'); }}>
                 觀看影片
               </button>
             )}
@@ -324,7 +335,7 @@ const P2Scan = ({ setScreen, dispatch }) => {
 
       <SystemToast text={toast} onClose={() => setToast(null)} />
 
-      <button className="nav-back" onClick={() => setScreen('p1')}>‹ 返回</button>
+      <NavBack onClick={() => setScreen('p1')} light />
       <div className="p2-label">
         <span className="dot"></span>
         <span>掃描條碼</span>
@@ -383,20 +394,21 @@ const P2Scan = ({ setScreen, dispatch }) => {
 };
 
 /* ═══════════════ P2b · 回收結果頁（滿版·對齊 P12）═══════════════ */
-const FOOD_CAP = 12;
-const P2bResult = ({ setScreen, dispatch, state }) => {
-  const [foodFullMsg, setFoodFullMsg] = useState(null);
+const P2bResult = ({ setScreen, dispatch }) => {
+  const [quotaFull, setQuotaFull] = useState(false);
 
-  const checkAndStore = () => {
-    const wouldOverflow = (state?.food || []).some((f, i) => {
-      if (f.state === 'locked') return false;
-      return (f.stock + ([3, 2, 1, 0][i] || 0)) > FOOD_CAP;
-    });
-    if (wouldOverflow) {
-      setFoodFullMsg(DIALOGUES.err.foodFull);
-      return;
-    }
-    dispatch({ type: 'COLLECT_BATCH' });
+  const handleFeed = () => {
+    dispatch({ type: 'COLLECT_BATCH', quotaFull: false });
+    setScreen('p3');
+  };
+
+  const handleStore = () => {
+    dispatch({ type: 'COLLECT_BATCH', quotaFull: false });
+    setScreen('p1');
+  };
+
+  const handleComplete = () => {
+    dispatch({ type: 'COLLECT_BATCH', quotaFull: true });
     setScreen('p1');
   };
 
@@ -411,7 +423,6 @@ const P2bResult = ({ setScreen, dispatch, state }) => {
           <span className="dot"></span>
           2026.06.15 14:32 · 家樂福 仁德店
         </div>
-
         <div className="recycle-stats">
           <div><b>12</b><span>投入瓶罐</span></div>
           <div><b>3</b><span>退瓶數</span></div>
@@ -420,28 +431,55 @@ const P2bResult = ({ setScreen, dispatch, state }) => {
       </div>
 
       <div className="result-body">
-        <div className="section-title">本次獲得食物</div>
-        <div className="gain-list">
-          <div className="gain"><div className="emoji">🌭</div><div className="qty">×3</div><div className="label">熱狗堡</div></div>
-          <div className="gain"><div className="emoji">🥬</div><div className="qty">×2</div><div className="label">蔬菜</div></div>
-          <div className="gain"><div className="emoji">🍓</div><div className="qty">×1</div><div className="label">莓果</div></div>
-        </div>
+        {quotaFull ? (
+          <div style={{ marginBottom: 12 }}>
+            <div className="section-title" style={{ color: '#888' }}>本週食物已領完</div>
+            <div style={{ fontSize: 13, color: '#aaa', lineHeight: 1.5, marginTop: 4 }}>
+              本週食物配額已達上限，投瓶仍可獲得 HP
+            </div>
+          </div>
+        ) : (
+          <>
+            <div className="section-title">本次獲得食物</div>
+            <div className="gain-list gain-list--single">
+              <div className="gain"><div className="emoji">🌭</div><div className="qty">×6</div><div className="label">熱狗堡</div></div>
+            </div>
+          </>
+        )}
         <div className="hp-preview">
           <span className="label">❤️ 小海龜 HP 預計補充</span>
           <span className="gain">+15</span>
         </div>
+        <div className="next-week-preview">
+          <div className="nwp-badge">下週預告</div>
+          <div className="nwp-body">
+            <div className="nwp-title">🥦 花椰菜</div>
+            <div className="nwp-hp">餵食 +8 HP / 份</div>
+          </div>
+          <div className="nwp-time">
+            <div className="nwp-time-label">開搶時間</div>
+            <div className="nwp-time-val">週一 00:00</div>
+          </div>
+        </div>
+      </div>
+
+      <div className="demo-pick">
+        <div className="demo-label">DEMO · 週配額情境</div>
+        <div className="demo-toggle">
+          <button className={!quotaFull ? 'active' : ''} onClick={() => setQuotaFull(false)}>配額未滿（有食物）</button>
+          <button className={quotaFull ? 'active' : ''} onClick={() => setQuotaFull(true)}>本週已領完</button>
+        </div>
       </div>
 
       <div className="footer">
-        {foodFullMsg && (
-          <div style={{
-            background: '#FFF0F2', border: '1px solid #FFD6DD', borderRadius: 12,
-            padding: '10px 14px', fontSize: 13, fontWeight: 700, color: '#B0203A',
-            textAlign: 'center', marginBottom: 4,
-          }}>{foodFullMsg}</div>
+        {quotaFull ? (
+          <button className="btn-primary" onClick={handleComplete}>完成</button>
+        ) : (
+          <>
+            <button className="btn-primary" onClick={handleFeed}>立即餵食</button>
+            <button className="btn-ghost" onClick={handleStore}>存入食物欄</button>
+          </>
         )}
-        <button className="btn-primary" onClick={() => { dispatch({ type: 'COLLECT_BATCH' }); setScreen('p1', { autoFeed: true }); }}>立即餵食</button>
-        <button className="btn-ghost" onClick={checkAndStore}>存至食物欄</button>
       </div>
     </div>);
 
@@ -474,6 +512,7 @@ const P3Feeding = ({ setScreen, dispatch }) => {
   return (
     <div className="screen p1" style={{ background: "url('assets/bg.svg') center / cover no-repeat, #FFE9B7" }}>
       <StatusBar />
+      <NavBack onClick={() => setScreen('p1')} />
       <div className="p3-stage-name">餵食中 · {stages[Math.min(idx, stages.length - 1)].name}</div>
       <div style={{ flex: 1, position: 'relative', display: 'flex', alignItems: 'flex-end', justifyContent: 'center', paddingBottom: 160 }}>
         <div style={{ position: 'relative' }}>
@@ -488,9 +527,8 @@ const P3Feeding = ({ setScreen, dispatch }) => {
           }
         </div>
       </div>
-      <div style={{ position: 'absolute', bottom: 30, left: 18, right: 18, display: 'flex', gap: 8 }}>
-        <button className="btn-ghost" style={{ flex: 1 }} onClick={() => setScreen('p1')}>返回</button>
-        <button className="btn-primary" style={{ flex: 1 }} onClick={() => {setIdx(0);}}>再餵一份</button>
+      <div style={{ position: 'absolute', bottom: 30, left: 18, right: 18 }}>
+        <button className="btn-primary" style={{ width: '100%' }} onClick={() => {setIdx(0);}}>再餵一份</button>
       </div>
     </div>);
 
@@ -855,8 +893,8 @@ const P5Missions = ({ setScreen, state, dispatch }) => {
 };
 
 /* ═══════════════ P6 · Ads → box ═══════════════ */
-const P6Ads = ({ setScreen, state, dispatch, payload }) => {
-  const [step, setStep] = useState(payload?.fromSheet ? 1 : 0); // 0 confirm, 1 ad, 2 reward
+const P6Ads = ({ setScreen, state, dispatch }) => {
+  const [step, setStep] = useState(1); // 1 ad, 2 reward (confirm handled by sheet at each entry point)
   const [adTime, setAdTime] = useState(15);
   const [pity, setPity] = useState(state.pity || 0);
   const [reward, setReward] = useState(null);
@@ -893,32 +931,8 @@ const P6Ads = ({ setScreen, state, dispatch, payload }) => {
   return (
     <div className="screen p6">
       <StatusBar light />
-      <button style={{ position: 'absolute', top: 60, left: 18, zIndex: 10, color: '#fff', fontSize: 14 }} onClick={() => setScreen('p1')}>‹ 返回</button>
+      <NavBack onClick={() => setScreen('p1')} light />
 
-      {step === 0 &&
-      <div className="step">
-          <h2>免費道具</h2>
-          <div className="sub">
-            {state.adRemaining > 0
-              ? <>今日剩 {state.adRemaining} 次 · 觀看 30 秒影片即可獲得</>
-              : <>{DIALOGUES.err.adsDaily}</>
-            }
-          </div>
-          <div className="box">
-            <div className="glow"></div>
-            <div className="chest">🎁</div>
-          </div>
-          <div className="pity-bar">
-            {[0, 1, 2, 3].map((i) =>
-          <div key={i} className={`seg ${i < pity ? 'fill' : ''}`}></div>
-          )}
-          </div>
-          <div style={{ textAlign: 'center', color: 'rgba(255,255,255,0.65)', fontSize: 11, marginTop: 6 }}>連 3 次未抽到零食 → 第 4 次必給</div>
-          <button className="btn-primary" style={{ marginTop: 24 }} onClick={() => {setStep(1);setAdTime(15);}}>
-            觀看影片
-          </button>
-        </div>
-      }
       {step === 1 &&
       <div className="ad-screen">
           <div className="ad-label">AD · 廣告</div>
@@ -1070,10 +1084,10 @@ const P8Profile = ({ setScreen, state }) => {
   return (
     <div className="screen p8">
       <StatusBar light />
+      <NavBack onClick={() => setScreen('p1')} light />
       <div className="screen-scroll" style={{ paddingTop: 0 }}>
 
         <div className="header">
-          <button onClick={() => setScreen('p1')} className="back">‹ 返回</button>
           <div className="profile-row">
             <div className="avatar"><img src="assets/btn/avatar.svg" alt="" draggable="false" /></div>
             <div style={{ flex: 1 }}>
@@ -1153,26 +1167,23 @@ const P8Profile = ({ setScreen, state }) => {
 };
 
 /* ═══════════════ P9 · Bag ═══════════════ */
-const P9Bag = ({ setScreen, state, dispatch, dragManager }) => {
+const P9Bag = ({ setScreen, state, dispatch }) => {
   const [tab, setTab] = useState('free');
   const [p6SheetOpen, setP6SheetOpen] = useState(false);
   const tools = state.tools;
   const filtered = tools.filter((t) => tab === 'free' ? !t.permanent : tab === 'paid' ? t.permanent : true);
 
-  const onDrop = (payload, pos) => {
-    if (payload?.kind === 'tool') {
-      dispatch({ type: 'USE_TOOL', tool: payload.id });
-      setScreen('p9b');
-    }
+  const handleUse = (toolId) => {
+    dispatch({ type: 'USE_TOOL', tool: toolId });
+    setScreen('p9b');
   };
 
   return (
     <div className="screen p9">
       <StatusBar />
+      <NavBack onClick={() => setScreen('p1')} />
       <div className="header">
-        <button onClick={() => setScreen('p1')} style={{ fontSize: 22, fontWeight: 300 }}>‹</button>
         <h2>道具背包</h2>
-        <div></div>
       </div>
       <div className="tabs">
         <button className={`tab ${tab === 'free' ? 'active' : ''}`} onClick={() => setTab('free')}>免費道具 ({tools.filter((t) => !t.permanent).length})</button>
@@ -1197,8 +1208,7 @@ const P9Bag = ({ setScreen, state, dispatch, dragManager }) => {
 
       <div className="bag-grid">
           {filtered.map((t) =>
-        <div key={t.id} className="bag-cell"
-        onPointerDown={(e) => dragManager.startDrag(e, { kind: 'tool', id: t.id, emoji: t.emoji }, onDrop)}>
+        <div key={t.id} className="bag-cell">
               {t.permanent && <div className="perm">永久</div>}
               <div className="emoji">{t.emoji}</div>
               <div className="name">{t.name}</div>
@@ -1208,26 +1218,31 @@ const P9Bag = ({ setScreen, state, dispatch, dragManager }) => {
                 </div>
           }
               {t.count > 1 && <span className="badge">{t.count}</span>}
+              <button className="use-btn" onClick={() => handleUse(t.id)}>使用</button>
             </div>
         )}
         </div>
       }
-      <div style={{ padding: '0 18px 90px', marginTop: 'auto' }}>
-        <button className="btn-primary" style={{ width: '100%' }} onClick={() => setScreen('p1')}>前往夥伴頁使用</button>
-      </div>
+      <div style={{ paddingBottom: 40 }}></div>
       {p6SheetOpen && (
         <div className="p6-confirm-backdrop" onClick={() => setP6SheetOpen(false)}>
           <div className="p6-confirm-sheet" onClick={e => e.stopPropagation()}>
             <div className="sheet-grip" />
             <h3 style={{ fontSize: 18, fontWeight: 900, textAlign: 'center', marginBottom: 6 }}>免費道具</h3>
-            <div style={{ textAlign: 'center', color: 'var(--gray-text)', fontSize: 13, marginBottom: 20 }}>
+            <div style={{ textAlign: 'center', color: 'var(--gray-text)', fontSize: 13, marginBottom: 12 }}>
               {state.adRemaining > 0
                 ? `今日剩 ${state.adRemaining} 次 · 觀看 30 秒影片即可獲得`
                 : DIALOGUES.err.adsDaily}
             </div>
+            <div className="pity-bar" style={{ marginBottom: 6 }}>
+              {[0, 1, 2, 3].map((i) =>
+                <div key={i} className={`seg ${i < (state.pity || 0) ? 'fill' : ''}`}></div>
+              )}
+            </div>
+            <div style={{ textAlign: 'center', color: 'var(--gray-text)', fontSize: 11, marginBottom: 20 }}>連 3 次未抽到零食 → 第 4 次必給</div>
             {state.adRemaining > 0 && (
               <button className="btn-primary" style={{ width: '100%' }}
-                onClick={() => { setP6SheetOpen(false); setScreen('p6', { fromSheet: true }); }}>
+                onClick={() => { setP6SheetOpen(false); setScreen('p6'); }}>
                 觀看影片
               </button>
             )}
@@ -1251,6 +1266,7 @@ const P9bToolAnim = ({ setScreen }) => {
   return (
     <div className="screen p1" style={{ background: "url('assets/bg.svg') center / cover no-repeat, #FFE9B7" }}>
       <StatusBar />
+      <NavBack onClick={() => setScreen('p9')} />
       <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
         <div style={{ position: 'relative' }}>
           <TurtleImg className="touched" />
@@ -1304,8 +1320,8 @@ const P10Picker = ({ setScreen, state, dispatch }) => {
 const P11Pack = ({ setScreen }) =>
 <div className="screen p11">
     <StatusBar />
+    <NavBack onClick={() => setScreen('p7')} />
     <div className="header">
-      <button onClick={() => setScreen('p7')} style={{ fontSize: 22, fontWeight: 300, color: '#1a1a1a' }}>‹ 返回圖鑑</button>
       <h2 style={{ marginTop: 8 }}>更換次數包</h2>
       <p>用於修改年度圖鑑已鎖入的格子</p>
     </div>

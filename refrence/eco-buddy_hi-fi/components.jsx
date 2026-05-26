@@ -1,6 +1,13 @@
 /* ECO BUDDY · Shared UI components */
 const { useState, useEffect, useRef, useMemo, useCallback } = React;
 
+/* ───────── Unified back button — fixed top-left ───────── */
+const NavBack = ({ onClick, light = false }) => (
+  <button className={`nav-back-btn${light ? ' light' : ''}`} onClick={onClick}>
+    ‹ 返回
+  </button>
+);
+
 /* ───────── Status bar (iOS time + battery) ───────── */
 const StatusBar = ({ light=false }) => (
   <div className={`statusbar ${light?'light':''}`}>

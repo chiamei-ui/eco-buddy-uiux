@@ -55,7 +55,10 @@ function stateReducer(state, action){
     case 'COLLECT_BATCH':
       return {
         ...state,
-        food: state.food.map((f,i) => i<3 ? {...f, stock:f.stock + (i===0?3:i===1?2:1)} : f),
+        stats: { ...state.stats, hp: Math.min(100, state.stats.hp + 15) },
+        ...(!action.quotaFull && {
+          food: state.food.map((f,i) => i<3 ? {...f, stock:f.stock + (i===0?3:i===1?2:1)} : f),
+        }),
         points: state.points + 18,
       };
     case 'BUY':
@@ -287,7 +290,7 @@ const App = () => {
       case 'p6':  return <P6Ads setScreen={setScreen} state={effectiveState} dispatch={dispatch} payload={screenPayload} />;
       case 'p7':  return <P7Dex setScreen={setScreen} state={effectiveState} />;
       case 'p8':  return <P8Profile setScreen={setScreen} state={effectiveState} />;
-      case 'p9':  return <P9Bag setScreen={setScreen} state={effectiveState} dispatch={dispatch} dragManager={dragManager} />;
+      case 'p9':  return <P9Bag setScreen={setScreen} state={effectiveState} dispatch={dispatch} />;
       case 'p9b': return <P9bToolAnim setScreen={setScreen} />;
       case 'p10': return <P10Picker setScreen={setScreen} state={effectiveState} dispatch={dispatch} />;
       case 'p11': return <P11Pack setScreen={setScreen} />;
