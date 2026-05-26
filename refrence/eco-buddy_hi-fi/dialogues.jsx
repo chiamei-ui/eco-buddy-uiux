@@ -20,6 +20,7 @@ const DIALOGUES = {
 
   // 角色錯誤操作（P1 / P3 / P6 / P9 等含角色畫面）
   err: {
+    foodTap:     '把食物拖到我身上餵我吧！🍖',
     foodEmpty:   '沒東西吃了 😢 去回收換食物來！',
     foodLocked:  '這個還沒解鎖，再努力一下！🔒',
     foodFull:    '放不下了！先把現有的吃掉再說 🍖',

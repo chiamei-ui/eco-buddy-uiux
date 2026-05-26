@@ -1,14 +1,27 @@
 /* ECO BUDDY · All game-mode screens */
 
 /* ═══════════════ P1 · Buddy Home ═══════════════ */
-const P1Home = ({ state, dispatch, setScreen, dragManager }) => {
+const P1Home = ({ state, dispatch, setScreen, dragManager, payload }) => {
   const [dockTab, setDockTab] = useState('food'); // food | tools
   const [touched, setTouched] = useState(false);
   const [eating, setEating] = useState(false);
   const [bubble, setBubble] = useState(null); // {text, error}
+  const [p6SheetOpen, setP6SheetOpen] = useState(false);
+  const [ambientVisible, setAmbientVisible] = useState(true);
+  const [ambientDismissing, setAmbientDismissing] = useState(false);
   const turtleRef = useRef(null);
   const valueRiseRef = useRef([]);
   const [valueRises, setValueRises] = useState([]);
+
+  useEffect(() => {
+    if (payload?.autoFeed) {
+      setEating(true);
+      showBubble({ text: '好好吃！謝謝你～', error: false });
+      setTimeout(() => setEating(false), 1500);
+    }
+    const t = setTimeout(() => dismissAmbient(), 10000);
+    return () => clearTimeout(t);
+  }, []);
 
   // tap turtle = touch reaction (and check special states)
   const handleTurtleTap = () => {
@@ -17,11 +30,16 @@ const P1Home = ({ state, dispatch, setScreen, dragManager }) => {
     const text = special === 'legendary' ? DIALOGUES.special.legendary
                : special === 'dying'     ? DIALOGUES.special.dying
                : touchDialogue();
-    showBubble({ text, error: special === 'dying' }, 2400);
+    showBubble({ text, error: special === 'dying' });
     setTimeout(() => setTouched(false), 1000);
   };
 
-  const showBubble = (b, ms = 2200) => {
+  const dismissAmbient = () => {
+    setAmbientDismissing(true);
+    setTimeout(() => setAmbientVisible(false), 250);
+  };
+
+  const showBubble = (b, ms = 10000) => {
     setBubble(b);
     setTimeout(() => setBubble(null), ms);
   };
@@ -29,7 +47,7 @@ const P1Home = ({ state, dispatch, setScreen, dragManager }) => {
   // tap stat pip → show stat dialogue
   const handleStatTap = (kind) => {
     const value = state.stats[kind];
-    showBubble({ text: statDialogue(kind, value), error: statLevel(value)==='low' }, 2600);
+    showBubble({ text: statDialogue(kind, value), error: statLevel(value)==='low' });
   };
 
   // drop handler — applies food/item effect or shows error
@@ -87,7 +105,7 @@ const P1Home = ({ state, dispatch, setScreen, dragManager }) => {
       <div className="p1-header">
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <img src="assets/logo-ecobuddy.svg" alt="ecoBUDDY" className="ecobuddy-logo" />
-          <ModeChip mode="default" />
+          <ModeChip mode="game" />
         </div>
         <AvatarButton onClick={() => setScreen('p8')} />
       </div>
@@ -112,14 +130,18 @@ const P1Home = ({ state, dispatch, setScreen, dragManager }) => {
       onPointerEnter={() => dragManager.setHover('turtle')}
       onPointerLeave={() => dragManager.setHover(null)}>
 
-        {!bubble &&
-        <div className="ambient-bubble">月底了，<br />來選擇你的夥伴吧</div>
+        {!bubble && ambientVisible &&
+        <div className={`ambient-bubble${ambientDismissing?' dismissing':''}`} onClick={dismissAmbient}>
+          月底了，<br />來選擇你的夥伴吧
+          <button className="ambient-close" onClick={dismissAmbient} aria-label="關閉">✕</button>
+        </div>
         }
 
         {bubble &&
         <SpeechBubble
           text={bubble.text}
           error={bubble.error}
+          onClose={() => setBubble(null)}
           style={{ top: 14, left: 'auto', right: 18 }} />
 
         }
@@ -139,9 +161,20 @@ const P1Home = ({ state, dispatch, setScreen, dragManager }) => {
           <button className="side-action tap-area" onClick={() => setScreen('p2')}>
             <ScanBtnIcon />
           </button>
-          <button className="side-action tap-area" onClick={() => setScreen('p6')}>
-            <AdsBtnIcon />
-          </button>
+          <div style={{ position: 'relative' }}>
+            <button className="side-action tap-area" onClick={() => setP6SheetOpen(true)}>
+              <AdsBtnIcon />
+            </button>
+            {state.adRemaining > 0 && (
+              <span style={{
+                position: 'absolute', top: 0, right: 0,
+                background: 'var(--ecoco-orange)', color: '#fff',
+                fontSize: 11, fontWeight: 800, minWidth: 20, height: 20,
+                borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                border: '2px solid rgba(255,255,255,0.5)', fontFamily: 'var(--font-en)', zIndex: 6, pointerEvents: 'none',
+              }}>{state.adRemaining}</span>
+            )}
+          </div>
         </div>
       </div>
 
@@ -173,6 +206,29 @@ const P1Home = ({ state, dispatch, setScreen, dragManager }) => {
           </div>
         </>}
       </div>
+      {p6SheetOpen && (
+        <div className="p6-confirm-backdrop" onClick={() => setP6SheetOpen(false)}>
+          <div className="p6-confirm-sheet" onClick={e => e.stopPropagation()}>
+            <div className="sheet-grip" />
+            <h3 style={{ fontSize: 18, fontWeight: 900, textAlign: 'center', marginBottom: 6 }}>免費道具</h3>
+            <div style={{ textAlign: 'center', color: 'var(--gray-text)', fontSize: 13, marginBottom: 20 }}>
+              {state.adRemaining > 0
+                ? `今日剩 ${state.adRemaining} 次 · 觀看 30 秒影片即可獲得`
+                : DIALOGUES.err.adsDaily}
+            </div>
+            {state.adRemaining > 0 && (
+              <button className="btn-primary" style={{ width: '100%' }}
+                onClick={() => { setP6SheetOpen(false); setScreen('p6', { fromSheet: true }); }}>
+                觀看影片
+              </button>
+            )}
+            <button className="btn-ghost" style={{ width: '100%', marginTop: 8 }}
+              onClick={() => setP6SheetOpen(false)}>
+              取消
+            </button>
+          </div>
+        </div>
+      )}
     </div>);
 
 };
@@ -189,9 +245,21 @@ const FoodCell = ({ food, dragManager, onDrop, showBubble }) => {
       showBubble({ text: DIALOGUES.err.foodEmpty, error: true });
       return;
     }
-    dragManager.startDrag(e, {
-      kind: 'food', id: food.id, stock: food.stock, emoji: food.emoji
-    }, onDrop);
+    const startX = e.clientX, startY = e.clientY;
+    const onMove = (me) => {
+      if (Math.abs(me.clientX - startX) > 6 || Math.abs(me.clientY - startY) > 6) {
+        window.removeEventListener('pointermove', onMove);
+        window.removeEventListener('pointerup', onUp);
+        dragManager.startDrag(e, { kind: 'food', id: food.id, stock: food.stock, emoji: food.emoji }, onDrop);
+      }
+    };
+    const onUp = () => {
+      window.removeEventListener('pointermove', onMove);
+      window.removeEventListener('pointerup', onUp);
+      showBubble({ text: DIALOGUES.err.foodTap });
+    };
+    window.addEventListener('pointermove', onMove);
+    window.addEventListener('pointerup', onUp);
   };
   const cls = food.state === 'locked' ? 'locked' : food.stock <= 2 ? 'low' : 'has-stock';
   return (
@@ -313,11 +381,27 @@ const P2Scan = ({ setScreen, dispatch }) => {
 };
 
 /* ═══════════════ P2b · 回收結果頁（滿版·對齊 P12）═══════════════ */
-const P2bResult = ({ setScreen, dispatch }) => {
+const FOOD_CAP = 12;
+const P2bResult = ({ setScreen, dispatch, state }) => {
+  const [foodFullMsg, setFoodFullMsg] = useState(null);
+
+  const checkAndStore = () => {
+    const wouldOverflow = (state?.food || []).some((f, i) => {
+      if (f.state === 'locked') return false;
+      return (f.stock + ([3, 2, 1, 0][i] || 0)) > FOOD_CAP;
+    });
+    if (wouldOverflow) {
+      setFoodFullMsg(DIALOGUES.err.foodFull);
+      return;
+    }
+    dispatch({ type: 'COLLECT_BATCH' });
+    setScreen('p1');
+  };
+
   return (
     <div className="screen p2b">
       <StatusBar />
-
+      <div className="sheet-grip" style={{marginTop:14}} />
       <div className="hero">
         <div className="eyebrow">RECYCLE COMPLETE · 回收掃碼</div>
         <h2>本次回收成功！</h2>
@@ -347,8 +431,15 @@ const P2bResult = ({ setScreen, dispatch }) => {
       </div>
 
       <div className="footer">
-        <button className="btn-primary" onClick={() => {dispatch({ type: 'COLLECT_BATCH' });setScreen('p3');}}>立即餵食</button>
-        <button className="btn-ghost" onClick={() => {dispatch({ type: 'COLLECT_BATCH' });setScreen('p1');}}>存至食物欄</button>
+        {foodFullMsg && (
+          <div style={{
+            background: '#FFF0F2', border: '1px solid #FFD6DD', borderRadius: 12,
+            padding: '10px 14px', fontSize: 13, fontWeight: 700, color: '#B0203A',
+            textAlign: 'center', marginBottom: 4,
+          }}>{foodFullMsg}</div>
+        )}
+        <button className="btn-primary" onClick={() => { dispatch({ type: 'COLLECT_BATCH' }); setScreen('p1', { autoFeed: true }); }}>立即餵食</button>
+        <button className="btn-ghost" onClick={checkAndStore}>存至食物欄</button>
       </div>
     </div>);
 
@@ -507,35 +598,25 @@ const P4Shop = ({ setScreen, state, dispatch }) => {
 const ShopPurchaseModal = ({ item, state, onClose, onConfirm }) => {
   const insufficient = state.points < item.price;
   const [method, setMethod] = useState(insufficient ? 'cash' : 'points');
-  const [alert, setAlert] = useState(null);
+  const [toast, setToast] = useState(null);
   const [payFailDemo, setPayFailDemo] = useState(false);
   const cashPrice = (item.price * 0.5).toFixed(0);
 
-  // 開啟時若點數不足 → 跳系統 alert 提示（取代角色對話）
   useEffect(() => {
     if (insufficient) {
-      setAlert({
-        title: '點數不足',
-        message: DIALOGUES.sys.p4.pointsLow,
-        actions: [
-          { label: '取消', onClick: () => { setAlert(null); onClose(); } },
-          { label: '改用現金', primary: true, onClick: () => { setMethod('cash'); setAlert(null); } },
-        ],
-      });
+      setToast(DIALOGUES.sys.p4.pointsLow);
     }
     // eslint-disable-next-line
   }, []);
 
   const handleConfirm = () => {
+    if (method === 'points' && insufficient) {
+      setToast(DIALOGUES.sys.p4.pointsLow);
+      return;
+    }
     if (payFailDemo) {
-      setAlert({
-        title: '付款失敗',
-        message: DIALOGUES.sys.p4.payFail,
-        actions: [
-          { label: '取消', onClick: () => { setAlert(null); onClose(); } },
-          { label: '重試', primary: true, onClick: () => setAlert(null) },
-        ],
-      });
+      setToast(DIALOGUES.sys.p4.payFail);
+      setPayFailDemo(false);
       return;
     }
     onConfirm();
@@ -583,14 +664,7 @@ const ShopPurchaseModal = ({ item, state, onClose, onConfirm }) => {
         </div>
       </div>
 
-      {alert &&
-        <SystemAlert
-          title={alert.title}
-          message={alert.message}
-          actions={alert.actions}
-          onDismiss={() => setAlert(null)}
-        />
-      }
+      <SystemToast text={toast} onClose={() => setToast(null)} />
     </div>
   );
 };
@@ -711,8 +785,8 @@ const P5Missions = ({ setScreen, state, dispatch }) => {
 };
 
 /* ═══════════════ P6 · Ads → box ═══════════════ */
-const P6Ads = ({ setScreen, state, dispatch }) => {
-  const [step, setStep] = useState(0); // 0 confirm, 1 ad, 2 reward
+const P6Ads = ({ setScreen, state, dispatch, payload }) => {
+  const [step, setStep] = useState(payload?.fromSheet ? 1 : 0); // 0 confirm, 1 ad, 2 reward
   const [adTime, setAdTime] = useState(15);
   const [pity, setPity] = useState(state.pity || 0);
   const [reward, setReward] = useState(null);
@@ -843,7 +917,7 @@ const P7Dex = ({ setScreen, state }) => {
         </div>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 10 }}>
           <button className="btn-primary" style={{ padding: '8px 18px', fontSize: 13, boxShadow: 'none' }} onClick={() => setScreen('p10')}>選擇 6 月角色</button>
-          <div className="swap-pill">🎫 剩餘更換 3 次</div>
+          <div className="swap-pill" onClick={() => setScreen('p11')} style={{ cursor: 'pointer' }}>🎫 剩餘更換 3 次</div>
         </div>
       </div>
 
@@ -1068,7 +1142,7 @@ const P9Bag = ({ setScreen, state, dispatch, dragManager }) => {
         </div>
       }
       <div style={{ padding: '0 18px 90px', marginTop: 'auto' }}>
-        <button className="btn-ghost" style={{ width: '100%' }} onClick={() => setScreen('p1')}>長按或拖曳道具到夥伴身上即可使用</button>
+        <button className="btn-primary" style={{ width: '100%' }} onClick={() => setScreen('p1')}>前往夥伴頁使用</button>
       </div>
     </div>);
 

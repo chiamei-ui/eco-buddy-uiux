@@ -42,8 +42,11 @@ const TabBar = ({ active, onNav }) => {
 };
 
 /* ───────── Speech bubble (renders relative to parent) ───────── */
-const SpeechBubble = ({ text, error=false, style }) => (
-  <div className={`bubble ${error?'error':''}`} style={style}>{text}</div>
+const SpeechBubble = ({ text, error=false, style, onClose }) => (
+  <div className={`bubble ${error?'error':''} ${onClose?'closable':''}`} style={style}>
+    {text}
+    {onClose && <button className="bubble-close" onClick={onClose} aria-label="關閉">✕</button>}
+  </div>
 );
 
 /* ───────── System Toast (iOS/Android-style 中性 toast, 用於 P2 等無角色場景) ───────── */

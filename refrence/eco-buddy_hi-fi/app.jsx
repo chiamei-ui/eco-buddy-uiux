@@ -93,7 +93,6 @@ function useDragManager(){
 
   const startDrag = useCallback((e, payload, dropHandler) => {
     e.preventDefault?.();
-    const rect = e.currentTarget.getBoundingClientRect();
     setDrag({ payload, x: e.clientX, y: e.clientY });
     dropHandlerRef.current = dropHandler;
   }, []);
@@ -277,13 +276,13 @@ const App = () => {
   const renderScreen = () => {
     switch(screen){
       case 'push': return <PushDemo setScreen={setScreen} />;
-      case 'p1':  return <P1Home state={effectiveState} dispatch={dispatch} setScreen={setScreen} dragManager={dragManager} />;
+      case 'p1':  return <P1Home state={effectiveState} dispatch={dispatch} setScreen={setScreen} dragManager={dragManager} payload={screenPayload} />;
       case 'p2':  return <P2Scan setScreen={setScreen} dispatch={dispatch} />;
-      case 'p2b': return <P2bResult setScreen={setScreen} dispatch={dispatch} />;
+      case 'p2b': return <P2bResult setScreen={setScreen} dispatch={dispatch} state={effectiveState} />;
       case 'p3':  return <P3Feeding setScreen={setScreen} dispatch={dispatch} />;
       case 'p4':  return <P4Shop setScreen={setScreen} state={effectiveState} dispatch={dispatch} />;
       case 'p5':  return <P5Missions setScreen={setScreen} state={effectiveState} dispatch={dispatch} />;
-      case 'p6':  return <P6Ads setScreen={setScreen} state={effectiveState} dispatch={dispatch} />;
+      case 'p6':  return <P6Ads setScreen={setScreen} state={effectiveState} dispatch={dispatch} payload={screenPayload} />;
       case 'p7':  return <P7Dex setScreen={setScreen} state={effectiveState} />;
       case 'p8':  return <P8Profile setScreen={setScreen} state={effectiveState} />;
       case 'p9':  return <P9Bag setScreen={setScreen} state={effectiveState} dispatch={dispatch} dragManager={dragManager} />;
