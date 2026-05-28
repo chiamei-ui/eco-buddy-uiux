@@ -1,21 +1,57 @@
-# ECOCO Brand Design System
+# ECO Buddy Design System
 
-> 這份文件是 ecoco 品牌 UI 的設計規範，專為 AI coding agent 設計。
-> 使用方式：將此檔案放在專案根目錄，告訴 AI agent「請依照 ECOCO_DESIGN.md 建構頁面」。
->
-> **This file is the single source of truth for all ecoco UI work.**
-> Any other design system (Notion, Linear, Apple, etc.) must NOT override these rules.
+> 這份文件是 ECO Buddy 遊戲模式的 UI 設計規範，專為 AI coding agent 設計。
+> **This file is the single source of truth for all ECO Buddy UI work.**
+
+---
+
+## 0. Brief 核心（最高優先）
+
+**ECO Buddy 是一個有生命的夥伴，不是一個 App。**
+
+每個設計決策都問：「這個設計會讓 Buddy 更像活著嗎？」
+
+### 8 條設計原則
+1. Buddy 是一個生命，不是一個 App
+2. 動機是「對 Buddy 好」，不是「完成任務」
+3. 環保是結果，不是訴求——不教育、不說教
+4. **每一頁都要有 Buddy**（全身／縮圖／對話泡泡至少一種）
+5. 鼓勵 ＞ 命令；陪伴 ＞ 提醒
+6. 情緒 ＞ 資訊（少三個數據，多一個表情）
+7. ECOCO 是 Buddy 的世界，不是廠商
+8. 驚喜 ＞ 完整（每天打開要有一點沒想到）
+
+### 絕對禁區（UI 文字）
+- 「回收、投遞、掃描、任務、KPI」— 不得出現在用戶可見處
+- 「Phase 2、即將推出、SDK 接管」— 工程師語言不外露
+- 「ECOCO 點數」直接露出 — 改用「愛心」
+- 法律免責語句出現在主視覺區
+
+### 文案替換規則
+| 原文 | 改後 |
+|------|------|
+| 回收 / 掃碼 | 帶食物回家 / 給 Buddy |
+| 任務 | 今日陪伴 |
+| 點數 | 愛心 |
+| HP | 精神 |
+| 潔淨度 | 清爽 |
+| 心情值 | 心情 |
+| 進化 | 變身 |
+| 角色 / 寵物 | Buddy |
+| 圖鑑 | 夥伴日誌 |
+| 完成 | 一起做到 |
+| 屬性 | 狀態 |
 
 ---
 
 ## 1. Visual Theme & Atmosphere
 
-ecoco 的視覺語言是「**現代環保科技品牌**」— 乾淨、大膽、有力量，帶有一絲工業/editorial 質感。
+ECO Buddy 的視覺語言是「**溫暖的生命世界**」— 柔和、有溫度、像一個有故事的家。
 
-- **主色調對比**：白底 + 深黑文字，配合橘色作為唯一醒目 CTA
-- **氣氛**：專業可信任（內部工具感）但不冷漠；中文排版優先
-- **禁止使用**：漸層色背景、繁複裝飾、多種主色競爭
-- **Hero 區塊**：黑色底 + 品牌圖像，加深色遮罩保持文字可讀
+- **氣氛**：可愛但不幼稚；溫暖但不俗氣；中文排版優先
+- **底色**：奶油膚（`#FAE0B8`），不是冷白
+- **禁止使用**：純白大面積底、冷色系工具感設計、多種主色競爭
+- **Buddy 優先**：ECOCO Logo 不放大，Buddy 是主角
 
 ---
 
@@ -23,39 +59,42 @@ ecoco 的視覺語言是「**現代環保科技品牌**」— 乾淨、大膽、
 
 ### Brand Colors（品牌色）
 ```
---color-ecoco-orange:     #FF5000   → 主要 CTA、強調色、邊框高亮
---color-ecoco-blue:       #060E9F   → 次要 CTA、資訊型 badge、連結
---color-ecoco-yellow:     #FFCE00   → 輔助標記（如 folder icon、highlight）
---color-ecoco-light-blue: #8EB9C9   → 圖表、說明性區塊
---color-ecoco-beige:      #FAE0B8   → 暖色說明區塊背景
---color-ecoco-cyan:       #0076A9   → 深色背景上的連結、輔助操作
+主色   #FF5000   → 主要 CTA、強調色
+副色   #060E9F   → Header 深色區、圖鑑類
+強調   #FFCE00   → 倒數、成就、警示
+海藍   #0076A9   → 補充站場景
+霧藍灰 #8EB8C9   → 次要資訊、夜間背景
 ```
 
-### Semantic Colors（語意色）
+### Background System（底色系統）
 ```
-Background (page):   #F7F9FC   → 整頁背景
-Background (card):   #F0F3F7   → 卡片、hover 狀態、次要背景
-Surface (white):     #FFFFFF   → 主要內容面板、modal、sidebar
-Hero:                #000000   → Hero 區塊全黑底
+主底（頁面）  #FAE0B8   → 奶油膚，大面積底色
+次底         #FFF5E6   → 淡奶油，次要區塊
+卡片底       #FFFFFF   → 僅卡片內，不大面積使用
+```
+> **禁止用 `#F7F9FC` 或純白做頁面底色**
 
-Text (primary):      #1A1A1A   → 所有主要內文
-Text (secondary):    #4B5563   → 說明文字
-Text (muted):        #6B7280   → 標籤、次要標題
-Text (placeholder):  #9CA3AF   → Input placeholder
-
-Border (default):    #E5E7EB
-Border (inner):      #F0F3F7   → 元件內部分隔線
-
-Status (success):    green-500 (#22C55E)
-Status (error/lock): red-600 (#DC2626)  → 受限資源
-Status (info):       #060E9F (ecoco-blue)
+### Attribute Colors（屬性色 / 三大狀態值）
+```
+精神（HP）  #FF5A5F   暖紅  ❤️
+清爽（潔淨） #4A90E2   水藍  💧
+心情        #FFC940   暖黃  😊
 ```
 
-### Color Usage Rules（使用規則）
-- `#FF5000` 只用於：主要 CTA 按鈕、search bar 邊框、hover 高亮
-- `#060E9F` 只用於：次要行動按鈕、category badge 文字、資訊圖示
-- **不要讓橘色與藍色在同一個元件上競爭注意力**
-- 頁面背景永遠是 `#F7F9FC`，不是純白
+### Text Colors
+```
+Text (primary):    #1A1A1A
+Text (secondary):  #4B5563
+Text (muted):      #6B7280
+Text (placeholder):#9CA3AF
+```
+
+### Color Usage Rules
+- `#FF5000` 只用於：主要 CTA、強調、品牌錨點
+- `#060E9F` 只用於：次要 CTA、圖鑑類、資訊圖示
+- 警示用 `#FFCE00`，**禁用警示紅 `#FF0000`**
+- 橘色與藍色不在同一元件上競爭注意力
+- ECOCO Logo 不放大，Buddy 是主角
 
 ---
 
@@ -241,22 +280,42 @@ Hero 遮罩層級：
 
 ## 7. Design Guardrails & Anti-Patterns
 
-### 絕對禁止（Anti-Patterns）
-- **不要用漸層色** — 背景、按鈕一律純色，不用 bg-gradient-*
-- **不要用圓角 rounded-full 在矩形容器** — 大容器用 rounded-xl 或 rounded-2xl
+### 絕對禁止（UI 視覺）
+- **不要用漸層色** — 背景、按鈕一律純色，不用 bg-gradient-*（主按鈕僅允許純色）
+- **不要用純白大面積底** — 頁面底色一律 `#FAE0B8`（奶油膚）
+- **不要讓 Buddy 缺席任何一頁** — 每頁至少有縮圖、對話泡泡或表情其中一種
 - **不要讓品牌色互相競爭** — 一個區塊只用一種主色作為強調
-- **不要用 Tailwind 預設藍色 (blue-500/600)** — 永遠用 `#060E9F` (ecoco-blue)
-- **不要用 Tailwind 預設橘色 (orange-500)** — 永遠用 `#FF5000` (ecoco-orange)
-- **不要在 Hero 以外使用全黑背景**
+- **不要用警示紅 #FF0000** — 警示用 `#FFCE00` 橘黃系
+- **不要用銳利直角卡片** — 圓角是視覺語言
+- **不要讓 ECOCO Logo 比 Buddy 更搶眼**
+- **不要用 Tailwind 預設藍色 (blue-500/600)** — 用 `#060E9F`
+- **不要用 Tailwind 預設橘色 (orange-500)** — 用 `#FF5000`
 - **不要省略繁體中文字型** — font-family 必須包含 "Noto Sans TC"
-- **不要用 Arial / Helvetica** 作為中文字型
+- **不要用系統 emoji（🔥💎📊⏰）** — Icon 全部自製，扁平+微立體風格
+
+### 絕對禁止（UI 文字）
+- 「回收、投遞、掃描、任務、KPI」不得出現在用戶可見文字
+- 「Phase 2、即將推出、SDK 接管」工程師語言不外露
+- 「ECOCO 點數」直接露出（改「愛心」）
+- 法律免責語句出現在主視覺區（移至頁面底部 8px 灰字）
 
 ### 設計守則
-- 按鈕 CTA 一律 `rounded-full`；容器、卡片、badge 用 `rounded-xl` 或 `rounded-lg`
-- 只有一個「最重要的行動」會用橘色，其他次要行動用藍色或 ghost 樣式
-- 微標籤文字（10px）加 `uppercase + tracking-widest` 增強可讀性
+- 按鈕 CTA 一律 `rounded-full`；容器、卡片用 `rounded-xl` 或 `rounded-2xl`
+- 只有一個「最重要的行動」用橘色，次要用藍色或 ghost 樣式
 - Hover 狀態必須有回饋：scale、color change、或 shadow change，至少一種
-- 圖示使用 Lucide React，大小通常 `w-4 h-4` 到 `w-5 h-5`
+- 空狀態（Empty State）必須有 Buddy 插圖 + 情感文案，不能只放灰字
+
+### Buddy 在各頁的存在（必達）
+| 頁面 | Buddy 出現方式 |
+|------|--------------|
+| 主畫面 | 全身、待機動畫、對話泡泡 |
+| 回收完成頁 | 慶祝動畫（跳起來接食物） |
+| 補充站完成頁 | Buddy 洗澡 / 變身動畫 |
+| 商店 | 角落縮圖看著商品（50×50） |
+| 任務頁 | Header 右側 Buddy 半身 |
+| 夥伴日誌（圖鑑） | 每張卡片中央 Buddy 小圖 |
+| 道具頁 | Buddy 等待表情（空狀態填補） |
+| 個人主頁 | 頂部 Buddy 半身陪伴 |
 
 ---
 
@@ -282,47 +341,54 @@ xl:  1280px → 卡片 4 欄
 
 ### 快速啟動 Prompt
 ```
-請依照 ECOCO_DESIGN.md 建構 UI。
-背景色 #F7F9FC，主色 #FF5000（橘），次色 #060E9F（藍），字型 Noto Sans TC。
-標題 font-black，按鈕 rounded-full，卡片 rounded-2xl bg-white border border-[#E5E7EB]。
+請依照 ECOCO_DESIGN.md 建構 ECO Buddy UI。
+頁面底色 #FAE0B8（奶油膚），主色 #FF5000（橘），次色 #060E9F（藍），字型 Noto Sans TC。
+卡片 bg-white rounded-2xl shadow-sm，按鈕 CTA rounded-full。
+每頁必須有 Buddy 的視覺存在（全身、縮圖、或對話泡泡）。
+所有面向用戶的文字禁用「回收、投遞、掃描、任務、點數」，改用 Buddy 世界語言。
+不要使用任何漸層色。
 ```
 
 ### 建立新頁面
 ```
-使用 ECOCO_DESIGN.md 的設計規範建立 [頁面描述]。
-- 頁面背景: bg-[#F7F9FC]
-- Header: sticky, bg-white, border-b border-[#E5E7EB], h-16
-- 主要 CTA 按鈕: bg-[#FF5000] text-white rounded-full font-bold
-- 次要 CTA 按鈕: bg-[#060E9F] text-white rounded-full font-bold
-- 所有文字: font-family "Noto Sans TC"
-- 不要使用任何漸層色
+使用 ECOCO_DESIGN.md 建立 [頁面描述]。
+- 頁面背景: bg-[#FAE0B8]（奶油膚，不是白色）
+- 卡片: bg-white rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.06)]
+- 主要 CTA: bg-[#FF5000] text-white rounded-full font-bold
+- 次要 CTA: bg-[#060E9F] text-white rounded-full font-bold
+- 字型: "Noto Sans TC"
+- Buddy 存在感: 右上角縮圖或底部對話泡泡（必填）
+- 禁止漸層色
 ```
 
 ### 建立卡片元件
 ```
-依照 ECOCO_DESIGN.md 建立卡片元件：
-bg-white rounded-2xl border border-[#E5E7EB] shadow-sm
-hover:shadow-md hover:scale-105 transition-all duration-200
-標題: font-black text-[#1A1A1A]
-說明: text-sm text-[#4B5563] font-medium
+依照 ECOCO_DESIGN.md 建立卡片：
+bg-white rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.06)]
+hover:shadow-[0_8px_24px_rgba(0,0,0,0.10)] hover:-translate-y-0.5 transition-all duration-200
+標題: font-bold text-[#1A1A1A] text-lg
+說明: text-sm text-[#4B5563]
 ```
 
-### 建立表單 / Modal
+### 建立 Buddy 對話泡泡
 ```
-依照 ECOCO_DESIGN.md 建立表單：
-背景遮罩: bg-[#1A1A1A]/20 backdrop-blur-sm
-卡片: bg-white rounded-2xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.12)]
-Submit 按鈕: bg-[#FF5000] text-white rounded-full font-bold shadow-[0_4px_16px_rgba(255,80,0,0.3)]
-Cancel 按鈕: ghost style, text-[#6B7280] hover:text-[#1A1A1A]
+形狀: rounded-2xl + 三角指向 Buddy
+底色: bg-white shadow-[0_2px_8px_rgba(0,0,0,0.06)]
+文字: text-sm text-[#333333]
+出現時機: 停在主畫面 3 秒後 / 屬性低於 30% / 進入新頁面
 ```
 
-### 品牌色參照速查
+### 色彩速查
 ```
-橘色 #FF5000 → CTA, 強調, hover highlight
-藍色 #060E9F → 次要 CTA, info badge, link
-黃色 #FFCE00 → 輔助標記
-頁面底色 #F7F9FC
-卡片白 #FFFFFF
-邊框 #E5E7EB
-主文 #1A1A1A
+頁面底色   #FAE0B8  奶油膚（大面積）
+次底      #FFF5E6  淡奶油（次要區塊）
+卡片      #FFFFFF  白（僅卡片內）
+主色 CTA  #FF5000  橘
+副色      #060E9F  藍
+強調      #FFCE00  黃（倒數/成就）
+精神(HP)  #FF5A5F  暖紅
+清爽      #4A90E2  水藍
+心情      #FFC940  暖黃
+主文      #1A1A1A
+次文      #4B5563
 ```
