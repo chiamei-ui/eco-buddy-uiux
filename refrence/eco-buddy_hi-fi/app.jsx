@@ -40,11 +40,18 @@ function stateReducer(state, action){
         food: action.food ? state.food.map(f => f.id===action.food ? {...f, stock:Math.max(0,f.stock-1)} : f) : state.food,
       };
     case 'USE_TOOL': {
-      const map = { feather:{key:'mood',v:8}, brush:{key:'clean',v:10}, ball:{key:'mood',v:6}, snack:{key:'hp',v:3} };
-      const m = map[action.tool] || {key:'mood',v:5};
+      const effects = {
+        feather: [{key:'mood',v:15}],
+        brush:   [{key:'clean',v:15},{key:'mood',v:10}],
+        ball:    [{key:'mood',v:15}],
+        snack:   [{key:'hp',v:15},{key:'mood',v:15}],
+      };
+      const eff = effects[action.tool] || [{key:'mood',v:5}];
+      let stats = {...state.stats};
+      eff.forEach(({key,v}) => { stats[key] = Math.min(100, stats[key]+v); });
       return {
         ...state,
-        stats:{...state.stats, [m.key]: Math.min(100, state.stats[m.key]+m.v)},
+        stats,
         tools: state.tools.map(t => t.id===action.tool ? {...t, count:Math.max(0,t.count-1)} : t).filter(t => t.count>0 || t.permanent),
       };
     }
@@ -177,9 +184,9 @@ const ScreenNav = ({ screen, setScreen }) => (
 /* ───────── Push notification entry mock ───────── */
 const PushDemo = ({ setScreen }) => {
   const samples = [
-    { trigger:'HP 低', msg:'快去回收！海龜餓壞了 🥺' },
-    { trigger:'潔淨低', msg:'🛁 我想洗澡澡～' },
-    { trigger:'心情低', msg:'好無聊喔，快來陪我玩！' },
+    { trigger:'精神低', msg:'Buddy 想念你了… 快帶食物回家給我 😫' },
+    { trigger:'清爽低', msg:'Buddy 想洗個澡 🛁 帶我去補充站沖一沖！' },
+    { trigger:'心情低', msg:'Buddy 有點寂寞 😞 快來陪我玩一玩！' },
     { trigger:'月底倒數', msg:'5 天後結算 · 還沒選 6 月夥伴喔' },
     { trigger:'道具即將過期', msg:'⏰ 你的逗貓棒還剩 6 小時！' },
     { trigger:'三值全滿', msg:'✨ 傳說型態解鎖！快來看看' },

@@ -3,9 +3,9 @@
 const DIALOGUES = {
   // 三維屬性 (state: high / mid / low)
   hp: {
-    high: '今天回收了瓶子，我整個活起來了！💪',
+    high: '今天帶食物回家，我整個活起來了！💪',
     mid:  '有點累… 去補充站補個能量吧？',
-    low:  '快沒力了！快去回收或補充站救我 😫',
+    low:  '快沒力了！帶食物回家給我補能量 😫',
   },
   clean: {
     high: '香噴噴✨ 補充站果然是我的秘密武器！',
@@ -21,7 +21,7 @@ const DIALOGUES = {
   // 角色錯誤操作（P1 / P3 / P6 / P9 等含角色畫面）
   err: {
     foodTap:     '把食物拖到我身上餵我吧！🍖',
-    foodEmpty:   '沒東西吃了 😢 去回收換食物來！',
+    foodEmpty:   '沒東西吃了 😢 去帶食物回家給我！',
     foodLocked:  '這個還沒解鎖，再努力一下！🔒',
     foodFull:    '放不下了！先把現有的吃掉再說 🍖',
     hpMax:       '我超飽的！先讓我消化一下嘛 🫃',
@@ -33,6 +33,7 @@ const DIALOGUES = {
     bagEmpty:    '背包空空的… 去廣告抽一個？🎁',
     toolExpire:  '我的玩具快消失了！快點用 ⏳',
     toolExpired: '嗚… 道具不見了 😔 下次要記得用',
+    foodStored:  '幫我存好了！等你準備好再給我～ 🍖',
   },
 
   // P2 掃碼 / P4 商店：畫面無角色，改用標準系統 UI（toast / alert），文案中性。
@@ -45,7 +46,7 @@ const DIALOGUES = {
       netFail:   '網路連線失敗，請確認連線後再試',
     },
     p4: {
-      pointsLow: '點數不足，無法完成購買',
+      pointsLow: 'ECOCO 點數不足，無法完成購買',
       payFail:   '付款失敗，請再試一次',
     },
   },

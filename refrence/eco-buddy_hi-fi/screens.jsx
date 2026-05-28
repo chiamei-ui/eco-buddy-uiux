@@ -9,6 +9,7 @@ const P1Home = ({ state, dispatch, setScreen, dragManager, payload }) => {
   const [p6SheetOpen, setP6SheetOpen] = useState(false);
   const [ambientVisible, setAmbientVisible] = useState(true);
   const [ambientDismissing, setAmbientDismissing] = useState(false);
+  const [pulsingIds, setPulsingIds] = useState(new Set());
   const turtleRef = useRef(null);
   const valueRiseRef = useRef([]);
   const [valueRises, setValueRises] = useState([]);
@@ -18,6 +19,15 @@ const P1Home = ({ state, dispatch, setScreen, dragManager, payload }) => {
       setEating(true);
       showBubble({ text: '好好吃！謝謝你～', error: false });
       setTimeout(() => setEating(false), 1500);
+    }
+    if (payload?.foodStored) {
+      setDockTab('food');
+      // pulse all unlocked food cells that have stock after COLLECT_BATCH
+      const ids = new Set(state.food.filter(f => f.state !== 'locked' && f.stock > 0).map(f => f.id));
+      setPulsingIds(ids);
+      setTimeout(() => setPulsingIds(new Set()), 2500);
+      // show bubble after a 120ms delay so the tab switch settles first
+      setTimeout(() => showBubble({ text: DIALOGUES.err.foodStored, error: false }), 120);
     }
     const t = setTimeout(() => dismissAmbient(), 10000);
     return () => clearTimeout(t);
@@ -65,7 +75,7 @@ const P1Home = ({ state, dispatch, setScreen, dragManager, payload }) => {
       // good drop → feeding mini animation in place
       setEating(true);
       dispatch({ type: 'FEED', food: payload.id, hpGain: 5 });
-      addRise('+5 HP', pos);
+      addRise('+5 精神', pos);
       showBubble({ text: '好好吃！謝謝你～', error: false });
       setTimeout(() => setEating(false), 1500);
     } else if (payload.kind === 'tool') {
@@ -82,7 +92,7 @@ const P1Home = ({ state, dispatch, setScreen, dragManager, payload }) => {
       // drop tool item → use animation
       setEating(true);
       dispatch({ type: 'USE_TOOL', tool });
-      const gainMap = { feather: '+8 心情', brush: '+10 潔淨', ball: '+6 心情', snack: '+3 HP' };
+      const gainMap = { feather: '+15 心情', brush: '+15 清爽', ball: '+15 心情', snack: '+15 精神' };
       addRise(gainMap[tool] || '+5', pos, tool === 'brush' ? '#1F3DBF' : tool === 'snack' ? '#FF4D63' : '#FFB000');
       showBubble({ text: '好玩好玩！', error: false });
       setTimeout(() => setEating(false), 1500);
@@ -190,7 +200,7 @@ const P1Home = ({ state, dispatch, setScreen, dragManager, payload }) => {
           <div className="dock-title">本週食物</div>
           <div className="dock-hint">每週限量配額，拖曳至角色即可餵食</div>
           <div className="dock-grid">
-            {state.food.map((f, i) => <FoodCell key={f.id} food={f} dragManager={dragManager} onDrop={onDrop} index={i} showBubble={showBubble} />
+            {state.food.map((f, i) => <FoodCell key={f.id} food={f} dragManager={dragManager} onDrop={onDrop} index={i} showBubble={showBubble} pulsing={pulsingIds.has(f.id)} />
             )}
           </div>
         </> : <>
@@ -249,7 +259,7 @@ const P1Home = ({ state, dispatch, setScreen, dragManager, payload }) => {
 };
 
 /* food cell with drag */
-const FoodCell = ({ food, dragManager, onDrop, showBubble }) => {
+const FoodCell = ({ food, dragManager, onDrop, showBubble, pulsing }) => {
   const cellRef = useRef(null);
   const handlePointerDown = (e) => {
     if (food.state === 'locked') {
@@ -278,7 +288,7 @@ const FoodCell = ({ food, dragManager, onDrop, showBubble }) => {
   };
   const cls = food.state === 'locked' ? 'locked' : food.stock <= 2 ? 'low' : 'has-stock';
   return (
-    <div ref={cellRef} className={`food-cell ${cls}`} onPointerDown={handlePointerDown}>
+    <div ref={cellRef} className={`food-cell ${cls}${pulsing ? ' pulsing' : ''}`} onPointerDown={handlePointerDown}>
       {food.state === 'locked' ? <span className="lock">🔒</span> : <>
         <span className="emoji">{food.emoji}</span>
         <span className="name">{food.name}</span>
@@ -371,6 +381,7 @@ const P2Scan = ({ setScreen, dispatch, tweaks = {}, setTweak = () => {} }) => {
 /* ═══════════════ P2b · 回收結果頁（滿版·對齊 P12）═══════════════ */
 const P2bResult = ({ setScreen, dispatch, tweaks = {}, setTweak = () => {} }) => {
   const quotaFull = tweaks.p2bQuotaFull || false;
+  const [showInfo, setShowInfo] = useState(false);
 
   const handleFeed = () => {
     dispatch({ type: 'COLLECT_BATCH', quotaFull: false });
@@ -379,7 +390,7 @@ const P2bResult = ({ setScreen, dispatch, tweaks = {}, setTweak = () => {} }) =>
 
   const handleStore = () => {
     dispatch({ type: 'COLLECT_BATCH', quotaFull: false });
-    setScreen('p1');
+    setScreen('p1', { foodStored: true });
   };
 
   const handleComplete = () => {
@@ -390,10 +401,37 @@ const P2bResult = ({ setScreen, dispatch, tweaks = {}, setTweak = () => {} }) =>
   return (
     <div className="screen p2b">
       <StatusBar />
+      {showInfo && (
+        <div
+          onClick={() => setShowInfo(false)}
+          style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.45)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+        >
+          <div
+            onClick={e => e.stopPropagation()}
+            style={{ background: '#fff', borderRadius: 20, padding: '24px 22px', width: '78%', maxWidth: 300 }}
+          >
+            <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 12, color: '#1a1a1a' }}>ECOCO 點數換算說明</div>
+            <div style={{ fontSize: 13, lineHeight: 2, color: '#555' }}>
+              <div>杯子 → ECOCO 點數 +1</div>
+              <div>寶特瓶 / 鋁罐 / 牛奶瓶 → ECOCO 點數 +2</div>
+              <div>電池（1號/2號）→ ECOCO 點數 +10</div>
+              <div>其餘電池 → ECOCO 點數 +5</div>
+            </div>
+            <button
+              onClick={() => setShowInfo(false)}
+              style={{ marginTop: 18, width: '100%', padding: '10px 0', borderRadius: 99, background: '#FF5000', color: '#fff', border: 'none', fontWeight: 700, fontSize: 14, cursor: 'pointer' }}
+            >知道了</button>
+          </div>
+        </div>
+      )}
       <div className="sheet-grip" style={{marginTop:14}} />
-      <div className="hero">
-        <div className="eyebrow">RECYCLE COMPLETE · 回收掃碼</div>
-        <h2>本次回收成功！</h2>
+      <div className="hero" style={{ position: 'relative' }}>
+        <button
+          onClick={() => setShowInfo(true)}
+          style={{ position: 'absolute', top: 10, right: 12, width: 22, height: 22, borderRadius: '50%', border: 'none', background: 'rgba(0,0,0,0.08)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0, color: '#888', fontSize: 13, fontWeight: 700, fontFamily: 'serif', lineHeight: 1 }}
+        >i</button>
+        <div className="eyebrow">RECYCLE COMPLETE · 帶食物回家</div>
+        <h2>Buddy 收到禮物了！</h2>
         <div className="meta">
           <span className="dot"></span>
           2026.06.15 14:32 · 家樂福 仁德店
@@ -410,7 +448,7 @@ const P2bResult = ({ setScreen, dispatch, tweaks = {}, setTweak = () => {} }) =>
           <div style={{ marginBottom: 12 }}>
             <div className="section-title" style={{ color: '#888' }}>本週食物已領完</div>
             <div style={{ fontSize: 13, color: '#aaa', lineHeight: 1.5, marginTop: 4 }}>
-              本週食物配額已達上限，投瓶仍可獲得 HP
+              本週食物已領滿，Buddy 的精神 +18！
             </div>
           </div>
         ) : (
@@ -422,14 +460,14 @@ const P2bResult = ({ setScreen, dispatch, tweaks = {}, setTweak = () => {} }) =>
           </>
         )}
         <div className="hp-preview">
-          <span className="label">❤️ 小海龜 HP 預計補充</span>
+          <span className="label">❤ Buddy 精神預計補充</span>
           <span className="gain">+15</span>
         </div>
         <div className="next-week-preview">
           <div className="nwp-badge">下週預告</div>
           <div className="nwp-body">
             <div className="nwp-title">🥦 花椰菜</div>
-            <div className="nwp-hp">餵食 +8 HP / 份</div>
+            <div className="nwp-hp">每份讓 Buddy +8 精神</div>
           </div>
           <div className="nwp-time">
             <div className="nwp-time-label">開搶時間</div>
@@ -443,8 +481,8 @@ const P2bResult = ({ setScreen, dispatch, tweaks = {}, setTweak = () => {} }) =>
           <button className="btn-primary" onClick={handleComplete}>完成</button>
         ) : (
           <>
-            <button className="btn-primary" onClick={handleFeed}>立即餵食</button>
-            <button className="btn-ghost" onClick={handleStore}>存入食物欄</button>
+            <button className="btn-primary" onClick={handleFeed}>馬上餵 Buddy</button>
+            <button className="btn-ghost" onClick={handleStore}>先放食物欄</button>
           </>
         )}
       </div>
@@ -488,7 +526,7 @@ const P3Feeding = ({ setScreen, dispatch }) => {
           <TurtleImg className={turtleClass} />
           {idx === 5 &&
           <>
-              <div className="value-rise" style={{ top: -20, left: 110, color: '#FF4D63' }}>+15 HP</div>
+              <div className="value-rise" style={{ top: -20, left: 110, color: '#FF4D63' }}>+15 精神</div>
               <SpeechBubble text="超滿足～謝謝！" style={{ top: 0, right: -20 }} />
             </>
           }
@@ -510,83 +548,104 @@ const P4Shop = ({ setScreen, state, dispatch }) => {
   const cats = [
   { id: 'food', label: '食物' },
   { id: 'tool', label: '道具' },
-  { id: 'decor', label: '裝飾', phase2: true },
-  { id: 'music', label: '音樂盒', phase2: true }];
+  { id: 'decor', label: '裝飾' },
+  { id: 'music', label: '音樂盒' }];
 
   const items = {
     food: [
-    { id: 'hotdog-pack', emoji: '🌭', name: '熱狗堡 ×5', desc: '人氣月底補給', price: 50, ribbon: '熱賣' },
-    { id: 'salad', emoji: '🥬', name: '蔬菜 ×5', desc: '潔淨度緩升', price: 60 },
-    { id: 'berry', emoji: '🍓', name: '莓果 ×3', desc: '限定食物', price: 80, soldOut: true },
-    { id: 'fish', emoji: '🐟', name: '小魚 ×5', desc: '高 HP 補給', price: 90 }],
+    { id: 'hotdog-pack', emoji: '🌭', name: '熱狗堡 ×5', desc: '人氣月底補給', price: 50, ribbon: '熱賣', currency: 'heart' },
+    { id: 'salad', emoji: '🥬', name: '蔬菜 ×5', desc: '清爽緩升', price: 60, currency: 'heart' },
+    { id: 'berry', emoji: '🍓', name: '莓果 ×3', desc: '限定食物', price: 80, soldOut: true, currency: 'heart' },
+    { id: 'fish', emoji: '🐟', name: '小魚 ×5', desc: '高精神補給', price: 90, currency: 'heart' },
+    { id: 'sprint-pack', emoji: '🎁', name: '月底衝刺禮包', desc: '限時限量豪華組', price: 199, currency: 'cash' },
+    { id: 'monthly-pass', emoji: '🎫', name: '月度通行證', desc: '30 天進階陪伴', price: 149, currency: 'cash' }],
 
     tool: [
-    { id: 'feather', emoji: '🪶', name: '逗貓棒', desc: '心情值 +8', price: 30 },
-    { id: 'brush', emoji: '🪮', name: '梳子', desc: '潔淨度 +10', price: 35 },
-    { id: 'ball', emoji: '⚾', name: '小球', desc: '心情值 +6', price: 25 },
-    { id: 'snack', emoji: '🍪', name: '零食', desc: 'HP +3', price: 20 }],
+    { id: 'feather', emoji: '🪶', name: '逗貓棒', desc: '心情 +15', price: 30, currency: 'heart' },
+    { id: 'brush', emoji: '🪮', name: '梳子', desc: '清爽 +15、心情 +10', price: 35, currency: 'heart' },
+    { id: 'ball', emoji: '⚾', name: '小球', desc: '心情 +15', price: 25, currency: 'heart' },
+    { id: 'snack', emoji: '🍪', name: '零食', desc: '精神 +15、心情 +15', price: 20, currency: 'heart' }],
 
     decor: [
-    { id: 'hat', emoji: '🎩', name: '紳士帽', desc: '永久裝飾', price: 299, locked: true }],
+    { id: 'star-hat', emoji: '⭐', name: '星辰帽', desc: '限定裝飾 · 閃閃發光', price: 299, currency: 'cash' },
+    { id: 'crystal-bow', emoji: '🎀', name: '水晶蝴蝶結', desc: '限定裝飾 · 精緻優雅', price: 249, currency: 'cash' }],
 
-    music: [
-    { id: 'box', emoji: '🎵', name: '音樂盒', desc: '永久裝飾', price: 399, locked: true }]
+    music: []
 
   };
+  const visibleCats = cats.filter(c => (items[c.id] || []).length > 0);
 
   return (
     <div className="screen p4">
       <StatusBar />
-      <div className="header">
-        <h2>商店</h2>
-        <button className="points-pill tappable" onClick={() => setShowPointSrc(true)} aria-label="點數來源">
-          <img src="assets/icon-ecoco-point.svg" alt="" width="18" height="18" />
-          <span>{state.points.toLocaleString()}</span>
-        </button>
-      </div>
-      <div className="tabs">
-        {cats.map((c) =>
-        <button key={c.id} className={`tab-chip ${tab === c.id ? 'active' : ''}`} onClick={() => setTab(c.id)}>
-            {c.label}
-            {c.phase2 && <span style={{ fontSize: 9, marginLeft: 4, opacity: .7 }}>Phase2</span>}
+      <div className="p4-sticky-top">
+        <div className="header">
+          <h2>商店</h2>
+          <button className="points-pill tappable" onClick={() => setShowPointSrc(true)} aria-label="ECOCO 點數來源">
+            <img src="assets/icon-ecoco-point.svg" alt="" width="18" height="18" />
+            <span>{state.points.toLocaleString()}</span>
           </button>
-        )}
+        </div>
+        <div className="tabs">
+          {visibleCats.map((c) =>
+          <button key={c.id} className={`tab-chip ${tab === c.id ? 'active' : ''}`} onClick={() => setTab(c.id)}>
+              {c.label}
+            </button>
+          )}
+        </div>
       </div>
 
-      {tab === 'food' &&
-      <div className="sprint-banner">
-          <div className="icon">🎁</div>
-          <div>
-            <div className="label">MONTH-END SPRINT</div>
-            <h3>月底衝刺禮包</h3>
-          </div>
-          <div className="countdown">
-            <b>06</b>
-            <span>剩餘天數</span>
-          </div>
-        </div>
-      }
 
-      <div className="shop-grid">
-        {(items[tab] || []).map((it) =>
-        <div key={it.id} className={`shop-card ${it.soldOut ? 'sold-out' : ''}`}>
-            {it.ribbon && !it.soldOut && <div className="ribbon">{it.ribbon}</div>}
-            {it.soldOut && <div className="oos-overlay">暫時缺貨</div>}
-            <div className="thumb">{it.emoji}</div>
-            <h4>{it.name}</h4>
-            <div className="desc">{it.desc}</div>
-            <div className="price">
-              <b style={{ fontWeight: "600", fontFamily: "\"Noto Sans TC\"" }}><img src="assets/icon-ecoco-point.svg" alt="" width="14" height="14" />{it.price}</b>
-              <button
-              className="buy-btn"
-              disabled={it.locked || it.soldOut}
-              onClick={() => !it.locked && !it.soldOut && setPurchasing(it)}>
-                {it.locked ? '即將推出' : it.soldOut ? '售罄' : '購買'}
-              </button>
+{/* 現金商品 — 橫向 strip，固定在點數商品上方 */}
+      {(() => {
+        const cashItems = (items[tab] || []).filter(it => it.currency === 'cash');
+        if (!cashItems.length) return null;
+        return (
+          <div>
+            <div style={{ fontSize: 13, fontWeight: 800, color: '#888', letterSpacing: '.04em', padding: '10px 18px 4px' }}>現金商品</div>
+            <div className="cash-strip">
+              {cashItems.map(it => (
+                <div key={it.id} className="cash-card" onClick={() => setPurchasing(it)}>
+                  <div className="cash-thumb">{it.emoji}</div>
+                  <div className="cash-info">
+                    <h4>{it.name}</h4>
+                    <div className="desc">{it.desc}</div>
+                    <div style={{ fontWeight: 800, color: '#060E9F', fontSize: 13, marginTop: 6, fontFamily: 'var(--font-en)' }}>NT$ {it.price}</div>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
-        )}
-      </div>
+        );
+      })()}
+
+      {/* 點數商品 — 2-column grid */}
+      {(() => {
+        const heartItems = (items[tab] || []).filter(it => (it.currency || 'heart') === 'heart');
+        if (!heartItems.length) return null;
+        return (
+          <div>
+            <div style={{ fontSize: 13, fontWeight: 800, color: '#888', letterSpacing: '.04em', padding: '10px 18px 4px' }}>點數商品</div>
+            <div className="shop-grid">
+              {heartItems.map(it => (
+                <div key={it.id} className={`shop-card ${it.soldOut ? 'sold-out' : ''}`}>
+                  <div className="thumb">{it.emoji}</div>
+                  <h4>{it.name}</h4>
+                  <div className="desc">{it.desc}</div>
+                  <div className="price">
+                    <b style={{ fontWeight: 600, color: '#FF5000' }}>
+                      <img src="assets/icon-ecoco-point.svg" alt="" width="14" height="14" />{it.price}
+                    </b>
+                    <button className="buy-btn" disabled={it.soldOut} onClick={() => !it.soldOut && setPurchasing(it)}>
+                      {it.soldOut ? '售罄' : '購買'}
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      })()}
 
       {purchasing &&
         <ShopPurchaseModal
@@ -616,32 +675,21 @@ const P4Shop = ({ setScreen, state, dispatch }) => {
 
 };
 
-/* ----- P4 helper: 購買確認 Modal（點數不足 / 付款失敗 採系統 alert · 中性語氣）----- */
+/* ----- P4 helper: 購買確認 Modal ----- */
 const ShopPurchaseModal = ({ item, state, onClose, onConfirm }) => {
-  const insufficient = state.points < item.price;
-  const [method, setMethod] = useState(insufficient ? 'cash' : 'points');
+  const isCash = item.currency === 'cash';
+  const insufficient = !isCash && state.points < item.price;
+  const [payMethod, setPayMethod] = useState('apple');
   const [toast, setToast] = useState(null);
   const [payFailDemo, setPayFailDemo] = useState(false);
-  const cashPrice = (item.price * 0.5).toFixed(0);
-
-  useEffect(() => {
-    if (insufficient) {
-      setToast(DIALOGUES.sys.p4.pointsLow);
-    }
-    // eslint-disable-next-line
-  }, []);
 
   const handleConfirm = () => {
-    if (method === 'points' && insufficient) {
-      setToast(DIALOGUES.sys.p4.pointsLow);
-      return;
-    }
     if (payFailDemo) {
       setToast(DIALOGUES.sys.p4.payFail);
       setPayFailDemo(false);
       return;
     }
-    onConfirm(method);
+    onConfirm(isCash ? 'cash' : 'points');
   };
 
   return (
@@ -650,29 +698,46 @@ const ShopPurchaseModal = ({ item, state, onClose, onConfirm }) => {
         <div className="preview">{item.emoji}</div>
         <h3>{item.name}</h3>
         <p>{item.desc}</p>
-        <div
-          className={`pay-row ${method === 'points' ? 'active' : ''} ${insufficient ? 'disabled' : ''}`}
-          onClick={() => !insufficient && setMethod('points')}
-        >
-          <span className="lhs">
-            <img src="assets/icon-ecoco-point.svg" alt="" width="18" height="18" />
-            ECOCO 點數
-            {method === 'points' && <span style={{ color: 'var(--ecoco-orange)' }}>✓</span>}
-          </span>
-          <span className="rhs">- {item.price} pt</span>
-        </div>
-        <div
-          className={`pay-row ${method === 'cash' ? 'active' : ''}`}
-          onClick={() => setMethod('cash')}
-          style={{ marginBottom: 14 }}
-        >
-          <span className="lhs">
-            <span style={{ fontSize: 16 }}>💳</span>
-            Apple / Google Pay
-            {method === 'cash' && <span style={{ color: 'var(--ecoco-orange)' }}>✓</span>}
-          </span>
-          <span className="rhs">NT$ {cashPrice}</span>
-        </div>
+
+        {!isCash && insufficient ? (
+          <div style={{ background: '#FFF3F0', borderRadius: 12, padding: '14px 16px', marginBottom: 14 }}>
+            <div style={{ fontWeight: 800, color: '#D9382A', fontSize: 15, marginBottom: 4 }}>ECOCO 點數不足，無法完成購買</div>
+            <div style={{ fontSize: 13, color: '#888' }}>再去帶食物回家給 Buddy</div>
+          </div>
+        ) : !isCash ? (
+          <div className="pay-row active" style={{ marginBottom: 14 }}>
+            <span className="lhs">
+              <img src="assets/icon-ecoco-point.svg" alt="" width="18" height="18" />
+              ECOCO 點數
+              <span style={{ color: 'var(--ecoco-orange)', marginLeft: 4 }}>✓</span>
+            </span>
+            <span className="rhs">- {item.price} pt</span>
+          </div>
+        ) : (
+          <div style={{ marginBottom: 14 }}>
+            <div
+              className={`pay-row ${payMethod === 'apple' ? 'active' : ''}`}
+              onClick={() => setPayMethod('apple')}
+            >
+              <span className="lhs">
+                🍎 Apple Pay
+                {payMethod === 'apple' && <span style={{ color: 'var(--ecoco-orange)', marginLeft: 4 }}>✓</span>}
+              </span>
+              <span className="rhs">NT$ {item.price}</span>
+            </div>
+            <div
+              className={`pay-row ${payMethod === 'google' ? 'active' : ''}`}
+              onClick={() => setPayMethod('google')}
+              style={{ marginTop: 8 }}
+            >
+              <span className="lhs">
+                🌐 Google Pay
+                {payMethod === 'google' && <span style={{ color: 'var(--ecoco-orange)', marginLeft: 4 }}>✓</span>}
+              </span>
+              <span className="rhs">NT$ {item.price}</span>
+            </div>
+          </div>
+        )}
 
         {/* DEMO toggle — 模擬付款失敗（採系統 alert） */}
         <label className="p4-demo-row">
@@ -682,7 +747,9 @@ const ShopPurchaseModal = ({ item, state, onClose, onConfirm }) => {
 
         <div className="modal-actions">
           <button onClick={onClose} style={{ background: 'var(--gray-light)', color: '#666' }}>取消</button>
-          <button onClick={handleConfirm} style={{ background: 'var(--ecoco-orange)', color: '#fff' }}>確認購買</button>
+          {!insufficient && (
+            <button onClick={handleConfirm} style={{ background: 'var(--ecoco-orange)', color: '#fff' }}>確認購買</button>
+          )}
         </div>
       </div>
 
@@ -719,7 +786,7 @@ const ShopSuccessModal = ({ item, state, onClose, onGoToBag }) => {
           </div>
           {item.paidWith === 'points' && (
             <div style={{ display: 'flex', justifyContent: 'space-between', color: '#555' }}>
-              <span>剩餘點數</span>
+              <span>剩餘 ECOCO 點數</span>
               <span style={{ fontWeight: 800, color: 'var(--ecoco-orange)', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
                 <img src="assets/icon-ecoco-point.svg" alt="" width="14" height="14" />
                 {(state.points - item.price).toLocaleString()} pt
@@ -747,18 +814,18 @@ const ShopSuccessModal = ({ item, state, onClose, onGoToBag }) => {
 /* ----- P4 helper: 點數來源 sheet ----- */
 const PointsSourceSheet = ({ state, onClose }) => {
   const sources = [
-    { kind: 'recycle', icon: '♻️', name: '回收掃碼', sub: '本月 12 次 · 累計 238 次', value: 216 },
-    { kind: 'refill', icon: '💧', name: '補充站消費', sub: '本月 3 次 消費回饋', value: 124 },
-    { kind: 'mission', icon: '✅', name: '任務獎勵', sub: '本月完成 18 項', value: 42 },
+    { kind: 'recycle', icon: '♻️', name: '帶食物回家累積', sub: '本月 12 次 · 累計 238 次', value: 216 },
+    { kind: 'refill', icon: '💧', name: '補充站消費累積', sub: '本月 3 次 消費回饋', value: 124 },
+    { kind: 'mission', icon: '✅', name: '今日陪伴累積', sub: '本月完成 18 項', value: 42 },
   ];
   const monthTotal = sources.reduce((a, b) => a + b.value, 0);
   return (
     <div className="points-source-sheet" onClick={onClose}>
       <div className="sheet" onClick={(e) => e.stopPropagation()}>
         <div className="grip"></div>
-        <h3>點數來源明細</h3>
+        <h3>ECOCO 點數來源</h3>
         <div className="total-row">
-          <span className="lbl">目前點數餘額</span>
+          <span className="lbl">目前 ECOCO 點數</span>
           <b>
             <img src="assets/icon-ecoco-point.svg" alt="" width="24" height="24" />
             {state.points.toLocaleString()}
@@ -788,16 +855,16 @@ const P5Missions = ({ setScreen, state, dispatch }) => {
   const [tab, setTab] = useState('daily');
   const tabs = [
   { id: 'daily', label: '每日' },
-  { id: 'week', label: '本週', phase2: true },
-  { id: 'month', label: '月度', phase2: true }];
+  { id: 'week', label: '本週' },
+  { id: 'month', label: '月度' }];
 
   const missions = {
     daily: [
-    { id: 'login', icon: '📅', title: '每日簽到', reward: '+5 點 · 🌭 ×1', progress: 1, total: 1, claimed: false },
-    { id: 'recycle', icon: '♻️', title: '完成 1 次回收掃碼', reward: '+10 點 · 🥬 ×1', progress: 1, total: 1, claimed: true },
-    { id: 'feed', icon: '🍖', title: '餵食 3 次', reward: '+8 點', progress: 2, total: 3, claimed: false },
-    { id: 'tap', icon: '👋', title: '撫摸夥伴 5 次', reward: '+3 心情', progress: 5, total: 5, claimed: false },
-    { id: 'ad', icon: '🎬', title: '看 1 次廣告領道具', reward: '🎁 道具', progress: 0, total: 1, claimed: false }],
+    { id: 'login', icon: '📅', title: '來看看 Buddy', reward: '🌭 ×1 · 心情 +3', progress: 1, total: 1, claimed: false },
+    { id: 'recycle', icon: '♻️', title: '帶食物回家', reward: '🥬 ×1 · 心情 +5', progress: 1, total: 1, claimed: true },
+    { id: 'feed', icon: '🍖', title: '為 Buddy 準備一餐', reward: '心情 +5', progress: 2, total: 3, claimed: false },
+    { id: 'tap', icon: '👋', title: '摸摸 Buddy 5 次', reward: '心情 +3', progress: 5, total: 5, claimed: false },
+    { id: 'ad', icon: '🎬', title: '看 Buddy 收禮物', reward: '🎁 道具', progress: 0, total: 1, claimed: false }],
 
     week: [],
     month: []
@@ -807,7 +874,7 @@ const P5Missions = ({ setScreen, state, dispatch }) => {
     <div className="screen p5">
       <StatusBar light />
       <div className="header">
-        <h2>任務</h2>
+        <h2>今日陪伴</h2>
         <div className="streak">
           <span className="fire">🔥</span>
           <span className="days">5</span>
@@ -824,18 +891,17 @@ const P5Missions = ({ setScreen, state, dispatch }) => {
       </div>
       <div className="tabs">
         {tabs.map((t) =>
-        <button key={t.id} className={`tab ${tab === t.id ? 'active' : ''} ${t.phase2 ? 'locked' : ''}`} onClick={() => !t.phase2 && setTab(t.id)}>
+        <button key={t.id} className={`tab ${tab === t.id ? 'active' : ''}`} onClick={() => setTab(t.id)}>
             {t.label}
-            {t.phase2 && <span className="coming-soon-pill" style={{ marginLeft: 4, fontSize: 9, padding: '1px 6px' }}>Phase 2</span>}
           </button>
         )}
       </div>
 
       {tab !== 'daily' ?
       <div style={{ padding: '40px 20px', textAlign: 'center', color: '#888' }}>
-          <div style={{ fontSize: 48, opacity: .4, marginBottom: 10 }}>🔒</div>
-          <h3 style={{ fontSize: 14, color: '#222', marginBottom: 4 }}>{tab === 'week' ? '週任務' : '月任務'}</h3>
-          <p style={{ fontSize: 12 }}>Phase 2 即將開放</p>
+          <div style={{ fontSize: 48, opacity: .4, marginBottom: 10 }}>🌱</div>
+          <h3 style={{ fontSize: 14, color: '#222', marginBottom: 4 }}>{tab === 'week' ? '本週陪伴任務' : '月度陪伴任務'}</h3>
+          <p style={{ fontSize: 12 }}>{tab === 'week' ? '本週陪伴任務，敬請期待！' : '月度陪伴任務，敬請期待！'}</p>
         </div> :
 
       <div className="mission-list">
@@ -909,7 +975,7 @@ const P6Ads = ({ setScreen, state, dispatch }) => {
           <div className="ad-mock">
             <div className="play">▶</div>
             <div style={{ fontSize: 18 }}>合作品牌廣告</div>
-            <div style={{ fontSize: 12, fontWeight: 500, opacity: .85 }}>SDK 接管 · 15 秒後可跳過</div>
+            <div style={{ fontSize: 12, fontWeight: 500, opacity: .85 }}>{adTime > 0 ? `${adTime} 秒` : '廣告結束'}</div>
           </div>
         </div>
       }
@@ -921,7 +987,7 @@ const P6Ads = ({ setScreen, state, dispatch }) => {
             <div className="reward-card">
               <div className="emoji">{reward.emoji}</div>
               <h3>{reward.name}</h3>
-              <p>{reward.id === 'snack' ? '拖到夥伴身上 HP +3' : reward.id === 'brush' ? '拖到夥伴身上 潔淨 +10' : '拖到夥伴身上 心情 +' + (reward.id === 'feather' ? '8' : '6')}</p>
+              <p>{reward.id === 'snack' ? '拖到夥伴身上 精神 +15、心情 +15' : reward.id === 'brush' ? '拖到夥伴身上 清爽 +15、心情 +10' : '拖到夥伴身上 心情 +15'}</p>
             </div>
           </div>
           <div className="reward-actions">
@@ -957,7 +1023,7 @@ const P7Dex = ({ setScreen, state, dispatch, onOpenPicker }) => {
     <div className="screen p7">
       <StatusBar />
       <div className="header">
-        <h2>圖鑑</h2>
+        <h2>夥伴日誌</h2>
         <div className="en">DEX · 2026</div>
       </div>
 
@@ -1029,7 +1095,7 @@ const P8Profile = ({ setScreen, state }) => {
     title: '遊戲功能',
     en: 'GAME',
     items: [
-    { icon: '🐢', label: '角色狀態', sub: `HP ${state.stats.hp} · 潔淨 ${state.stats.clean} · 心情 ${state.stats.mood}`, go: 'p1' },
+    { icon: '🐢', label: '角色狀態', sub: `精神 ${state.stats.hp} · 清爽 ${state.stats.clean} · 心情 ${state.stats.mood}`, go: 'p1' },
     { icon: '📖', label: '圖鑑進度', sub: `已解鎖 ${state.dexStates.filter((s) => s.unlocked).length} / 9 種型態`, go: 'p7' },
     { icon: '🎒', label: '道具背包', sub: `${state.tools.length} 個道具`, go: 'p9' },
     { icon: '✅', label: '任務中心', sub: '每日任務 3 個進行中', go: 'p5' },
@@ -1088,7 +1154,6 @@ const P8Profile = ({ setScreen, state }) => {
             <h3>月度通行證</h3>
             <p>解鎖進階互動 · NT$99/月</p>
           </div>
-          <span className="coming-soon-pill" style={{ background: 'rgba(0,0,0,0.15)', color: '#1a1a1a' }}>Phase 2</span>
         </div>
 
         {featureGroups.map((group) =>
@@ -1110,9 +1175,7 @@ const P8Profile = ({ setScreen, state }) => {
                     <div style={{ fontWeight: 700, color: '#222', fontSize: 14 }}>{it.label}</div>
                     {it.sub && <div style={{ fontSize: 11, color: '#888', marginTop: 2 }}>{it.sub}</div>}
                   </div>
-                  {it.comingSoon ?
-              <span className="coming-soon-pill" style={{ background: '#F0F3F7', color: '#888' }}>即將推出</span> :
-              <span className="arrow">›</span>}
+                  <span className="arrow" style={it.comingSoon ? { color: '#ccc' } : {}}>›</span>
                 </div>
             )}
             </div>
@@ -1248,7 +1311,7 @@ const P9bToolAnim = ({ setScreen }) => {
       <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
         <div style={{ position: 'relative' }}>
           <TurtleImg className="touched" />
-          <div className="value-rise" style={{ top: -10, left: 90, color: '#FFB000' }}>+8 心情</div>
+          <div className="value-rise" style={{ top: -10, left: 90, color: '#FFB000' }}>+15 心情</div>
           <SpeechBubble text="哇～新玩具！" style={{ top: 30, right: -10 }} />
         </div>
       </div>
@@ -1404,16 +1467,6 @@ const P11Pack = ({ setScreen }) => {
             </div>
           </div>
         ))}
-        <div className="pack-card" style={{ opacity: .6 }}>
-          <div className="ribbon" style={{ background: '#888' }}>Phase 2</div>
-          <h3>年度通行證</h3>
-          <div className="qty" style={{ color: '#666' }}>無限<span> 次</span></div>
-          <div className="desc">整年無限更換 + 每月免費解鎖 1 個未觸發狀態</div>
-          <div className="price-row">
-            <b style={{ color: '#999' }}>NT$ 999</b>
-            <button className="buy" style={{ background: '#999' }}>即將推出</button>
-          </div>
-        </div>
       </div>
       <div style={{ padding: '16px 18px 80px', fontSize: 11, color: '#888', lineHeight: 1.6 }}>
         ※ 更換次數永久有效，不會過期。<br />
