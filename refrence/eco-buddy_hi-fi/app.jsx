@@ -92,6 +92,8 @@ function stateReducer(state, action){
     case 'RESET_STATS': return {...state, stats:action.stats};
     case 'SET_STOCK': return {...state, food: state.food.map((f,i)=>({...f, stock:action.stocks[i] ?? f.stock, state:action.stocks[i]===0?(f.state==='locked'?'locked':'low'):f.state}))};
     case 'CLEAR_BAG': return {...state, tools:[]};
+    case 'CLAIM_MISSION':
+      return { ...state, stats: { ...state.stats, mood: Math.min(100, state.stats.mood + 3) } };
     default: return state;
   }
 }

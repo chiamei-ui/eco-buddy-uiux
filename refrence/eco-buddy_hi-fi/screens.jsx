@@ -853,22 +853,40 @@ const PointsSourceSheet = ({ state, onClose }) => {
 /* ═══════════════ P5 · Missions ═══════════════ */
 const P5Missions = ({ setScreen, state, dispatch }) => {
   const [tab, setTab] = useState('daily');
+  const [toast, setToast] = useState(null);
   const tabs = [
-  { id: 'daily', label: '每日' },
-  { id: 'week', label: '本週' },
-  { id: 'month', label: '月度' }];
+    { id: 'daily',   label: '每日' },
+    { id: 'week',    label: '本週' },
+    { id: 'month',   label: '月度' },
+    { id: 'achieve', label: '成就' },
+  ];
 
-  const missions = {
-    daily: [
-    { id: 'login', icon: '📅', title: '來看看 Buddy', reward: '🌭 ×1 · 心情 +3', progress: 1, total: 1, claimed: false },
-    { id: 'recycle', icon: '♻️', title: '帶食物回家', reward: '🥬 ×1 · 心情 +5', progress: 1, total: 1, claimed: true },
-    { id: 'feed', icon: '🍖', title: '為 Buddy 準備一餐', reward: '心情 +5', progress: 2, total: 3, claimed: false },
-    { id: 'tap', icon: '👋', title: '摸摸 Buddy 5 次', reward: '心情 +3', progress: 5, total: 5, claimed: false },
-    { id: 'ad', icon: '🎬', title: '看 Buddy 收禮物', reward: '🎁 道具', progress: 0, total: 1, claimed: false }],
+  const missionData = [
+    { id: 'login',   icon: '📅', title: '來看看 Buddy',      reward: '食物 ×1 · 心情 +3', progress: 1, total: 1, claimed: false },
+    { id: 'recycle', icon: '♻️', title: '帶食物回家',         reward: '食物 ×1 · 心情 +3', progress: 1, total: 1, claimed: true  },
+    { id: 'feed',    icon: '🍖', title: '為 Buddy 準備一餐',  reward: '食物 ×1 · 心情 +3', progress: 2, total: 3, claimed: false },
+    { id: 'tap',     icon: '👋', title: '摸摸 Buddy 5 次',    reward: '食物 ×1 · 心情 +3', progress: 5, total: 5, claimed: false },
+    { id: 'ad',      icon: '🎬', title: '看 Buddy 收禮物',    reward: '食物 ×1 · 心情 +3', progress: 0, total: 1, claimed: false },
+  ];
 
-    week: [],
-    month: []
+  const [claimedIds, setClaimedIds] = useState(() =>
+    missionData.filter(m => m.claimed).map(m => m.id)
+  );
+
+  const handleClaim = (m) => {
+    setClaimedIds(prev => [...prev, m.id]);
+    dispatch({ type: 'CLAIM_MISSION' });
+    setToast('一起做到！心情 +3 ✨');
   };
+
+  const sortedMissions = [...missionData].sort((a, b) => {
+    const rank = (m) => {
+      if (claimedIds.includes(m.id)) return 2;   // 已領 → 最下
+      if (m.progress >= m.total) return 0;        // 待領取 → 最上
+      return 1;                                   // 進行中 → 中間
+    };
+    return rank(a) - rank(b);
+  });
 
   return (
     <div className="screen p5">
@@ -878,11 +896,11 @@ const P5Missions = ({ setScreen, state, dispatch }) => {
         <div className="streak">
           <span className="fire">🔥</span>
           <span className="days">5</span>
-          <span className="label">天連續登入 · 明天 +6</span>
+          <span className="label">天連續登入</span>
         </div>
         <div className="day-dots">
           {['一', '二', '三', '四', '五', '六', '日'].map((d, i) =>
-          <div key={i} className={`day-dot ${i < 5 ? 'done' : i === 5 ? 'today' : ''}`}>
+            <div key={i} className={`day-dot ${i < 5 ? 'done' : i === 5 ? 'today' : ''}`}>
               <span>{d}</span>
               <div className="pill"></div>
             </div>
@@ -891,38 +909,51 @@ const P5Missions = ({ setScreen, state, dispatch }) => {
       </div>
       <div className="tabs">
         {tabs.map((t) =>
-        <button key={t.id} className={`tab ${tab === t.id ? 'active' : ''}`} onClick={() => setTab(t.id)}>
+          <button key={t.id} className={`tab ${tab === t.id ? 'active' : ''}`} onClick={() => setTab(t.id)}>
             {t.label}
           </button>
         )}
       </div>
 
-      {tab !== 'daily' ?
-      <div style={{ padding: '40px 20px', textAlign: 'center', color: '#888' }}>
+      {tab !== 'daily' ? (
+        <div style={{ padding: '40px 20px', textAlign: 'center', color: '#888' }}>
           <div style={{ fontSize: 48, opacity: .4, marginBottom: 10 }}>🌱</div>
-          <h3 style={{ fontSize: 14, color: '#222', marginBottom: 4 }}>{tab === 'week' ? '本週陪伴任務' : '月度陪伴任務'}</h3>
-          <p style={{ fontSize: 12 }}>{tab === 'week' ? '本週陪伴任務，敬請期待！' : '月度陪伴任務，敬請期待！'}</p>
-        </div> :
-
-      <div className="mission-list">
-          {missions.daily.map((m) =>
-        <div key={m.id} className="mission-card">
-              <div className="icon">{m.icon}</div>
-              <div className="body">
-                <h4>{m.title}</h4>
-                <div className="reward">獎勵：{m.reward}</div>
-                <div className="progress"><div style={{ width: `${m.progress / m.total * 100}%` }}></div></div>
-                <div className="progress-text">{m.progress}/{m.total}</div>
-              </div>
-              <button className={`claim ${m.claimed ? 'done' : m.progress < m.total ? 'locked' : ''}`}>
-                {m.claimed ? '已領' : m.progress < m.total ? '進行中' : '領取'}
-              </button>
-            </div>
-        )}
+          <h3 style={{ fontSize: 14, color: '#222', marginBottom: 4 }}>
+            {tab === 'week' ? '本週陪伴任務' : tab === 'month' ? '月度陪伴任務' : '成就'}
+          </h3>
+          <p style={{ fontSize: 12 }}>
+            {tab === 'week' ? '本週陪伴任務，敬請期待！' : tab === 'month' ? '月度陪伴任務，敬請期待！' : '成就系統，敬請期待！'}
+          </p>
         </div>
-      }
-    </div>);
+      ) : (
+        <div className="mission-list">
+          {sortedMissions.map((m) => {
+            const isClaimed = claimedIds.includes(m.id);
+            const isLocked = m.progress < m.total;
+            return (
+              <div key={m.id} className="mission-card">
+                <div className="icon">{m.icon}</div>
+                <div className="body">
+                  <h4>{m.title}</h4>
+                  <div className="reward">獎勵：{m.reward}</div>
+                  <div className="progress"><div style={{ width: `${m.progress / m.total * 100}%` }}></div></div>
+                  <div className="progress-text">{m.progress}/{m.total}</div>
+                </div>
+                <button
+                  className={`claim ${isClaimed ? 'done' : isLocked ? 'locked' : ''}`}
+                  onClick={!isClaimed && !isLocked ? () => handleClaim(m) : undefined}
+                >
+                  {isClaimed ? '已完成' : isLocked ? '進行中' : '領取'}
+                </button>
+              </div>
+            );
+          })}
+        </div>
+      )}
 
+      {toast && <SystemToast text={toast} bottom onClose={() => setToast(null)} duration={2200} />}
+    </div>
+  );
 };
 
 /* ═══════════════ P6 · Ads → box ═══════════════ */
