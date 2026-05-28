@@ -42,8 +42,8 @@ const TabBar = ({ active, onNav }) => {
       {/* Order in nav SVG: 夥伴 商店 任務 圖鑑 */}
       <button className="tab-hit" style={{left:'0%',width:'25%'}}  onClick={()=>onNav('buddy')}  aria-label="夥伴"></button>
       <button className="tab-hit" style={{left:'25%',width:'25%'}} onClick={()=>onNav('shop')}   aria-label="商店"></button>
-      <button className="tab-hit" style={{left:'50%',width:'25%'}} onClick={()=>onNav('mission')}aria-label="任務"></button>
-      <button className="tab-hit" style={{left:'75%',width:'25%'}} onClick={()=>onNav('dex')}    aria-label="圖鑑"></button>
+      <button className="tab-hit" style={{left:'50%',width:'25%'}} onClick={()=>onNav('mission')}aria-label="今日陪伴"></button>
+      <button className="tab-hit" style={{left:'75%',width:'25%'}} onClick={()=>onNav('dex')}    aria-label="夥伴日誌"></button>
     </div>
   );
 };
