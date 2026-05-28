@@ -730,7 +730,7 @@ img,svg{display:block;}
 .p7 .header h2{font-size:22px;font-weight:900;color:#fff;}
 .p7 .header .en{font-family:var(--font-en);font-size:11px;letter-spacing:.16em;font-weight:700;color:rgba(255,255,255,0.55);}
 .p7 .swap-pill{background:var(--ecoco-yellow);color:#1a1a1a;padding:4px 10px;border-radius:999px;font-weight:800;font-size:11px;white-space:nowrap;}
-.p7 .year-banner{margin:14px 18px;background:#fff;border:1.5px solid rgba(6,14,159,0.1);border-radius:18px;padding:12px 14px;box-shadow:0 4px 14px rgba(0,0,0,0.05);}
+.p7 .year-banner{margin:10px 18px;background:#fff;border:1.5px solid rgba(6,14,159,0.1);border-radius:16px;padding:10px 12px;box-shadow:0 4px 14px rgba(0,0,0,0.05);}
 .p7 .countdown-row{display:flex;align-items:center;gap:8px;}
 .p7 .countdown-row .dot{width:8px;height:8px;border-radius:50%;background:var(--ecoco-orange);animation:pulse-dot 1.5s infinite;}
 @keyframes pulse-dot{0%,100%{opacity:.4;}50%{opacity:1;}}
@@ -741,30 +741,32 @@ img,svg{display:block;}
 .p7 .section-h{font-size:14px;font-weight:700;padding:10px 18px 6px;color:#1a1a1a;}
 .p7 .section-h-row{display:flex;align-items:center;justify-content:space-between;}
 .p7 .section-h .meta{font-size:11px;color:#888;font-weight:500;}
+.p7 .alert-hint{font-size:11px;color:var(--ecoco-orange);font-weight:700;cursor:pointer;}
 .p7 .section-progress{margin:0 18px 12px;height:5px;border-radius:99px;background:rgba(0,0,0,0.08);}
 .p7 .section-progress .fill{height:100%;border-radius:99px;background:var(--ecoco-orange);transition:width .6s ease;}
 
-.p7 .year-grid{padding:0 18px 14px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+.year-strip{display:flex;gap:10px;overflow-x:auto;padding:4px 18px 18px;scrollbar-width:none;-ms-overflow-style:none;}
+.year-strip::-webkit-scrollbar{display:none;}
 .year-cell{
-  aspect-ratio:.85;border-radius:16px;
+  flex:0 0 auto;width:195px;height:231px;border-radius:27px;
   background:#fff;border:1.5px solid var(--border);
   display:flex;flex-direction:column;align-items:center;justify-content:center;
   font-size:11px;color:#bbb;position:relative;
   transition:transform .15s ease,box-shadow .15s ease;
 }
-.year-cell .month{font-family:var(--font-en);font-weight:700;color:#ccc;font-size:10px;}
+.year-cell .month{font-family:var(--font-en);font-weight:700;color:#ccc;font-size:14px;}
 /* filled: collected trophy feel */
 .year-cell.filled{
   background:linear-gradient(155deg,#FFF3EE 0%,#FFE5D4 100%);
   border:2px solid var(--ecoco-orange);
-  box-shadow:0 4px 14px rgba(255,80,0,0.18),inset 0 1px 0 rgba(255,255,255,0.7);
+  box-shadow:0 6px 20px rgba(255,80,0,0.18),inset 0 1px 0 rgba(255,255,255,0.7);
 }
 .year-cell.filled .month{color:var(--ecoco-orange);font-weight:900;}
-.year-cell.filled .icon{font-size:28px;filter:drop-shadow(0 2px 5px rgba(255,80,0,0.35));margin-bottom:2px;}
+.year-cell.filled .icon{font-size:54px;filter:drop-shadow(0 3px 6px rgba(255,80,0,0.35));margin-bottom:4px;}
 /* small ✓ badge corner */
 .year-cell.filled::after{
-  content:"✓";position:absolute;top:5px;right:7px;
-  font-size:9px;font-weight:900;color:var(--ecoco-orange);opacity:.7;
+  content:"✓";position:absolute;top:10px;right:12px;
+  font-size:13px;font-weight:900;color:var(--ecoco-orange);opacity:.7;
 }
 .year-cell.current{border:2.5px dashed var(--ecoco-orange);background:#FFF8F4;}
 .year-cell.current .month{color:var(--ecoco-orange);}
@@ -816,10 +818,22 @@ img,svg{display:block;}
 .state-card.locked .name{opacity:0.3;color:#555;}
 .state-card.locked .lock{position:absolute;font-size:20px;opacity:0.5;}
 
+/* ───── P7 year-cell detail overlay ───── */
+.year-detail-overlay{position:absolute;inset:0;z-index:50;background:rgba(0,0,0,0.45);display:flex;align-items:center;justify-content:center;padding:24px;}
+.year-detail-sheet{background:#fff;border-radius:24px;width:100%;padding:28px 22px 24px;display:flex;flex-direction:column;align-items:center;position:relative;box-shadow:0 24px 60px rgba(0,0,0,0.25);}
+.year-detail-close{position:absolute;top:14px;right:16px;background:none;border:none;font-size:16px;color:#aaa;cursor:pointer;line-height:1;}
+.year-detail-collected{background:rgba(255,80,0,0.1);color:var(--ecoco-orange);font-size:11px;font-weight:800;padding:3px 10px;border-radius:999px;margin-bottom:14px;}
+.year-detail-emoji{font-size:144px;line-height:1;filter:drop-shadow(0 4px 10px rgba(255,80,0,0.25));margin-bottom:12px;}
+.year-detail-code{font-family:var(--font-en);font-size:11px;color:#aaa;font-weight:700;letter-spacing:.08em;}
+.year-detail-name{font-size:22px;font-weight:900;color:#1a1a1a;margin-top:4px;}
+.year-detail-month{font-size:12px;color:#888;margin-top:6px;}
+.year-detail-rarity{margin-top:8px;font-size:12px;font-weight:800;color:#c47b00;background:#FFF8E1;padding:3px 10px;border-radius:999px;}
+.state-detail-turtle{width:240px;height:240px;object-fit:contain;margin-bottom:12px;}
+
 /* ───── P10 month picker (overlay on P7) ───── */
 .p10{position:absolute;inset:0;z-index:50;background:rgba(0,0,0,0.4);display:flex;align-items:center;justify-content:center;padding:18px;}
 .p10 .sheet{background:#fff;border-radius:24px;color:var(--core-black);padding:24px 18px 18px;width:100%;max-height:90%;display:flex;flex-direction:column;border:1.5px solid var(--border);box-shadow:0 24px 60px rgba(0,0,0,0.25);}
-.p10 .title{text-align:center;}
+.p10 .title{text-align:left;}
 .p10 .title h3{font-size:18px;font-weight:900;color:#1a1a1a;}
 .p10 .title p{font-size:12px;color:#888;margin-top:4px;}
 .p10 .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:14px 0;overflow-y:auto;flex:1;}

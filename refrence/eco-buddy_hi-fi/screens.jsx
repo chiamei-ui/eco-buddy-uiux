@@ -1049,6 +1049,23 @@ const P7Dex = ({ setScreen, state, dispatch, onOpenPicker }) => {
 
 
   const states = state.dexStates;
+  const stripRef = useRef(null);
+  const currentCellRef = useRef(null);
+  const [detailMo, setDetailMo] = useState(null);
+  const [detailState, setDetailState] = useState(null);
+
+  useEffect(() => {
+    if (currentCellRef.current && stripRef.current) {
+      const strip = stripRef.current;
+      const cell = currentCellRef.current;
+      strip.scrollLeft = cell.offsetLeft - strip.offsetWidth / 2 + cell.offsetWidth / 2;
+    }
+  }, []);
+
+  const handleCellClick = (mo) => {
+    if (mo.filled) setDetailMo(mo);
+    else if (mo.current) onOpenPicker && onOpenPicker();
+  };
 
   return (
     <div className="screen p7">
@@ -1058,36 +1075,39 @@ const P7Dex = ({ setScreen, state, dispatch, onOpenPicker }) => {
         <div className="en">DEX · 2026</div>
       </div>
 
-      <div className="year-banner">
-        <div className="countdown-row">
-          <span className="dot"></span>
-          <span className="text">6 月份角色尚未選入年度，尚可更換 <b>{state.swapLeft} 次</b></span>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 10 }}>
-          <button className="btn-primary" style={{ flex: 1, padding: '9px 0', fontSize: 13, boxShadow: 'none' }} onClick={() => onOpenPicker && onOpenPicker()}>選擇 6 月角色</button>
-          <button className="swap-pill" onClick={() => setScreen('p11')} style={{ flex: 1, padding: '9px 0', fontSize: 13, cursor: 'pointer', background: 'none', border: '2px solid var(--ecoco-yellow)', color: '#1a1a1a', fontWeight: 800, borderRadius: 999, textAlign: 'center' }}>增加更換次數</button>
-        </div>
-      </div>
-
       <div className="section-h">
         <div className="section-h-row">
           <span>年度收藏</span>
-          <span className="meta">{months.filter(m => m.filled).length} / 12 月</span>
+          <span className="alert-hint" onClick={() => onOpenPicker && onOpenPicker()}>本月角色尚未選入收藏夾 ›</span>
         </div>
       </div>
-      <div className="section-progress">
-        <div className="fill" style={{ width: `${(months.filter(m => m.filled).length / 12) * 100}%` }} />
-      </div>
-      <div className="year-grid">
+      <div className="year-strip" ref={stripRef}>
         {months.map((mo) =>
-        <div key={mo.m} className={`year-cell ${mo.filled ? 'filled' : ''} ${mo.current ? 'current' : ''} ${mo.locked ? 'locked' : ''}`} onClick={mo.current ? () => onOpenPicker && onOpenPicker() : undefined} style={mo.current ? { cursor: 'pointer' } : undefined}>
+        <div key={mo.m} ref={mo.current ? currentCellRef : null} className={`year-cell ${mo.filled ? 'filled' : ''} ${mo.current ? 'current' : ''} ${mo.locked ? 'locked' : ''}`} onClick={() => handleCellClick(mo)} style={(mo.filled || mo.current) ? { cursor: 'pointer' } : undefined}>
             <span className="month">{String(mo.m).padStart(2, '0')}</span>
-            {mo.filled && <><span className="icon">{mo.icon}</span><span style={{ fontSize: 9, opacity: .55 }}>#{mo.code}</span></>}
-            {mo.current && <span style={{ fontSize: 22, marginTop: 4 }}>?</span>}
-            {mo.locked && <span style={{ fontSize: 18, marginTop: 4, opacity: .18 }}>?</span>}
+            {mo.filled && <><span className="icon">{mo.icon}</span><span style={{ fontSize: 13, opacity: .55 }}>#{mo.code}</span></>}
+            {mo.current && <span style={{ fontSize: 42, marginTop: 6 }}>?</span>}
+            {mo.locked && <span style={{ fontSize: 33, marginTop: 6, opacity: .18 }}>?</span>}
           </div>
         )}
       </div>
+
+      {detailMo && (() => {
+        const charState = states.find(s => s.code === detailMo.code);
+        return (
+          <div className="year-detail-overlay" onClick={() => setDetailMo(null)}>
+            <div className="year-detail-sheet" onClick={e => e.stopPropagation()}>
+              <button className="year-detail-close" onClick={() => setDetailMo(null)}>✕</button>
+              <div className="year-detail-collected">已收藏 ✓</div>
+              <div className="year-detail-emoji">{detailMo.icon}</div>
+              <div className="year-detail-code">#{detailMo.code}</div>
+              <div className="year-detail-name">{charState?.name || '???'}</div>
+              <div className="year-detail-month">{String(detailMo.m).padStart(2, '0')} 月 · 2026 年度</div>
+              {charState?.legendary && <div className="year-detail-rarity">✦ 傳說</div>}
+            </div>
+          </div>
+        );
+      })()}
 
       <div className="section-h">
         <div className="section-h-row">
@@ -1100,7 +1120,7 @@ const P7Dex = ({ setScreen, state, dispatch, onOpenPicker }) => {
       </div>
       <div className="month-grid" style={{ paddingBottom: 100 }}>
         {states.map((s) =>
-        <div key={s.code} className={`state-card ${s.unlocked ? 'unlocked' : 'locked'} ${s.legendary ? 'legendary' : ''}`} onClick={() => setScreen('p11')}>
+        <div key={s.code} className={`state-card ${s.unlocked ? 'unlocked' : 'locked'} ${s.legendary ? 'legendary' : ''}`} onClick={() => setDetailState(s)} style={{ cursor: 'pointer' }}>
             <span className="code">#{s.code}</span>
             {s.unlocked ? <>
               <img className="turtle" src="assets/sea-turtle.svg" alt="" style={{ filter: s.tint || 'none' }} />
@@ -1114,6 +1134,27 @@ const P7Dex = ({ setScreen, state, dispatch, onOpenPicker }) => {
           </div>
         )}
       </div>
+
+      {detailState && (
+        <div className="year-detail-overlay" onClick={() => setDetailState(null)}>
+          <div className="year-detail-sheet" onClick={e => e.stopPropagation()}>
+            <button className="year-detail-close" onClick={() => setDetailState(null)}>✕</button>
+            {detailState.unlocked
+              ? <div className="year-detail-collected">已解鎖 ✓</div>
+              : <div className="year-detail-collected" style={{ background: 'rgba(0,0,0,0.06)', color: '#999' }}>🔒 尚未解鎖</div>
+            }
+            <img
+              src="assets/sea-turtle.svg" alt=""
+              className="state-detail-turtle"
+              style={{ filter: detailState.unlocked ? (detailState.tint || 'none') : 'grayscale(1) opacity(0.3)' }}
+            />
+            <div className="year-detail-code">#{detailState.code}</div>
+            <div className="year-detail-name">{detailState.unlocked ? detailState.name : '??? ???'}</div>
+            <div className="year-detail-month">本月 6 月 · 小海龜</div>
+            {detailState.legendary && detailState.unlocked && <div className="year-detail-rarity">✦ 傳說</div>}
+          </div>
+        </div>
+      )}
 
     </div>);
 
@@ -1366,7 +1407,10 @@ const P10Picker = ({ setScreen, state, dispatch, onClose }) => {
         <div className="title">
           <h3>選擇你的 6 月夥伴</h3>
           <p>從本月觸發過的狀態中挑一個鎖入年度圖鑑</p>
-          <p style={{ marginTop: 6, fontSize: 12, color: 'var(--ecoco-orange)', fontWeight: 700 }}>尚可更換 {state.swapLeft} 次</p>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 8 }}>
+            <p style={{ fontSize: 12, color: 'var(--ecoco-orange)', fontWeight: 700, margin: 0 }}>尚可更換 {state.swapLeft} 次</p>
+            <button onClick={() => { handleClose(); setScreen('p11'); }} style={{ fontSize: 11, fontWeight: 800, color: 'var(--ecoco-blue)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, textDecoration: 'underline' }}>增加更換次數 →</button>
+          </div>
         </div>
         <div className="grid">
           {states.map((s) =>
