@@ -229,17 +229,22 @@ const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
 }/*EDITMODE-END*/;
 
 const P8_SUBS = new Set(['p8-faq']);
+const TAB_ORDER = ['p1','p4','p5','p7'];
 
 const App = () => {
   const [screen, _setScreen] = useState('p1');
   const screenRef = useRef('p1');
   const [screenPayload, setScreenPayload] = useState(null);
   const [slideDir, setSlideDir] = useState(null);
-  const setScreen = useCallback((id, payload = null) => {
+  const setScreen = useCallback((id, payload = null, opts = {}) => {
     const from = screenRef.current;
-    const forward = P8_SUBS.has(id) || from === 'p8';
-    const back    = id === 'p8' && P8_SUBS.has(from);
-    setSlideDir(forward ? 'forward' : back ? 'back' : null);
+    let dir = opts.dir;
+    if (dir === undefined) {
+      if (P8_SUBS.has(id) || from === 'p8') dir = 'forward';
+      else if (id === 'p8' && P8_SUBS.has(from)) dir = 'back';
+      else dir = null;
+    }
+    setSlideDir(dir);
     screenRef.current = id;
     _setScreen(id);
     setScreenPayload(payload);
@@ -256,7 +261,14 @@ const App = () => {
   }[screen];
 
   const navFromTabbar = (id) => {
-    setScreen({buddy:'p1', shop:'p4', mission:'p5', dex:'p7'}[id] || 'p1');
+    const target = {buddy:'p1', shop:'p4', mission:'p5', dex:'p7'}[id] || 'p1';
+    const fromIdx = TAB_ORDER.indexOf(screenRef.current);
+    const toIdx = TAB_ORDER.indexOf(target);
+    let dir = null;
+    if (fromIdx >= 0 && toIdx >= 0 && fromIdx !== toIdx) {
+      dir = toIdx > fromIdx ? 'forward' : 'back';
+    }
+    setScreen(target, null, { dir });
   };
 
   const renderScreen = () => {
