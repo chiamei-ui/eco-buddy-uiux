@@ -366,21 +366,16 @@ const P1Home = ({ state, dispatch, setScreen, dragManager, payload, showTutorial
         </div>
         <div className="dock">
         {dockTab === 'food' ? <>
-          <div className="dock-title">本週食物</div>
           <div className="dock-hint">每週限量配額，拖曳至角色即可餵食</div>
           <div className="dock-grid">
             {state.food.map((f, i) => <FoodCell key={f.id} food={f} dragManager={dragManager} onDrop={onDrop} index={i} showBubble={showBubble} pulsing={pulsingIds.has(f.id)} />
             )}
           </div>
         </> : <>
-          <div className="dock-title" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <span>道具背包</span>
-            <button onClick={() => setScreen('p9')} style={{
-              fontSize: 12, fontWeight: 700, color: 'var(--ecoco-blue)',
-              background: 'none', border: 'none', cursor: 'pointer', padding: 0,
-            }}>管理 ›</button>
+          <div className="dock-hint" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <span>拖到角色身上即可使用 · 24 小時內有效</span>
+            <button onClick={() => setScreen('p9')} style={{ fontSize: 12, fontWeight: 700, color: 'var(--ecoco-blue)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, flexShrink: 0 }}>管理 ›</button>
           </div>
-          <div className="dock-hint">拖到角色身上即可使用 · 24 小時內有效</div>
           <div className="dock-grid">
             {state.tools.length ? state.tools.map((t, i) =>
             <ToolCell key={t.id} tool={t} dragManager={dragManager} onDrop={onDrop} />
@@ -435,6 +430,13 @@ const P1Home = ({ state, dispatch, setScreen, dragManager, payload, showTutorial
 
 };
 
+const toolEffectMap = {
+  feather: { label: '+15 心情', color: '#FFB000' },
+  brush:   { label: '+15 清爽', color: '#1F3DBF' },
+  ball:    { label: '+15 心情', color: '#FFB000' },
+  snack:   { label: '+15 精神', color: '#FF4D63' },
+};
+
 /* food cell with drag */
 const FoodCell = ({ food, dragManager, onDrop, showBubble, pulsing }) => {
   const cellRef = useRef(null);
@@ -465,12 +467,22 @@ const FoodCell = ({ food, dragManager, onDrop, showBubble, pulsing }) => {
   };
   const cls = food.state === 'locked' ? 'locked' : food.stock <= 2 ? 'low' : 'has-stock';
   return (
-    <div ref={cellRef} className={`food-cell ${cls}${pulsing ? ' pulsing' : ''}`} onPointerDown={handlePointerDown}>
-      {food.state === 'locked' ? <span className="lock">🔒</span> : <>
-        <span className="emoji">{food.emoji}</span>
-        <span className="name">{food.name}</span>
-        {food.stock > 0 && <span className="badge">{food.stock}</span>}
-      </>}
+    <div className="food-slot">
+      <div ref={cellRef} className={`food-cell ${cls}${pulsing ? ' pulsing' : ''}`} onPointerDown={handlePointerDown}>
+        {food.state === 'locked'
+          ? <span className="lock">🔒</span>
+          : <>
+              <span className="emoji">{food.emoji}</span>
+              {food.stock > 0 && <span className="badge">{food.stock}</span>}
+            </>
+        }
+      </div>
+      {food.state !== 'locked' && (
+        <div className="food-label">
+          <span className="name">{food.name}</span>
+          <span className="effect-tag" style={{ color: '#FF4D63' }}>+5 精神</span>
+        </div>
+      )}
     </div>);
 
 };
@@ -479,10 +491,17 @@ const ToolCell = ({ tool, dragManager, onDrop }) => {
     dragManager.startDrag(e, { kind: 'tool', id: tool.id, emoji: tool.emoji }, onDrop);
   };
   return (
-    <div className="food-cell has-stock" onPointerDown={handlePointerDown}>
-      <span className="emoji">{tool.emoji}</span>
-      <span className="name">{tool.name}</span>
-      {tool.count > 1 && <span className="badge">{tool.count}</span>}
+    <div className="food-slot">
+      <div className="food-cell has-stock" onPointerDown={handlePointerDown}>
+        <span className="emoji">{tool.emoji}</span>
+        {tool.count > 1 && <span className="badge">{tool.count}</span>}
+      </div>
+      <div className="food-label">
+        <span className="name">{tool.name}</span>
+        <span className="effect-tag" style={{ color: toolEffectMap[tool.id].color }}>
+          {toolEffectMap[tool.id].label}
+        </span>
+      </div>
     </div>);
 
 };
@@ -615,7 +634,7 @@ const P2bResult = ({ setScreen, dispatch, tweaks = {}, setTweak = () => {} }) =>
         </div>
         <div className="recycle-stats">
           <div><b>12</b><span>投入瓶罐</span></div>
-          <div><b>3</b><span>退瓶數</span></div>
+          <div><b>3</b><span>投電池數</span></div>
           <div><b>+18</b><span>ECOCO 點數</span></div>
         </div>
       </div>
@@ -730,10 +749,10 @@ const P4Shop = ({ setScreen, state, dispatch }) => {
 
   const items = {
     food: [
-    { id: 'hotdog-pack', emoji: '🌭', name: '熱狗堡 ×5', desc: '人氣月底補給', price: 50, ribbon: '熱賣', currency: 'heart' },
-    { id: 'salad', emoji: '🥬', name: '蔬菜 ×5', desc: '清爽緩升', price: 60, currency: 'heart' },
-    { id: 'berry', emoji: '🍓', name: '莓果 ×3', desc: '限定食物', price: 80, soldOut: true, currency: 'heart' },
-    { id: 'fish', emoji: '🐟', name: '小魚 ×5', desc: '高精神補給', price: 90, currency: 'heart' },
+    { id: 'hotdog-pack', emoji: '🌭', name: '熱狗堡 ×5', desc: '+5 精神/個', price: 50, ribbon: '熱賣', currency: 'heart' },
+    { id: 'salad', emoji: '🥬', name: '蔬菜 ×5', desc: '+5 精神/個', price: 60, currency: 'heart' },
+    { id: 'berry', emoji: '🍓', name: '莓果 ×3', desc: '+5 精神/個', price: 80, soldOut: true, currency: 'heart' },
+    { id: 'fish', emoji: '🐟', name: '小魚 ×5', desc: '+5 精神/個', price: 90, currency: 'heart' },
     { id: 'sprint-pack', emoji: '🎁', name: '月底衝刺禮包', desc: '限時限量豪華組', price: 199, currency: 'cash' },
     { id: 'monthly-pass', emoji: '🎫', name: '月度通行證', desc: '30 天進階陪伴', price: 149, currency: 'cash' }],
 
@@ -1489,6 +1508,7 @@ const P9Bag = ({ setScreen, state, dispatch }) => {
                   剩 {t.hoursLeft}h
                 </div>
           }
+              <span className="effect-tag" style={{ color: toolEffectMap[t.id].color }}>{toolEffectMap[t.id].label}</span>
               {t.count > 1 && <span className="badge">{t.count}</span>}
               <button className="use-btn" onClick={() => handleUse(t.id)}>使用</button>
             </div>
@@ -1726,25 +1746,106 @@ const P11Pack = ({ setScreen }) => {
 
 
 /* ═══════════════ P8-FAQ · 常見問題 ═══════════════ */
+const FAQ_DATA = [
+  {
+    cat: '🐾 Buddy 養成', id: 'buddy',
+    items: [
+      { q: 'Buddy 的精神怎麼補充？', a: '每天帶食物回家給 Buddy 吃就能補充精神。精神越高，Buddy 越活潑！' },
+      { q: 'Buddy 的清爽怎麼提升？', a: '使用沐浴或保養道具可以提升 Buddy 的清爽度。補充站消費也能讓 Buddy 清爽一整天。' },
+      { q: '怎麼讓 Buddy 心情變好？', a: '每天打招呼、使用玩具道具、完成今日陪伴，都能讓 Buddy 心情變好。' },
+      { q: 'Buddy 什麼時候可以變身？', a: '當 Buddy 三個狀態都達到一定數值，就會觸發變身機會。可在夥伴日誌查看目前進度。' },
+      { q: 'Buddy 精神歸零會怎樣？', a: 'Buddy 會進入睡眠狀態，等你帶食物回家補充精神就能喚醒。Buddy 不會消失，放心！' },
+    ],
+  },
+  {
+    cat: '🍽️ 食物與道具', id: 'items',
+    items: [
+      { q: '食物和道具有什麼差別？', a: '食物補充精神，每天都能帶回家；道具有特定效果（提升清爽、心情等），效果更強但數量有限，用完可在商店補充。' },
+      { q: '道具會過期嗎？', a: '道具不會過期，放在背包裡隨時可以使用，不用擔心浪費。' },
+      { q: '道具可以一次用很多個嗎？', a: '每次只能使用一個道具，但效果可以累積，依序對 Buddy 使用即可。' },
+      { q: '背包容量有上限嗎？', a: '目前背包沒有容量上限，盡情收集！' },
+    ],
+  },
+  {
+    cat: '📓 夥伴日誌', id: 'dex',
+    items: [
+      { q: '夥伴日誌是什麼？', a: '夥伴日誌記錄 Buddy 每個月的成長軌跡，一年 12 格，代表你們一起走過的每個月份。' },
+      { q: '更換次數怎麼用？', a: '每月底可修改夥伴日誌中已鎖入的格子，每次修改消耗 1 次更換次數。可在商店補充。' },
+      { q: '格子鎖定後還能改嗎？', a: '可以，但需消耗更換次數。每月底是最好的調整時機，調整前記得確認剩餘次數。' },
+      { q: '為什麼有些格子是空的？', a: '空格代表那個月還沒有陪伴記錄。繼續每天帶食物回家給 Buddy，就能慢慢填滿每一格！' },
+    ],
+  },
+  {
+    cat: '💎 點數與商店', id: 'points',
+    items: [
+      { q: '怎麼取得 ECOCO 點數？', a: '每次帶食物回家給 Buddy、在補充站消費，都能獲得 ECOCO 點數。' },
+      { q: 'ECOCO 點數會過期嗎？', a: 'ECOCO 點數目前不設過期，但建議定期使用讓 Buddy 保持活力。' },
+      { q: '商店目前可以買什麼？', a: '目前商店提供食物、道具、更換次數包，以 ECOCO 點數結帳。禮包與通行證 Buddy 還在準備中。' },
+      { q: '可以用真實金錢購買嗎？', a: '目前尚未開放真實金流，所有商品均以 ECOCO 點數購買。' },
+    ],
+  },
+  {
+    cat: '🔔 帳號與通知', id: 'account',
+    items: [
+      { q: '可以關閉特定通知嗎？', a: '可以！到「我的」→「通知偏好」，自由開關各類通知，包含餵食提醒、Buddy 呼喚等。' },
+      { q: '可以換綁其他 ECOCO 帳號嗎？', a: '請到「我的」→「帳號管理」操作，或聯繫客服協助處理。' },
+      { q: '忘記密碼怎麼辦？', a: '在登入頁點「忘記密碼」，依步驟驗證並重設即可。若仍有問題請聯繫客服。' },
+    ],
+  },
+];
+
 const P8Faq = ({ setScreen }) => {
-  const faqs = [
-    { q: '更換次數怎麼用？', a: '每月底可修改年度圖鑑已鎖入的格子，每次修改消耗 1 次更換次數。可在商店或更換次數包頁面補充。' },
-    { q: '道具過期了怎麼辦？', a: '道具不會過期，隨時可從道具背包拖拽至 Buddy 使用。' },
-    { q: '課金問題？', a: '目前可在商店以 ECOCO 點數購買食物與道具。真實金流商品（禮包、通行證）尚未開放。' },
-  ];
+  const [activeCat, setActiveCat] = useState('buddy');
+  const [openIdx, setOpenIdx] = useState(null);
+
+  const currentItems = FAQ_DATA.find(c => c.id === activeCat)?.items ?? [];
+  const handleCat = (id) => { setActiveCat(id); setOpenIdx(null); };
+
   return (
     <div className="screen p8">
       <StatusBar light />
       <NavBack onClick={() => setScreen('p8')} light />
       <div className="screen-scroll" style={{ paddingTop: 0 }}>
         <div className="header"><h2 style={{ marginTop: 8 }}>常見問題</h2></div>
+
+        {/* Category chips */}
+        <div style={{ display: 'flex', gap: 8, padding: '0 18px 16px', overflowX: 'auto', scrollbarWidth: 'none' }}>
+          {FAQ_DATA.map(cat => {
+            const active = activeCat === cat.id;
+            return (
+              <button key={cat.id} onClick={() => handleCat(cat.id)} style={{
+                flexShrink: 0, padding: '7px 14px', borderRadius: 999,
+                fontSize: 13, fontWeight: active ? 700 : 500,
+                border: active ? 'none' : '1.5px solid #FF5000',
+                background: active ? '#FF5000' : '#fff',
+                color: active ? '#fff' : '#FF5000',
+                cursor: 'pointer', whiteSpace: 'nowrap',
+              }}>
+                {cat.cat}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Accordion items */}
         <div style={{ padding: '0 18px 80px' }}>
-          {faqs.map((f, i) => (
-            <div key={i} style={{ background: '#fff', borderRadius: 16, padding: '14px 16px', marginBottom: 12 }}>
-              <div style={{ fontWeight: 700, fontSize: 14, color: '#222', marginBottom: 6 }}>{f.q}</div>
-              <div style={{ fontSize: 13, color: '#555', lineHeight: 1.6 }}>{f.a}</div>
-            </div>
-          ))}
+          {currentItems.map((f, i) => {
+            const open = openIdx === i;
+            return (
+              <div key={i} onClick={() => setOpenIdx(open ? null : i)}
+                style={{ background: '#fff', borderRadius: 16, marginBottom: 10, overflow: 'hidden', cursor: 'pointer' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px' }}>
+                  <div style={{ fontWeight: 700, fontSize: 14, color: '#222', flex: 1, paddingRight: 8 }}>{f.q}</div>
+                  <div style={{ fontSize: 16, color: '#FF5000', flexShrink: 0, transition: 'transform 0.2s', transform: open ? 'rotate(180deg)' : 'rotate(0deg)' }}>▾</div>
+                </div>
+                {open && (
+                  <div style={{ padding: '10px 16px 14px', fontSize: 13, color: '#555', lineHeight: 1.7, borderTop: '1px solid #F4F4F4' }}>
+                    {f.a}
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>
