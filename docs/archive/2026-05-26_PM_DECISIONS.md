@@ -1,3 +1,6 @@
+> **[ARCHIVED 2026-05-26]** 此為改版前的待決清單，部分決策已在 `docs/pm_decisions_20260527/PM_DECISIONS.md` 定案。
+> 本文件僅供歷史對照，不作為任何決策依據。
+
 # ECO BUDDY — PM 待決策清單
 
 **Date**: 2026-05-26

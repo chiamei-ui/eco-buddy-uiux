@@ -1,3 +1,6 @@
+> **[ARCHIVED 2026-04]** 此為 4 月版設計師說明書（36 種狀態矩陣歷史版本）。
+> 當前設計規範請見 `docs/ECOCO_DESIGN.md`，文案規則見 `docs/pm_decisions_20260527/ECO_Buddy_文案對照表.md`。
+
 **ECO BUDDY**
 
 **角色設計完整說明書**
