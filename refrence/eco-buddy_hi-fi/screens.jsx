@@ -11,7 +11,7 @@ const OB_STEPS = [
   { refKey: 'scanBtnRef',    pad: 8,  radius: 24, textRight: true,
     title: '帶食物回家 📦',         text: '回收後，掃描機台螢幕條碼，有機會換到食物哦！' },
   { refKey: 'adsBtnRef',     pad: 8,  radius: 24, textRight: true,
-    title: '免費道具 🎁',           text: '看廣告領道具，每天最多三次' },
+    title: '免費道具 🎁',           text: '看廣告領道具，每天最多 5 次' },
   { refKey: 'dockTabsRef',   pad: 6,  radius: 16,
     title: '食物欄 & 道具包',       text: '切換查看食物和道具，拖到夥伴身上使用' },
   { refKey: 'tabbarRef',     pad: 4,  radius: 12,
@@ -490,11 +490,25 @@ const ToolCell = ({ tool, dragManager, onDrop }) => {
   const handlePointerDown = (e) => {
     dragManager.startDrag(e, { kind: 'tool', id: tool.id, emoji: tool.emoji }, onDrop);
   };
+  const warn = tool.hoursLeft != null && tool.hoursLeft <= 6;
   return (
     <div className="food-slot">
       <div className="food-cell has-stock" onPointerDown={handlePointerDown}>
         <span className="emoji">{tool.emoji}</span>
         {tool.count > 1 && <span className="badge">{tool.count}</span>}
+        {tool.hoursLeft != null && (
+          <span style={{
+            position: 'absolute', bottom: 4, right: 4,
+            background: warn ? '#FF5000' : 'rgba(0,0,0,0.32)',
+            color: '#fff',
+            fontSize: 9, fontWeight: 800, lineHeight: 1,
+            padding: '2px 5px', borderRadius: 6,
+            letterSpacing: '0.02em',
+            pointerEvents: 'none',
+          }}>
+            {tool.hoursLeft}h
+          </span>
+        )}
       </div>
       <div className="food-label">
         <span className="name">{tool.name}</span>
@@ -1197,7 +1211,7 @@ const P6Ads = ({ setScreen, state, dispatch }) => {
       <div className="ad-screen">
           <div className="ad-label">AD · 廣告</div>
           <div className={`skip ${adTime <= 0 ? 'ready' : ''}`} onClick={adTime <= 0 ? skipAd : undefined}>
-            {adTime > 0 ? `${adTime}s` : '跳過 ›'}
+            {adTime > 0 ? `${adTime}s` : '領道具 ›'}
           </div>
           <div className="ad-mock">
             <div className="play">▶</div>
@@ -1218,7 +1232,7 @@ const P6Ads = ({ setScreen, state, dispatch }) => {
             </div>
           </div>
           <div className="reward-actions">
-            <button className="btn-primary" onClick={() => {dispatch({ type: 'ADD_TOOL', tool: reward });setScreen('p1');}}>立即使用</button>
+            <button className="btn-primary" onClick={() => {dispatch({ type: 'ADD_TOOL', tool: reward });setScreen('p3');}}>立即使用</button>
             <button className="btn-ghost" style={{ color: '#fff', borderColor: 'rgba(255,255,255,0.4)' }} onClick={() => {dispatch({ type: 'ADD_TOOL', tool: reward });setScreen('p9');}}>放入背包</button>
           </div>
         </div>
@@ -1433,7 +1447,7 @@ const P8Profile = ({ setScreen, state }) => {
 
         <div style={{ padding: '18px 18px 90px' }}>
           <button
-            onClick={() => setScreen('p1')}
+            onClick={() => setScreen('p0')}
             style={{
               width: '100%',
               background: '#fff',
@@ -1748,48 +1762,44 @@ const P11Pack = ({ setScreen }) => {
 /* ═══════════════ P8-FAQ · 常見問題 ═══════════════ */
 const FAQ_DATA = [
   {
-    cat: '🐾 Buddy 養成', id: 'buddy',
+    cat: 'Buddy 養成', id: 'buddy',
     items: [
-      { q: 'Buddy 的精神怎麼補充？', a: '每天帶食物回家給 Buddy 吃就能補充精神。精神越高，Buddy 越活潑！' },
-      { q: 'Buddy 的清爽怎麼提升？', a: '使用沐浴或保養道具可以提升 Buddy 的清爽度。補充站消費也能讓 Buddy 清爽一整天。' },
-      { q: '怎麼讓 Buddy 心情變好？', a: '每天打招呼、使用玩具道具、完成今日陪伴，都能讓 Buddy 心情變好。' },
-      { q: 'Buddy 什麼時候可以變身？', a: '當 Buddy 三個狀態都達到一定數值，就會觸發變身機會。可在夥伴日誌查看目前進度。' },
-      { q: 'Buddy 精神歸零會怎樣？', a: 'Buddy 會進入睡眠狀態，等你帶食物回家補充精神就能喚醒。Buddy 不會消失，放心！' },
+      { q: 'Buddy 的精神怎麼補充？', a: '每天帶食物回家給 Buddy 吃就能補充精神。不同食材補充的精神不同——杯子 +1、寶特瓶／鋁罐／牛奶瓶 +2、大顆電池 +10、其他電池 +5。精神越高，Buddy 越活潑！' },
+      { q: 'Buddy 的清爽怎麼提升？', a: '到補充站帶洗劑回家，每 NT$10 能讓 Buddy 同時 +10 精神、+10 清爽。日常使用沐浴或梳子道具也能讓 Buddy 立刻清爽起來。' },
+      { q: '怎麼讓 Buddy 心情變好？', a: '每天摸摸 Buddy（每日上限 10 次，每次 +1）、給 Buddy 玩玩具（逗貓棒、小球 +15）、完成今日陪伴，都能讓 Buddy 心情變好。' },
+      { q: '為什麼 Buddy 的狀態會自己下降？', a: 'Buddy 想你了。三個狀態每天會各自慢慢下降一些，記得常回來看看牠。' },
+      { q: 'Buddy 什麼時候可以變身？', a: '當 Buddy 三個狀態都達到一定數值，就會觸發變身機會。每隻 Buddy 有自己的變身條件，可在夥伴日誌查看目前進度。Phase 1 小海龜共有 9 個樣子可以遇見。' },
+      { q: 'Buddy 精神歸零會怎樣？', a: 'Buddy 會進入睡眠狀態，等你帶食物回家給牠補充精神就能喚醒。Buddy 不會消失，放心！' },
     ],
   },
   {
-    cat: '🍽️ 食物與道具', id: 'items',
+    cat: '食物與道具', id: 'items',
     items: [
-      { q: '食物和道具有什麼差別？', a: '食物補充精神，每天都能帶回家；道具有特定效果（提升清爽、心情等），效果更強但數量有限，用完可在商店補充。' },
-      { q: '道具會過期嗎？', a: '道具不會過期，放在背包裡隨時可以使用，不用擔心浪費。' },
-      { q: '道具可以一次用很多個嗎？', a: '每次只能使用一個道具，但效果可以累積，依序對 Buddy 使用即可。' },
-      { q: '背包容量有上限嗎？', a: '目前背包沒有容量上限，盡情收集！' },
+      { q: '食物和道具有什麼差別？', a: '食物補充精神，每週能帶回家；道具有特定效果（提升清爽、心情等），效果更強但數量有限，用完可在商店補充。' },
+      { q: '為什麼食物有「這週」配額？', a: '每種食物每週上限 5 個，週三中午 12:00 重置。週日中午 12:00 起會預告下週 Buddy 想吃什麼，可以提前期待。配額用完當週仍能補充 Buddy 精神，只是不會再產生食物。' },
+      { q: '道具會過期嗎？', a: '看來源而定。Buddy 的小驚喜（看廣告獲得）24 小時後消失；商店購買的消耗道具有 7 天有效期，可帶到下個月；裝扮與音樂盒類道具則永久綁定帳號，不會消失。剩餘時間會顯示在道具背包的卡片上，快過期時 Buddy 也會提醒你！' },
+      { q: '道具可以一次用很多個嗎？', a: '每次只能用一個道具，但效果可以累積。依序對 Buddy 使用即可。' },
+      { q: '一天可以看幾次廣告領道具？', a: '每天最多 5 次。連續 3 次沒抽到零食，第 4 次會保底給你一個。' },
+      { q: '道具背包有容量上限嗎？', a: '目前道具背包沒有容量上限，盡情收集！' },
     ],
   },
   {
-    cat: '📓 夥伴日誌', id: 'dex',
+    cat: '夥伴日誌', id: 'dex',
     items: [
-      { q: '夥伴日誌是什麼？', a: '夥伴日誌記錄 Buddy 每個月的成長軌跡，一年 12 格，代表你們一起走過的每個月份。' },
-      { q: '更換次數怎麼用？', a: '每月底可修改夥伴日誌中已鎖入的格子，每次修改消耗 1 次更換次數。可在商店補充。' },
-      { q: '格子鎖定後還能改嗎？', a: '可以，但需消耗更換次數。每月底是最好的調整時機，調整前記得確認剩餘次數。' },
+      { q: '夥伴日誌是什麼？', a: '夥伴日誌記錄 Buddy 每個月的樣子，一年 12 格，代表你們一起走過的每個月份。' },
+      { q: '月底要做什麼？', a: '月底前 5 天會出現提醒，從這個月遇到過的 Buddy 樣子裡挑一個收進日誌。結算後 3 天內仍可進去調整，超過時間沒選會由系統自動挑分數最高的填入。' },
+      { q: '更換次數怎麼用？', a: '日誌格子鎖入後若想換掉，每次修改消耗 1 次更換次數。月底首次鎖入是免費的，不需要更換次數。次數不足時，鎖入畫面會出現「增加更換次數 →」連結，可進入「更換次數包」購買補充。' },
+      { q: '更換次數會過期嗎？', a: '不會，機會永遠有效。' },
       { q: '為什麼有些格子是空的？', a: '空格代表那個月還沒有陪伴記錄。繼續每天帶食物回家給 Buddy，就能慢慢填滿每一格！' },
     ],
   },
   {
-    cat: '💎 點數與商店', id: 'points',
+    cat: '點數與商店', id: 'points',
     items: [
-      { q: '怎麼取得 ECOCO 點數？', a: '每次帶食物回家給 Buddy、在補充站消費，都能獲得 ECOCO 點數。' },
-      { q: 'ECOCO 點數會過期嗎？', a: 'ECOCO 點數目前不設過期，但建議定期使用讓 Buddy 保持活力。' },
-      { q: '商店目前可以買什麼？', a: '目前商店提供食物、道具、更換次數包，以 ECOCO 點數結帳。禮包與通行證 Buddy 還在準備中。' },
-      { q: '可以用真實金錢購買嗎？', a: '目前尚未開放真實金流，所有商品均以 ECOCO 點數購買。' },
-    ],
-  },
-  {
-    cat: '🔔 帳號與通知', id: 'account',
-    items: [
-      { q: '可以關閉特定通知嗎？', a: '可以！到「我的」→「通知偏好」，自由開關各類通知，包含餵食提醒、Buddy 呼喚等。' },
-      { q: '可以換綁其他 ECOCO 帳號嗎？', a: '請到「我的」→「帳號管理」操作，或聯繫客服協助處理。' },
-      { q: '忘記密碼怎麼辦？', a: '在登入頁點「忘記密碼」，依步驟驗證並重設即可。若仍有問題請聯繫客服。' },
+      { q: '怎麼取得 ECOCO 點數？', a: '帶食物回家給 Buddy、在補充站消費、完成今日陪伴，都能獲得 ECOCO 點數。' },
+      { q: 'ECOCO 點數會過期嗎？', a: '詳細內容請至 ECOCO 官網常見問題查看。' },
+      { q: '商店可以買什麼？', a: '商店分為食物、道具、裝飾、音樂盒四個分類。每個分類內，上方為「現金商品」（如月底衝刺禮包、月度通行證、限定裝飾），下方為「點數商品」（用 ECOCO 點數購買的食物與道具）。點數與現金不互換、不互買，每張卡片都會標示「點數」或「NT$」。' },
+      { q: '月底衝刺禮包是什麼？', a: '每月 22–28 日上架，幫 Buddy 在月底前衝一波狀態與日誌收藏的限時禮包，商店頁會置頂顯示倒數天數。' },
     ],
   },
 ];
@@ -1809,7 +1819,7 @@ const P8Faq = ({ setScreen }) => {
         <div className="header"><h2 style={{ marginTop: 8 }}>常見問題</h2></div>
 
         {/* Category chips */}
-        <div style={{ display: 'flex', gap: 8, padding: '0 18px 16px', overflowX: 'auto', scrollbarWidth: 'none' }}>
+        <div style={{ display: 'flex', gap: 8, padding: '16px 18px 16px', overflowX: 'auto', scrollbarWidth: 'none' }}>
           {FAQ_DATA.map(cat => {
             const active = activeCat === cat.id;
             return (
@@ -1853,123 +1863,6 @@ const P8Faq = ({ setScreen }) => {
 };
 
 
-/* ═══════════════ P8-Member · 會員資料 ═══════════════ */
-const P8Member = ({ setScreen }) => (
-  <div className="screen p8">
-    <StatusBar light />
-    <NavBack onClick={() => setScreen('p8')} light />
-    <div className="screen-scroll" style={{ paddingTop: 0 }}>
-      <div className="header">
-        <div className="profile-row">
-          <div className="avatar"><img src="assets/btn/avatar.svg" alt="" draggable="false" /></div>
-          <div style={{ flex: 1 }}>
-            <h2>可可粉</h2>
-            <div className="id">ID · ECOCO_9999 · 已驗證</div>
-          </div>
-        </div>
-      </div>
-      <div style={{ padding: '0 18px 80px' }}>
-        {[
-          { label: '暱稱', value: '可可粉' },
-          { label: '帳號 ID', value: 'ECOCO_9999' },
-          { label: '等級', value: 'Lv.12 · 環保大使' },
-          { label: '連續登入', value: '5 天' },
-          { label: '累積回收', value: '238 次' },
-          { label: '加入時間', value: '2024 年 3 月' },
-        ].map((row, i) => (
-          <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#fff', borderRadius: 14, padding: '13px 16px', marginBottom: 10 }}>
-            <span style={{ fontSize: 13, color: '#888' }}>{row.label}</span>
-            <span style={{ fontSize: 14, fontWeight: 700, color: '#222' }}>{row.value}</span>
-          </div>
-        ))}
-      </div>
-    </div>
-  </div>
-);
-
-
-/* ═══════════════ P8-Notify · 通知偏好 ═══════════════ */
-const P8Notify = ({ setScreen }) => {
-  const types = ['餵食提醒', '進化提醒', '任務完成', '點數異動', '商店新品', '系統公告', 'Buddy 呼喚'];
-  const [on, setOn] = React.useState(() => Object.fromEntries(types.map(t => [t, true])));
-  return (
-    <div className="screen p8">
-      <StatusBar light />
-      <NavBack onClick={() => setScreen('p8')} light />
-      <div className="screen-scroll" style={{ paddingTop: 0 }}>
-        <div className="header"><h2 style={{ marginTop: 8 }}>通知偏好</h2><p>選擇想要接收的推播類型</p></div>
-        <div style={{ padding: '0 18px 80px' }}>
-          {types.map((t) => (
-            <div key={t} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#fff', borderRadius: 14, padding: '14px 16px', marginBottom: 10 }}>
-              <span style={{ fontSize: 14, fontWeight: 600, color: '#222' }}>{t}</span>
-              <div
-                onClick={() => setOn(prev => ({ ...prev, [t]: !prev[t] }))}
-                style={{
-                  width: 44, height: 26, borderRadius: 13, cursor: 'pointer', transition: 'background .2s',
-                  background: on[t] ? 'var(--ecoco-orange)' : '#ccc',
-                  display: 'flex', alignItems: 'center', padding: '0 3px',
-                  justifyContent: on[t] ? 'flex-end' : 'flex-start',
-                }}>
-                <div style={{ width: 20, height: 20, borderRadius: '50%', background: '#fff' }} />
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-};
-
-
-/* ═══════════════ P8-Account · 帳號管理 ═══════════════ */
-const P8Account = ({ setScreen }) => (
-  <div className="screen p8">
-    <StatusBar light />
-    <NavBack onClick={() => setScreen('p8')} light />
-    <div className="screen-scroll" style={{ paddingTop: 0 }}>
-      <div className="header"><h2 style={{ marginTop: 8 }}>帳號管理</h2></div>
-      <div style={{ padding: '0 18px 80px' }}>
-        <div className="menu">
-          {[
-            { label: '修改密碼', sub: '定期更換以保護帳號安全' },
-            { label: '綁定手機', sub: '已綁定 · 09xx-xxx-xxx' },
-          ].map((it, i) => (
-            <div key={i} className="menu-item tap-area">
-              <div style={{ flex: 1 }}>
-                <div style={{ fontWeight: 700, color: '#222', fontSize: 14 }}>{it.label}</div>
-                <div style={{ fontSize: 11, color: '#888', marginTop: 2 }}>{it.sub}</div>
-              </div>
-              <span className="arrow">›</span>
-            </div>
-          ))}
-          <div className="menu-item tap-area" style={{ marginTop: 16 }}>
-            <div style={{ flex: 1, fontWeight: 700, fontSize: 14, color: '#E53935' }}>登出</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-);
-
-
-/* ═══════════════ P8-Terms · 服務條款 ═══════════════ */
-const P8Terms = ({ setScreen }) => (
-  <div className="screen p8">
-    <StatusBar light />
-    <NavBack onClick={() => setScreen('p8')} light />
-    <div className="screen-scroll" style={{ paddingTop: 0 }}>
-      <div className="header"><h2 style={{ marginTop: 8 }}>服務條款 · 隱私權</h2></div>
-      <div style={{ padding: '0 18px 80px', fontSize: 13, color: '#444', lineHeight: 1.8 }}>
-        <p>本服務由 ECOCO 提供，使用本服務即表示您同意遵守相關條款與隱私政策。我們致力於保護您的個人資料，不會在未經授權的情況下分享給第三方。</p>
-        <p style={{ marginTop: 16 }}>您在使用 ECO BUDDY 遊戲功能時所產生的回收紀錄、點數及角色資料，均屬您的個人資產。ECOCO 保留依法律規定或業務需要調整服務內容的權利，並將提前通知用戶。</p>
-        <p style={{ marginTop: 16 }}>如有任何疑問，請透過官方客服管道聯繫我們。</p>
-        <p style={{ marginTop: 24, fontSize: 11, color: '#999' }}>最後更新：2026 年 1 月 1 日</p>
-      </div>
-    </div>
-  </div>
-);
-
-
 /* ═══════════════ P0 · 一般模式-首頁 ═══════════════ */
 const PNormalHome = ({ setScreen }) => (
   <div className="screen p0">
@@ -1997,7 +1890,7 @@ const PNormalHome = ({ setScreen }) => (
 Object.assign(window, {
   P1Home, P2Scan, P2bResult, P3Feeding,
   P4Shop, P5Missions, P6Ads, P7Dex,
-  P8Profile, P8Faq, P8Member, P8Notify, P8Account, P8Terms,
+  P8Profile, P8Faq,
   P9Bag, P9bToolAnim,
   P10Picker, P11Pack, P11PurchaseModal, P11SuccessModal,
   PNormalHome,

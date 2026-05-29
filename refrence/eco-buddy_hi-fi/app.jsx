@@ -5,7 +5,7 @@ const { useState, useEffect, useRef, useReducer, useCallback, useMemo } = React;
 const DEFAULT_STATE = {
   stats: { hp: 78, clean: 62, mood: 45 },
   points: 1280,
-  adRemaining: 3,
+  adRemaining: 5,
   swapLeft: 3,
   pity: 1,
   food: [
@@ -228,7 +228,7 @@ const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
   "p2bQuotaFull": false
 }/*EDITMODE-END*/;
 
-const P8_SUBS = new Set(['p8-faq', 'p8-member', 'p8-notify', 'p8-account', 'p8-terms']);
+const P8_SUBS = new Set(['p8-faq']);
 
 const App = () => {
   const [screen, _setScreen] = useState('p1');
@@ -279,10 +279,6 @@ const App = () => {
       case 'p11': return <P11Pack setScreen={setScreen} />;
       case 'p12': return <P12RefillResult setScreen={setScreen} state={state} dispatch={dispatch} payload={screenPayload} />;
       case 'p8-faq':    return <P8Faq setScreen={setScreen} />;
-      case 'p8-member': return <P8Member setScreen={setScreen} />;
-      case 'p8-notify': return <P8Notify setScreen={setScreen} />;
-      case 'p8-account':return <P8Account setScreen={setScreen} />;
-      case 'p8-terms':  return <P8Terms setScreen={setScreen} />;
       default: return null;
     }
   };
