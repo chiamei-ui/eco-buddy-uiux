@@ -118,9 +118,6 @@ const P12RefillResult = ({ setScreen, state, dispatch, payload }) => {
         <button className="btn-primary" disabled={phase !== 'done'} onClick={() => setScreen('p1')}>
           {phase === 'done' ? '返回首頁' : '計算中…'}
         </button>
-        <div className="meta-note">
-          進化判斷將於動畫結束後執行 · 不與計數同步觸發
-        </div>
       </div>
     </div>
   );

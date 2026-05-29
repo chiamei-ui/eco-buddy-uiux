@@ -1357,8 +1357,7 @@ const P8Profile = ({ setScreen, state }) => {
     title: '使用教學',
     en: 'GUIDE',
     items: [
-    { icon: '🌱', label: '新手引導', sub: '認識三維屬性、餵食、進化', go: null, comingSoon: true },
-    { icon: '📘', label: '玩法說明', sub: '每月選夥伴、圖鑑收藏', go: null, comingSoon: true },
+    { icon: '🌱', label: '新手引導', sub: '認識三維屬性、餵食、進化', go: 'p0a' },
     { icon: '💬', label: '常見問題', sub: '更換次數、過期道具、課金', go: 'p8-faq' }]
 
   }];

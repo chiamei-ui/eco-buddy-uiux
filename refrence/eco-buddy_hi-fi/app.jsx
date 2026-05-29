@@ -301,7 +301,7 @@ const App = () => {
         <div className="iphone">
           <div className="iphone-screen">
             <div className="iphone-notch"></div>
-            <div key={screen} className={slideDir ? `screen-slide-${slideDir}` : undefined} style={{ position: 'absolute', inset: 0, overflow: 'hidden' }}>
+            <div key={screen} className={slideDir ? `screen-slide-${slideDir}` : undefined} onAnimationEnd={() => setSlideDir(null)} style={{ position: 'absolute', inset: 0, overflow: 'hidden' }}>
               {renderScreen()}
             </div>
             {(dexPickerOpen || screen === 'p10') && (
