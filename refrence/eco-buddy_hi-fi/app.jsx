@@ -90,6 +90,7 @@ function stateReducer(state, action){
     case 'LOCK_DEX':
       return state; // could persist
     case 'RESET_STATS': return {...state, stats:action.stats};
+    case 'SET_STAT': return {...state, stats:{...state.stats, [action.kind]: Math.min(100, Math.max(0, action.value))}};
     case 'SET_STOCK': return {...state, food: state.food.map((f,i)=>({...f, stock:action.stocks[i] ?? f.stock, state:action.stocks[i]===0?(f.state==='locked'?'locked':'low'):f.state}))};
     case 'CLEAR_BAG': return {...state, tools:[]};
     case 'CLAIM_MISSION':
@@ -152,6 +153,7 @@ const DragGhost = ({ drag, hover }) => {
 /* ───────── Screen nav (left rail) ───────── */
 const SCREENS = [
   { code:'A',  id:'push',  label:'推播觸發', section:'入口' },
+  { code:'OB', id:'p0a',   label:'新手引導 Overlay', section:'新手引導' },
   { code:'P0', id:'p0',    label:'一般模式-首頁', section:'主流程' },
   { code:'P1', id:'p1',    label:'夥伴首頁 · Hub' },
   { code:'P2', id:'p2',    label:'掃描 QR Code' },
@@ -250,7 +252,7 @@ const App = () => {
 
   // map screen → tabbar active id (only show on tab pages)
   const tabbarActive = {
-    p1:'buddy', p4:'shop', p5:'mission', p7:'dex', p9:'buddy'
+    p1:'buddy', p4:'shop', p5:'mission', p7:'dex', p9:'buddy', p0a:'buddy'
   }[screen];
 
   const navFromTabbar = (id) => {
@@ -260,6 +262,7 @@ const App = () => {
   const renderScreen = () => {
     switch(screen){
       case 'push': return <PushDemo setScreen={setScreen} />;
+      case 'p0a': return <P1Home state={state} dispatch={dispatch} setScreen={setScreen} dragManager={dragManager} payload={null} showTutorial={true} onTutorialDone={() => setScreen('p1')} />;
       case 'p0':  return <PNormalHome setScreen={setScreen} />;
       case 'p1':  return <P1Home state={state} dispatch={dispatch} setScreen={setScreen} dragManager={dragManager} payload={screenPayload} />;
       case 'p2':  return <P2Scan setScreen={setScreen} dispatch={dispatch} tweaks={tweaks} setTweak={setTweak} />;
@@ -289,7 +292,7 @@ const App = () => {
       {/* Left rail */}
       <div className="stage-pane">
         <div className="stage-title">畫面導覽</div>
-        <div className="stage-sub">點選任一畫面跳轉 · 共 15 個畫面</div>
+        <div className="stage-sub">點選任一畫面跳轉 · 共 16 個畫面</div>
         <ScreenNav screen={screen} setScreen={setScreen} />
       </div>
 
@@ -329,7 +332,7 @@ const App = () => {
         </div>
 
         <div className="stage-title" style={{padding:'0 4px'}}>Tweaks · 即時調整</div>
-        <InlineTweaks tweaks={tweaks} setTweak={setTweak} setScreen={setScreen} />
+        <InlineTweaks tweaks={tweaks} setTweak={setTweak} setScreen={setScreen} state={state} dispatch={dispatch} />
       </div>
 
       <DragGhost drag={dragManager.drag} hover={dragManager.hover} />
@@ -346,13 +349,33 @@ const P2_ERR_OPTIONS = [
   { id:'netFail',   label:'網路失敗' },
 ];
 
-const InlineTweaks = ({ tweaks, setTweak, setScreen }) => {
+const InlineTweaks = ({ tweaks, setTweak, setScreen, state, dispatch }) => {
   return (
     <div style={{
       background:'rgba(255,255,255,0.04)',
       border:'1px solid rgba(255,255,255,0.08)',
       borderRadius:20,padding:16,color:'#fff',
     }}>
+      <div style={tweakLabel}>三維數值</div>
+      {[
+        { kind:'hp',    label:'精神', color:'#D4251C' },
+        { kind:'clean', label:'清爽', color:'#060E9F' },
+        { kind:'mood',  label:'心情', color:'#FFCE00' },
+      ].map(({ kind, label, color }) => (
+        <div key={kind} style={{marginBottom:8}}>
+          <div style={{display:'flex',justifyContent:'space-between',fontSize:11,color:'rgba(255,255,255,0.7)',marginBottom:3}}>
+            <span style={{fontWeight:600}}>{label}</span>
+            <span style={{fontVariantNumeric:'tabular-nums'}}>{state.stats[kind]}%</span>
+          </div>
+          <input type="range" min={0} max={100} step={1}
+            value={state.stats[kind]}
+            onChange={e => dispatch({ type:'SET_STAT', kind, value:Number(e.target.value) })}
+            style={{width:'100%',accentColor:color,cursor:'pointer'}}
+          />
+        </div>
+      ))}
+
+      <div style={{marginTop:4,paddingTop:10,borderTop:'1px solid rgba(255,255,255,0.08)'}}>
       <div style={tweakLabel}>P2 · 模擬掃碼來源</div>
       <Segmented
         value={tweaks.p2DemoType || 'recycle'}
@@ -396,6 +419,7 @@ const InlineTweaks = ({ tweaks, setTweak, setScreen }) => {
           <button onClick={()=>setScreen('push')} style={tweakBtn}>▶ 推播範例</button>
           <button onClick={()=>setScreen('p4')} style={tweakBtn}>▶ P4 商店（唯一金流）</button>
         </div>
+      </div>
       </div>
     </div>
   );

@@ -1,7 +1,152 @@
 /* ECO BUDDY · All game-mode screens */
 
+/* ═══════════════ Onboarding Spotlight Overlay ═══════════════ */
+const OB_STEPS = [
+  { refKey: 'turtleWrapRef', pad: 24, radius: 99,
+    title: '本月夥伴✨',            text: '點一下，看牠會怎麼反應' },
+  { refKey: 'statRowRef',    pad: 6, padRight: 22, padBottom: 16, radius: 14,
+    title: '精神・清爽・心情',      text: '點圖示看夥伴目前的狀態' },
+  { refKey: 'modeBtnRef',    pad: 8,  radius: 20, textRight: true,
+    title: '切換一般模式',          text: '點這裡可以回到 ECOCO 的一般功能' },
+  { refKey: 'scanBtnRef',    pad: 8,  radius: 24, textRight: true,
+    title: '帶食物回家 📦',         text: '回收後，掃描機台螢幕條碼，有機會換到食物哦！' },
+  { refKey: 'adsBtnRef',     pad: 8,  radius: 24, textRight: true,
+    title: '免費道具 🎁',           text: '看廣告領道具，每天最多三次' },
+  { refKey: 'dockTabsRef',   pad: 6,  radius: 16,
+    title: '食物欄 & 道具包',       text: '切換查看食物和道具，拖到夥伴身上使用' },
+  { refKey: 'tabbarRef',     pad: 4,  radius: 12,
+    title: '四大功能',              text: '快來探索遊戲中的每個小驚喜吧！' },
+];
+
+const OnboardingSpotlight = ({ step, refs, onNext, onSkip }) => {
+  const containerRef = useRef(null);
+  const [hl, setHl] = useState(null);
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+    const s = OB_STEPS[step];
+    const cR = containerRef.current.getBoundingClientRect();
+    let targetEl = refs[s.refKey]?.current;
+    if (!targetEl && s.refKey === 'tabbarRef') {
+      targetEl = document.querySelector('.tabbar-img');
+    }
+    if (!targetEl) return;
+    const tR = targetEl.getBoundingClientRect();
+    const pT = s.padTop    ?? s.pad;
+    const pR = s.padRight  ?? s.pad;
+    const pB = s.padBottom ?? s.pad;
+    const pL = s.padLeft   ?? s.pad;
+    setHl({
+      top:  tR.top  - cR.top  - pT,
+      left: tR.left - cR.left - pL,
+      w: tR.width  + pL + pR,
+      h: tR.height + pT + pB,
+      r: s.radius,
+      cH: cR.height,
+      cW: cR.width,
+    });
+  }, [step]);
+
+  const cur = OB_STEPS[step];
+  const isLast = step === OB_STEPS.length - 1;
+
+  if (!hl) return <div ref={containerRef} style={{ position: 'absolute', inset: 0, zIndex: 9999, pointerEvents: 'none' }} />;
+
+  const descBelow = (hl.top + hl.h / 2) < hl.cH * 0.55;
+
+  // Arrow: from text area edge → spotlight edge
+  const isRight = !!cur.textRight;
+  const hlCx = hl.left + hl.w / 2;
+  // arrow tip: nearest edge of spotlight (bottom or top)
+  const arrowTipY  = descBelow ? hl.top + hl.h + 3   : hl.top - 3;
+  // arrow base: offset from tip, shifted right when textRight
+  const arrowBaseY = descBelow ? hl.top + hl.h + 52  : hl.top - 52;
+  const arrowTipX  = Math.max(32, Math.min(hl.cW - 32, isRight ? hl.left + hl.w * 0.7 : hlCx - 10));
+  const arrowBaseX = isRight
+    ? Math.min(hl.cW - 22, arrowTipX + (descBelow ? 28 : 20))
+    : arrowTipX + (descBelow ? 18 : -14);
+  const ctrlX = (arrowTipX + arrowBaseX) / 2 + (isRight ? 20 : descBelow ? 22 : -22);
+  const ctrlY = (arrowTipY + arrowBaseY) / 2;
+  // arrowhead direction
+  const dx = arrowTipX - ctrlX, dy = arrowTipY - ctrlY;
+  const len = Math.sqrt(dx*dx + dy*dy) || 1;
+  const nx = dx/len, ny = dy/len;
+  const sz = 9;
+  const ah1x = arrowTipX - nx*sz + ny*sz*0.55, ah1y = arrowTipY - ny*sz - nx*sz*0.55;
+  const ah2x = arrowTipX - nx*sz - ny*sz*0.55, ah2y = arrowTipY - ny*sz + nx*sz*0.55;
+
+  return (
+    <div ref={containerRef} style={{ position: 'absolute', inset: 0, zIndex: 9999, pointerEvents: 'none' }}>
+      {/* Rounded-corner spotlight via box-shadow */}
+      <div style={{
+        position: 'absolute',
+        top: hl.top, left: hl.left, width: hl.w, height: hl.h,
+        borderRadius: hl.r,
+        boxShadow: '0 0 0 9999px rgba(0,0,0,0.78)',
+        border: '2px solid rgba(255,255,255,0.45)',
+        outline: '4px solid rgba(255,255,255,0.1)',
+      }} />
+
+      {/* Hand-drawn arrow SVG */}
+      <svg style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', overflow: 'visible', pointerEvents: 'none' }}>
+        <path d={`M ${arrowBaseX} ${arrowBaseY} Q ${ctrlX} ${ctrlY} ${arrowTipX} ${arrowTipY}`}
+          stroke="white" strokeWidth="2.2" fill="none" strokeLinecap="round" opacity="0.85" />
+        <path d={`M ${ah1x} ${ah1y} L ${arrowTipX} ${arrowTipY} L ${ah2x} ${ah2y}`}
+          stroke="white" strokeWidth="2.2" fill="none" strokeLinecap="round" strokeLinejoin="round" opacity="0.85" />
+      </svg>
+
+      {/* Text + 下一步 button — near spotlight */}
+      <div style={{
+        position: 'absolute',
+        left: 20, right: 20,
+        ...(descBelow ? { top: hl.top + hl.h + 56 } : { bottom: hl.cH - hl.top + 56 }),
+        pointerEvents: 'auto',
+      }}>
+        <div style={{ fontWeight: 800, fontSize: 20, color: '#fff', lineHeight: 1.3, textShadow: '0 1px 6px rgba(0,0,0,0.3)', textAlign: isRight ? 'right' : 'left' }}>
+          {cur.title}
+        </div>
+        <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.82)', marginTop: 6, lineHeight: 1.6, textAlign: isRight ? 'right' : 'left' }}>
+          {cur.text}
+        </div>
+        <div style={{ display: 'flex', justifyContent: isRight ? 'flex-end' : 'flex-start', marginTop: 16 }}>
+          <button onClick={onNext} style={{
+            background: '#FF5000', color: '#fff', border: 'none',
+            borderRadius: 999, padding: '9px 22px', fontWeight: 700, fontSize: 14, cursor: 'pointer',
+          }}>
+            {isLast ? '知道了！' : '下一步 →'}
+          </button>
+        </div>
+      </div>
+
+      {/* Progress dots + 跳過 — above tabbar when spotlight is near bottom */}
+      <div style={{
+        position: 'absolute',
+        bottom: hl.top + hl.h > hl.cH * 0.7 ? hl.cH - hl.top + 12 : 28,
+        left: 20, right: 20,
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        pointerEvents: 'auto',
+      }}>
+        <div style={{ display: 'flex', gap: 5 }}>
+          {OB_STEPS.map((_, i) => (
+            <div key={i} style={{
+              width: i === step ? 20 : 6, height: 6, borderRadius: 3,
+              background: i === step ? '#FF5000' : 'rgba(255,255,255,0.3)',
+              transition: 'width .2s',
+            }} />
+          ))}
+        </div>
+        {!isLast && (
+          <button onClick={onSkip} style={{ fontSize: 13, color: 'rgba(255,255,255,0.45)', background: 'none', border: 'none', cursor: 'pointer', padding: '4px 0' }}>
+            跳過
+          </button>
+        )}
+      </div>
+    </div>
+  );
+};
+
 /* ═══════════════ P1 · Buddy Home ═══════════════ */
-const P1Home = ({ state, dispatch, setScreen, dragManager, payload }) => {
+const P1Home = ({ state, dispatch, setScreen, dragManager, payload, showTutorial, onTutorialDone }) => {
   const [dockTab, setDockTab] = useState('food'); // food | tools
   const [touched, setTouched] = useState(false);
   const [eating, setEating] = useState(false);
@@ -10,9 +155,30 @@ const P1Home = ({ state, dispatch, setScreen, dragManager, payload }) => {
   const [ambientVisible, setAmbientVisible] = useState(true);
   const [ambientDismissing, setAmbientDismissing] = useState(false);
   const [pulsingIds, setPulsingIds] = useState(new Set());
+  const [tutorialStep, setTutorialStep] = useState(showTutorial ? 0 : -1);
   const turtleRef = useRef(null);
+  const turtleWrapRef = useRef(null);
+  const statRowRef = useRef(null);
+  const modeBtnRef = useRef(null);
+  const scanBtnRef = useRef(null);
+  const adsBtnRef = useRef(null);
+  const dockTabsRef = useRef(null);
+  const dockRef = useRef(null);
   const valueRiseRef = useRef([]);
   const [valueRises, setValueRises] = useState([]);
+
+  const handleTutorialNext = () => {
+    if (tutorialStep < OB_STEPS.length - 1) {
+      setTutorialStep(t => t + 1);
+    } else {
+      setTutorialStep(-1);
+      if (onTutorialDone) onTutorialDone();
+    }
+  };
+  const handleTutorialSkip = () => {
+    setTutorialStep(-1);
+    if (onTutorialDone) onTutorialDone();
+  };
 
   useEffect(() => {
     if (payload?.autoFeed) {
@@ -54,10 +220,11 @@ const P1Home = ({ state, dispatch, setScreen, dragManager, payload }) => {
     setTimeout(() => setBubble(null), ms);
   };
 
-  // tap stat pip → show stat dialogue
+  // tap stat pip → show stat value + dialogue
+  const STAT_LABELS = { hp: '精神', clean: '清爽', mood: '心情' };
   const handleStatTap = (kind) => {
     const value = state.stats[kind];
-    showBubble({ text: statDialogue(kind, value), error: statLevel(value)==='low' });
+    showBubble({ text: `${STAT_LABELS[kind]} ${value}%　${statDialogue(kind, value)}`, error: statLevel(value)==='low' });
   };
 
   // drop handler — applies food/item effect or shows error
@@ -115,7 +282,7 @@ const P1Home = ({ state, dispatch, setScreen, dragManager, payload }) => {
       <div className="p1-header">
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <img src="assets/logo-ecobuddy.svg" alt="ecoBUDDY" className="ecobuddy-logo" />
-          <button style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }} onClick={() => setScreen('p0')}>
+          <button ref={modeBtnRef} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }} onClick={() => setScreen('p0')}>
             <img src="assets/btn/normal-mode.svg" alt="一般模式" height="26" draggable="false" />
           </button>
         </div>
@@ -132,9 +299,11 @@ const P1Home = ({ state, dispatch, setScreen, dragManager, payload }) => {
         </div>
       </div>
       <div className="stat-row">
-        <StatPip kind="hp" value={state.stats.hp} onClick={()=>handleStatTap('hp')} />
-        <StatPip kind="clean" value={state.stats.clean} onClick={()=>handleStatTap('clean')} />
-        <StatPip kind="mood" value={state.stats.mood} onClick={()=>handleStatTap('mood')} />
+        <div ref={statRowRef} style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+          <StatPip kind="hp" value={state.stats.hp} onClick={()=>handleStatTap('hp')} />
+          <StatPip kind="clean" value={state.stats.clean} onClick={()=>handleStatTap('clean')} />
+          <StatPip kind="mood" value={state.stats.mood} onClick={()=>handleStatTap('mood')} />
+        </div>
       </div>
 
       <div className="turtle-stage" ref={turtleRef}
@@ -158,7 +327,7 @@ const P1Home = ({ state, dispatch, setScreen, dragManager, payload }) => {
 
         }
 
-        <div className={`turtle-wrap`} style={{ position: 'relative' }}>
+        <div className={`turtle-wrap`} ref={turtleWrapRef} style={{ position: 'relative' }}>
           <TurtleImg
             className={`${touched ? 'touched' : ''} ${eating ? 'eating' : ''} ${dragManager.hover === 'turtle' ? 'dragover' : ''}`}
             onClick={handleTurtleTap}
@@ -170,11 +339,11 @@ const P1Home = ({ state, dispatch, setScreen, dragManager, payload }) => {
         </div>
 
         <div className="side-actions">
-          <button className="side-action tap-area" onClick={() => setScreen('p2')}>
+          <button ref={scanBtnRef} className="side-action tap-area" onClick={() => setScreen('p2')}>
             <ScanBtnIcon />
           </button>
           <div style={{ position: 'relative' }}>
-            <button className="side-action tap-area" onClick={() => setP6SheetOpen(true)}>
+            <button ref={adsBtnRef} className="side-action tap-area" onClick={() => setP6SheetOpen(true)}>
               <AdsBtnIcon />
             </button>
             {state.adRemaining > 0 && (
@@ -190,8 +359,8 @@ const P1Home = ({ state, dispatch, setScreen, dragManager, payload }) => {
         </div>
       </div>
 
-      <div className="dock-shell">
-        <div className="dock-tabs">
+      <div className="dock-shell" ref={dockRef}>
+        <div className="dock-tabs" ref={dockTabsRef}>
           <button className={`dock-tab ${dockTab === 'food' ? 'active' : ''}`} onClick={() => setDockTab('food')}>食物欄</button>
           <button className={`dock-tab ${dockTab === 'tools' ? 'active' : ''}`} onClick={() => setDockTab('tools')}>道具包</button>
         </div>
@@ -253,6 +422,14 @@ const P1Home = ({ state, dispatch, setScreen, dragManager, payload }) => {
             </button>
           </div>
         </div>
+      )}
+      {tutorialStep >= 0 && (
+        <OnboardingSpotlight
+          step={tutorialStep}
+          refs={{ turtleWrapRef, statRowRef, modeBtnRef, scanBtnRef, adsBtnRef, dockTabsRef, dockRef }}
+          onNext={handleTutorialNext}
+          onSkip={handleTutorialSkip}
+        />
       )}
     </div>);
 
