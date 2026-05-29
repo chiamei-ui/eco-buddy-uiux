@@ -3,7 +3,7 @@
 # 多個負責人用空格分隔
 # 文件：https://docs.github.com/en/repositories/managing-your-repositories-settings-and-features/customizing-your-repository/about-code-owners
 
-# === 請替換以下 @username 為實際 GitHub 帳號 ===
+# === 待填入：@PM_USERNAME（PM 的 GitHub 帳號）===
 
 # PM 決策與 Brief（PM 為主要負責人）
 docs/decisions/        @PM_USERNAME
@@ -16,8 +16,8 @@ docs/design/           @chiamei-ui
 docs/product/          @PM_USERNAME @chiamei-ui
 
 # 動畫需求與素材（窗口設計師為主要負責人）
-docs/animation/        @LIAISON_DESIGNER_USERNAME
-assets/animations/     @LIAISON_DESIGNER_USERNAME
+docs/animation/        @idahsueh-cmd
+assets/animations/     @idahsueh-cmd
 
 # OpenSpec change proposals（全員可動）
 openspec/              @chiamei-ui
@@ -26,12 +26,12 @@ openspec/              @chiamei-ui
 /CLAUDE.md             @chiamei-ui @PM_USERNAME
 /README.md             @chiamei-ui
 
-# === TODO：填入實際 GitHub username 後刪除此區塊 ===
-# 替換對象：
-# - @PM_USERNAME → PM 的 GitHub 帳號
-# - @LIAISON_DESIGNER_USERNAME → 窗口設計師（對接外包動畫師）的 GitHub 帳號
-# - @chiamei-ui 已使用（這是你的帳號，如有誤請更正）
+# === 團隊成員 ===
+# @chiamei-ui     → 你（UI/UX 設計師）
+# @idahsueh-cmd   → 窗口設計師（對接外包 Rive 動畫師）
+# @shangchian     → 前端工程師（Watch repo；未來有程式碼路徑時加入此檔）
+# @PM_USERNAME    → ⏳ 待填入 PM 的 GitHub 帳號
 #
-# 提醒：
-# - 外包 Rive 動畫師不出現在此檔案（他不進 repo）
-# - 前端 / 後端工程師可以全員 Watch repo，不必特別列入 CODEOWNERS
+# === 不進 repo ===
+# - 外包 Rive 動畫師（透過 @idahsueh-cmd 對接）
+# - 後端工程師（待加入後補 username）
