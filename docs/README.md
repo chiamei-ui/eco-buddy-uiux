@@ -2,12 +2,13 @@
 
 ## 我是誰，我該看什麼
 
-| 角色 | 必讀（順序） | 補充 |
-|------|-------------|------|
-| **PM / CEO** | [decisions/CURRENT.md](decisions/CURRENT.md) → [briefs/UI_REDESIGN_BRIEF.md](briefs/UI_REDESIGN_BRIEF.md) | — |
-| **前端工程師** | [design/DESIGN_SYSTEM.md](design/DESIGN_SYSTEM.md) → [design/UI_SPEC.md](design/UI_SPEC.md) | [design/GAME_MECHANICS.md](design/GAME_MECHANICS.md) |
-| **設計師** | [decisions/CURRENT.md](decisions/CURRENT.md) → [design/DESIGN_SYSTEM.md](design/DESIGN_SYSTEM.md) | [design/COPY_TABLE.md](design/COPY_TABLE.md) |
-| **動畫師** | [animation/ANIMATION_BRIEF.md](animation/ANIMATION_BRIEF.md) → [animation/ANIMATION_LIST.md](animation/ANIMATION_LIST.md) | — |
+| 角色 | 30 秒上手 | 必讀（順序） | 補充 |
+|------|----------|-------------|------|
+| **PM / CEO** | [onboarding/FOR_PM.md](onboarding/FOR_PM.md) | [decisions/CURRENT.md](decisions/CURRENT.md) → [briefs/UI_REDESIGN_BRIEF.md](briefs/UI_REDESIGN_BRIEF.md) | — |
+| **前端工程師** | [onboarding/FOR_FRONTEND.md](onboarding/FOR_FRONTEND.md) | [design/DESIGN_SYSTEM.md](design/DESIGN_SYSTEM.md) → [design/UI_SPEC.md](design/UI_SPEC.md) | [design/GAME_MECHANICS.md](design/GAME_MECHANICS.md) |
+| **後端工程師** | [onboarding/FOR_BACKEND.md](onboarding/FOR_BACKEND.md) | [design/GAME_MECHANICS.md](design/GAME_MECHANICS.md) → [decisions/CURRENT.md](decisions/CURRENT.md) | [product/USER_FLOW.md](product/USER_FLOW.md) |
+| **UI/UX 設計師** | — | [decisions/CURRENT.md](decisions/CURRENT.md) → [design/DESIGN_SYSTEM.md](design/DESIGN_SYSTEM.md) | [design/COPY_TABLE.md](design/COPY_TABLE.md) |
+| **窗口設計師（動畫對接）** | [onboarding/FOR_LIAISON_DESIGNER.md](onboarding/FOR_LIAISON_DESIGNER.md) | [animation/ANIMATION_BRIEF.md](animation/ANIMATION_BRIEF.md) → [animation/ANIMATION_LIST.md](animation/ANIMATION_LIST.md) | — |
 
 ---
 
