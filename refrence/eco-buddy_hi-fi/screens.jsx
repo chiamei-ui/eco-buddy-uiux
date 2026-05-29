@@ -410,12 +410,12 @@ const P2bResult = ({ setScreen, dispatch, tweaks = {}, setTweak = () => {} }) =>
             onClick={e => e.stopPropagation()}
             style={{ background: '#fff', borderRadius: 20, padding: '24px 22px', width: '78%', maxWidth: 300 }}
           >
-            <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 12, color: '#1a1a1a' }}>ECOCO 點數換算說明</div>
+            <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 12, color: '#1a1a1a' }}>精神換算說明</div>
             <div style={{ fontSize: 13, lineHeight: 2, color: '#555' }}>
-              <div>杯子 → ECOCO 點數 +1</div>
-              <div>寶特瓶 / 鋁罐 / 牛奶瓶 → ECOCO 點數 +2</div>
-              <div>電池（1號/2號）→ ECOCO 點數 +10</div>
-              <div>其餘電池 → ECOCO 點數 +5</div>
+              <div>杯子 → 精神 +1</div>
+              <div>寶特瓶 / 鋁罐 / 牛奶瓶 → 精神 +2</div>
+              <div>電池（1號/2號）→ 精神 +10</div>
+              <div>其餘電池 → 精神 +5</div>
             </div>
             <button
               onClick={() => setShowInfo(false)}
@@ -1162,6 +1162,7 @@ const P7Dex = ({ setScreen, state, dispatch, onOpenPicker }) => {
 
 /* ═══════════════ P8 · Profile (Me · 我的) ═══════════════ */
 const P8Profile = ({ setScreen, state }) => {
+  const [showPointSrc, setShowPointSrc] = useState(false);
   const featureGroups = [
   {
     title: '遊戲功能',
@@ -1170,10 +1171,9 @@ const P8Profile = ({ setScreen, state }) => {
     { icon: '🐢', label: '角色狀態', sub: `精神 ${state.stats.hp} · 清爽 ${state.stats.clean} · 心情 ${state.stats.mood}`, go: 'p1' },
     { icon: '📖', label: '圖鑑進度', sub: `已解鎖 ${state.dexStates.filter((s) => s.unlocked).length} / 9 種型態`, go: 'p7' },
     { icon: '🎒', label: '道具背包', sub: `${state.tools.length} 個道具`, go: 'p9' },
-    { icon: '✅', label: '任務中心', sub: '每日任務 3 個進行中', go: 'p5' },
+    { icon: '✅', label: '今日陪伴', sub: '每日任務 3 個進行中', go: 'p5' },
     { icon: '🛒', label: '商店', sub: `點數 ${state.points.toLocaleString()}`, go: 'p4' },
-    { icon: 'pt', label: '點數明細', sub: '本月 +382 · 累積 8,720', go: null, comingSoon: true },
-    { icon: '♻️', label: '回收紀錄', sub: '本月 12 次 · 累計 238 次', go: null, comingSoon: true }]
+    { icon: 'pt', label: '點數明細', sub: '本月 +382 · 回收 12 次', action: () => setShowPointSrc(true) }]
 
   },
   {
@@ -1182,17 +1182,7 @@ const P8Profile = ({ setScreen, state }) => {
     items: [
     { icon: '🌱', label: '新手引導', sub: '認識三維屬性、餵食、進化', go: null, comingSoon: true },
     { icon: '📘', label: '玩法說明', sub: '每月選夥伴、圖鑑收藏', go: null, comingSoon: true },
-    { icon: '💬', label: '常見問題', sub: '更換次數、過期道具、課金' }]
-
-  },
-  {
-    title: '個人資訊 · 設定',
-    en: 'ACCOUNT',
-    items: [
-    { icon: '👤', label: '會員資料', sub: '可可粉 · ECOCO_9999' },
-    { icon: '🔔', label: '通知偏好', sub: '7 種推播類型可調整' },
-    { icon: '🔒', label: '帳號管理', sub: '密碼 · 綁定 · 登出' },
-    { icon: '📋', label: '服務條款 · 隱私權' }]
+    { icon: '💬', label: '常見問題', sub: '更換次數、過期道具、課金', go: 'p8-faq' }]
 
   }];
 
@@ -1220,14 +1210,6 @@ const P8Profile = ({ setScreen, state }) => {
           <div className="stat-card"><b>4.2 <span style={{ fontSize: 11 }}>kg</span></b><div className="label">減碳量</div></div>
         </div>
 
-        <div className="pass-card">
-          <span className="gem">💎</span>
-          <div style={{ flex: 1 }}>
-            <h3>月度通行證</h3>
-            <p>解鎖進階互動 · NT$99/月</p>
-          </div>
-        </div>
-
         {featureGroups.map((group) =>
         <div key={group.title} style={{ marginTop: 18 }}>
             <div className="p8-group-h">
@@ -1236,8 +1218,8 @@ const P8Profile = ({ setScreen, state }) => {
             </div>
             <div className="menu">
               {group.items.map((it, i) =>
-            <div key={i} className={`menu-item ${it.go || it.comingSoon ? 'tap-area' : ''}`}
-            onClick={() => it.go && setScreen(it.go)}>
+            <div key={i} className={`menu-item ${it.go || it.comingSoon || it.action ? 'tap-area' : ''}`}
+            onClick={() => { if (it.action) it.action(); else if (it.go) setScreen(it.go); }}>
                   <span className="icon">
                     {it.icon === 'pt' ?
                 <img src="assets/icon-ecoco-point.svg" alt="" width="20" height="20" /> :
@@ -1275,6 +1257,7 @@ const P8Profile = ({ setScreen, state }) => {
         </div>
 
       </div>
+      {showPointSrc && <PointsSourceSheet state={state} onClose={() => setShowPointSrc(false)} />}
     </div>);
 
 };
@@ -1566,6 +1549,150 @@ const P11Pack = ({ setScreen }) => {
 };
 
 
+/* ═══════════════ P8-FAQ · 常見問題 ═══════════════ */
+const P8Faq = ({ setScreen }) => {
+  const faqs = [
+    { q: '更換次數怎麼用？', a: '每月底可修改年度圖鑑已鎖入的格子，每次修改消耗 1 次更換次數。可在商店或更換次數包頁面補充。' },
+    { q: '道具過期了怎麼辦？', a: '道具不會過期，隨時可從道具背包拖拽至 Buddy 使用。' },
+    { q: '課金問題？', a: '目前可在商店以 ECOCO 點數購買食物與道具。真實金流商品（禮包、通行證）尚未開放。' },
+  ];
+  return (
+    <div className="screen p8">
+      <StatusBar light />
+      <NavBack onClick={() => setScreen('p8')} light />
+      <div className="screen-scroll" style={{ paddingTop: 0 }}>
+        <div className="header"><h2 style={{ marginTop: 8 }}>常見問題</h2></div>
+        <div style={{ padding: '0 18px 80px' }}>
+          {faqs.map((f, i) => (
+            <div key={i} style={{ background: '#fff', borderRadius: 16, padding: '14px 16px', marginBottom: 12 }}>
+              <div style={{ fontWeight: 700, fontSize: 14, color: '#222', marginBottom: 6 }}>{f.q}</div>
+              <div style={{ fontSize: 13, color: '#555', lineHeight: 1.6 }}>{f.a}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+
+/* ═══════════════ P8-Member · 會員資料 ═══════════════ */
+const P8Member = ({ setScreen }) => (
+  <div className="screen p8">
+    <StatusBar light />
+    <NavBack onClick={() => setScreen('p8')} light />
+    <div className="screen-scroll" style={{ paddingTop: 0 }}>
+      <div className="header">
+        <div className="profile-row">
+          <div className="avatar"><img src="assets/btn/avatar.svg" alt="" draggable="false" /></div>
+          <div style={{ flex: 1 }}>
+            <h2>可可粉</h2>
+            <div className="id">ID · ECOCO_9999 · 已驗證</div>
+          </div>
+        </div>
+      </div>
+      <div style={{ padding: '0 18px 80px' }}>
+        {[
+          { label: '暱稱', value: '可可粉' },
+          { label: '帳號 ID', value: 'ECOCO_9999' },
+          { label: '等級', value: 'Lv.12 · 環保大使' },
+          { label: '連續登入', value: '5 天' },
+          { label: '累積回收', value: '238 次' },
+          { label: '加入時間', value: '2024 年 3 月' },
+        ].map((row, i) => (
+          <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#fff', borderRadius: 14, padding: '13px 16px', marginBottom: 10 }}>
+            <span style={{ fontSize: 13, color: '#888' }}>{row.label}</span>
+            <span style={{ fontSize: 14, fontWeight: 700, color: '#222' }}>{row.value}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+);
+
+
+/* ═══════════════ P8-Notify · 通知偏好 ═══════════════ */
+const P8Notify = ({ setScreen }) => {
+  const types = ['餵食提醒', '進化提醒', '任務完成', '點數異動', '商店新品', '系統公告', 'Buddy 呼喚'];
+  const [on, setOn] = React.useState(() => Object.fromEntries(types.map(t => [t, true])));
+  return (
+    <div className="screen p8">
+      <StatusBar light />
+      <NavBack onClick={() => setScreen('p8')} light />
+      <div className="screen-scroll" style={{ paddingTop: 0 }}>
+        <div className="header"><h2 style={{ marginTop: 8 }}>通知偏好</h2><p>選擇想要接收的推播類型</p></div>
+        <div style={{ padding: '0 18px 80px' }}>
+          {types.map((t) => (
+            <div key={t} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#fff', borderRadius: 14, padding: '14px 16px', marginBottom: 10 }}>
+              <span style={{ fontSize: 14, fontWeight: 600, color: '#222' }}>{t}</span>
+              <div
+                onClick={() => setOn(prev => ({ ...prev, [t]: !prev[t] }))}
+                style={{
+                  width: 44, height: 26, borderRadius: 13, cursor: 'pointer', transition: 'background .2s',
+                  background: on[t] ? 'var(--ecoco-orange)' : '#ccc',
+                  display: 'flex', alignItems: 'center', padding: '0 3px',
+                  justifyContent: on[t] ? 'flex-end' : 'flex-start',
+                }}>
+                <div style={{ width: 20, height: 20, borderRadius: '50%', background: '#fff' }} />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+
+/* ═══════════════ P8-Account · 帳號管理 ═══════════════ */
+const P8Account = ({ setScreen }) => (
+  <div className="screen p8">
+    <StatusBar light />
+    <NavBack onClick={() => setScreen('p8')} light />
+    <div className="screen-scroll" style={{ paddingTop: 0 }}>
+      <div className="header"><h2 style={{ marginTop: 8 }}>帳號管理</h2></div>
+      <div style={{ padding: '0 18px 80px' }}>
+        <div className="menu">
+          {[
+            { label: '修改密碼', sub: '定期更換以保護帳號安全' },
+            { label: '綁定手機', sub: '已綁定 · 09xx-xxx-xxx' },
+          ].map((it, i) => (
+            <div key={i} className="menu-item tap-area">
+              <div style={{ flex: 1 }}>
+                <div style={{ fontWeight: 700, color: '#222', fontSize: 14 }}>{it.label}</div>
+                <div style={{ fontSize: 11, color: '#888', marginTop: 2 }}>{it.sub}</div>
+              </div>
+              <span className="arrow">›</span>
+            </div>
+          ))}
+          <div className="menu-item tap-area" style={{ marginTop: 16 }}>
+            <div style={{ flex: 1, fontWeight: 700, fontSize: 14, color: '#E53935' }}>登出</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
+
+/* ═══════════════ P8-Terms · 服務條款 ═══════════════ */
+const P8Terms = ({ setScreen }) => (
+  <div className="screen p8">
+    <StatusBar light />
+    <NavBack onClick={() => setScreen('p8')} light />
+    <div className="screen-scroll" style={{ paddingTop: 0 }}>
+      <div className="header"><h2 style={{ marginTop: 8 }}>服務條款 · 隱私權</h2></div>
+      <div style={{ padding: '0 18px 80px', fontSize: 13, color: '#444', lineHeight: 1.8 }}>
+        <p>本服務由 ECOCO 提供，使用本服務即表示您同意遵守相關條款與隱私政策。我們致力於保護您的個人資料，不會在未經授權的情況下分享給第三方。</p>
+        <p style={{ marginTop: 16 }}>您在使用 ECO BUDDY 遊戲功能時所產生的回收紀錄、點數及角色資料，均屬您的個人資產。ECOCO 保留依法律規定或業務需要調整服務內容的權利，並將提前通知用戶。</p>
+        <p style={{ marginTop: 16 }}>如有任何疑問，請透過官方客服管道聯繫我們。</p>
+        <p style={{ marginTop: 24, fontSize: 11, color: '#999' }}>最後更新：2026 年 1 月 1 日</p>
+      </div>
+    </div>
+  </div>
+);
+
+
 /* ═══════════════ P0 · 一般模式-首頁 ═══════════════ */
 const PNormalHome = ({ setScreen }) => (
   <div className="screen p0">
@@ -1593,7 +1720,8 @@ const PNormalHome = ({ setScreen }) => (
 Object.assign(window, {
   P1Home, P2Scan, P2bResult, P3Feeding,
   P4Shop, P5Missions, P6Ads, P7Dex,
-  P8Profile, P9Bag, P9bToolAnim,
+  P8Profile, P8Faq, P8Member, P8Notify, P8Account, P8Terms,
+  P9Bag, P9bToolAnim,
   P10Picker, P11Pack, P11PurchaseModal, P11SuccessModal,
   PNormalHome,
   ShopPurchaseModal, ShopSuccessModal, PointsSourceSheet,

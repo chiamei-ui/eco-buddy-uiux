@@ -159,8 +159,8 @@ const SCREENS = [
   { code:'P3', id:'p3',    label:'餵食動畫流程' },
   { code:'P12',id:'p12',   label:'補充站消費結果', section:'補充站 Loop' },
   { code:'P4', id:'p4',    label:'商店', section:'底部 Tab' },
-  { code:'P5', id:'p5',    label:'任務' },
-  { code:'P7', id:'p7',    label:'圖鑑' },
+  { code:'P5', id:'p5',    label:'今日陪伴' },
+  { code:'P7', id:'p7',    label:'夥伴日誌' },
   { code:'P6', id:'p6',    label:'廣告 → 開箱', section:'道具' },
   { code:'P9', id:'p9',    label:'道具背包' },
   { code:'P9b',id:'p9b',   label:'道具使用動畫' },
@@ -226,10 +226,19 @@ const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
   "p2bQuotaFull": false
 }/*EDITMODE-END*/;
 
+const P8_SUBS = new Set(['p8-faq', 'p8-member', 'p8-notify', 'p8-account', 'p8-terms']);
+
 const App = () => {
   const [screen, _setScreen] = useState('p1');
+  const screenRef = useRef('p1');
   const [screenPayload, setScreenPayload] = useState(null);
+  const [slideDir, setSlideDir] = useState(null);
   const setScreen = useCallback((id, payload = null) => {
+    const from = screenRef.current;
+    const forward = P8_SUBS.has(id) || from === 'p8';
+    const back    = id === 'p8' && P8_SUBS.has(from);
+    setSlideDir(forward ? 'forward' : back ? 'back' : null);
+    screenRef.current = id;
     _setScreen(id);
     setScreenPayload(payload);
   }, []);
@@ -266,6 +275,11 @@ const App = () => {
       case 'p10': return <P7Dex setScreen={setScreen} state={state} dispatch={dispatch} onOpenPicker={() => setDexPickerOpen(true)} />;
       case 'p11': return <P11Pack setScreen={setScreen} />;
       case 'p12': return <P12RefillResult setScreen={setScreen} state={state} dispatch={dispatch} payload={screenPayload} />;
+      case 'p8-faq':    return <P8Faq setScreen={setScreen} />;
+      case 'p8-member': return <P8Member setScreen={setScreen} />;
+      case 'p8-notify': return <P8Notify setScreen={setScreen} />;
+      case 'p8-account':return <P8Account setScreen={setScreen} />;
+      case 'p8-terms':  return <P8Terms setScreen={setScreen} />;
       default: return null;
     }
   };
@@ -284,7 +298,9 @@ const App = () => {
         <div className="iphone">
           <div className="iphone-screen">
             <div className="iphone-notch"></div>
-            {renderScreen()}
+            <div key={screen} className={slideDir ? `screen-slide-${slideDir}` : undefined} style={{ position: 'absolute', inset: 0, overflow: 'hidden' }}>
+              {renderScreen()}
+            </div>
             {(dexPickerOpen || screen === 'p10') && (
               <P10Picker
                 setScreen={setScreen}
@@ -308,7 +324,7 @@ const App = () => {
             <p style={{marginBottom:6}}>🚫 錯誤操作會出現對話框提示</p>
             <p style={{marginBottom:6}}>📷 <b>掍描條碼</b>為統一入口：收瓶機 / 補充站可同一按鈕辨識</p>
           <p style={{marginBottom:6}}>💳 活動社群內唯一金流入口為 P4 商店 · 補充站不涉及付款</p>
-          <p>📱 15 個畫面涵蓋 user-flow.md v1.5 全部 P1–P12 + 推播觸發</p>
+          <p>📱 15 個畫面涵蓋 user-flow.md v1.7 全部 P1–P12 + 推播觸發</p>
           </div>
         </div>
 
