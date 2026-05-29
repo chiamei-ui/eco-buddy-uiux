@@ -3,17 +3,17 @@
 # 多個負責人用空格分隔
 # 文件：https://docs.github.com/en/repositories/managing-your-repositories-settings-and-features/customizing-your-repository/about-code-owners
 
-# === 待填入：@PM_USERNAME（PM 的 GitHub 帳號）===
+# === 所有負責人已填入 ===
 
 # PM 決策與 Brief（PM 為主要負責人）
-docs/decisions/        @PM_USERNAME
-docs/briefs/           @PM_USERNAME
+docs/decisions/        @andrewtainan
+docs/briefs/           @andrewtainan
 
 # 設計系統與頁面規格（你為主要負責人）
 docs/design/           @chiamei-ui
 
 # 使用者流程（PM 與你共同負責）
-docs/product/          @PM_USERNAME @chiamei-ui
+docs/product/          @andrewtainan @chiamei-ui
 
 # 動畫需求與素材（窗口設計師為主要負責人）
 docs/animation/        @idahsueh-cmd
@@ -23,14 +23,14 @@ assets/animations/     @idahsueh-cmd
 openspec/              @chiamei-ui
 
 # Repo 根目錄文件（你與 PM 共同負責）
-/CLAUDE.md             @chiamei-ui @PM_USERNAME
+/CLAUDE.md             @chiamei-ui @andrewtainan
 /README.md             @chiamei-ui
 
 # === 團隊成員 ===
 # @chiamei-ui     → 你（UI/UX 設計師）
 # @idahsueh-cmd   → 窗口設計師（對接外包 Rive 動畫師）
 # @shangchian     → 前端工程師（Watch repo；未來有程式碼路徑時加入此檔）
-# @PM_USERNAME    → ⏳ 待填入 PM 的 GitHub 帳號
+# @andrewtainan   → PM / CEO
 #
 # === 不進 repo ===
 # - 外包 Rive 動畫師（透過 @idahsueh-cmd 對接）
