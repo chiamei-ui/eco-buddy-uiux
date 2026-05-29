@@ -8,31 +8,56 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 > 舊 Rive 動畫預覽工具計畫已封存至 `archive/rive-plan/`，程式碼封存至 `archive/rive-previewer/`。
 
-當前狀態：UI/UX 設計階段。詳見 [docs/user-flow.md](docs/user-flow.md)。
+當前狀態：UI/UX 設計階段。詳見 [docs/product/USER_FLOW.md](docs/product/USER_FLOW.md)。
 
 ## Architecture
 
 ```
 eco-buddy/
-├── archive/               # 封存的舊計畫
+├── archive/               # 封存的舊計畫，不修改也不引用為現行依據
 ├── docs/
-│   ├── ECOCO_DESIGN.md    # ECO Buddy 設計規範（所有 UI 工作的唯一依據）
-│   ├── user-flow.md       # 使用者流程圖
-│   ├── UI_SPEC.md         # 各頁面 UI 規格
-│   ├── PM_DECISIONS.md    # PM 決策記錄
-│   └── pm_decisions_20260527/  # 2026-05-27 PM 文件包
-├── openspec/              # Change management（用 /opsx:* 指令操作）
-├── character/             # 設計師角色素材
+│   ├── README.md          # 所有角色的入口地圖（從這裡開始）
+│   ├── decisions/
+│   │   └── CURRENT.md     # PM 決策唯一寫入點（最高優先）
+│   ├── design/
+│   │   ├── DESIGN_SYSTEM.md  # 設計規範（色彩/字型/元件，唯一來源）
+│   │   ├── UI_SPEC.md        # 各頁面 UI 規格
+│   │   ├── COPY_TABLE.md     # 文案對照表
+│   │   └── DESIGN_NOTES.md   # 設計細節補充
+│   ├── product/
+│   │   ├── USER_FLOW.md      # 使用者流程圖
+│   │   ├── STAT_DIALOGUE.md  # 對話框文案
+│   │   └── FAQ.md
+│   ├── animation/
+│   │   ├── ANIMATION_LIST.md
+│   │   └── ANIMATION_BRIEF.md
+│   ├── briefs/
+│   │   └── UI_REDESIGN_BRIEF.md  # PM 8 條核心原則
+│   └── archive/           # 已過時，不作業
+├── openspec/
+│   ├── changes/           # 進行中的 change proposal
+│   └── specs/             # 已歸檔規格
+├── character/             # 設計師角色素材，唯讀參考
+├── reference/             # 外部參考資料，唯讀
 └── assets/                # 設計資源
 ```
 
+## 文件優先順序（衝突時）
+
+1. `docs/decisions/CURRENT.md` — PM 最新定案，最高優先
+2. `docs/design/DESIGN_SYSTEM.md` — 視覺規範（色彩唯一來源）
+3. `docs/design/UI_SPEC.md` — 頁面規格
+4. `docs/product/USER_FLOW.md` — 流程
+
+`docs/archive/` 下所有文件皆為舊版，僅供歷史參考。
+
 ## Design System
 
-所有 UI 必須遵循 [docs/ECOCO_DESIGN.md](docs/ECOCO_DESIGN.md)，關鍵約束：
+所有 UI 必須遵循 [docs/design/DESIGN_SYSTEM.md](docs/design/DESIGN_SYSTEM.md)，關鍵約束：
 
 - **Buddy 必須出現在每一頁**（全身／縮圖／對話泡泡至少一種）
 - **禁止功能語言**：「回收、投遞、掃描、任務、KPI」不得出現在用戶可見文字
-- **禁止工程師語言**：「Phase 2、即將推出、SDK 接管」不得露出
+- **禁止工程師語言**：「Phase、Sprint、Milestone、SDK、TBD、TODO、即將推出」不得露出在用戶可見 UI（dev comment 可用）
 - HP → 精神；潔淨度 → 清爽；進化 → 變身
 - 主色：`#FF5000`（橘）、`#060E9F`（藍）；頁面底色：`#FAE0B8`（奶油膚）
 - 字體：Noto Sans TC（中文優先）
@@ -41,7 +66,7 @@ eco-buddy/
 
 ## Brief 核心原則（2026-05-27 PM 定稿）
 
-> 完整 Brief：[docs/pm_decisions_20260527/ECO_Buddy_UI改版_Brief.md](docs/pm_decisions_20260527/ECO_Buddy_UI改版_Brief.md)
+> 完整 Brief：[docs/briefs/UI_REDESIGN_BRIEF.md](docs/briefs/UI_REDESIGN_BRIEF.md)
 
 1. **Buddy 是一個生命，不是一個 App** — 判斷準則：這個設計會讓 Buddy 更像活著嗎？
 2. **動機是「對 Buddy 好」，不是「完成任務」** — 所有功能語言翻譯成 Buddy 世界語言
@@ -66,7 +91,7 @@ eco-buddy/
 | 完成 | 一起做到 |
 | 圖鑑 | 夥伴日誌 |
 
-> 完整對照表：[docs/pm_decisions_20260527/ECO_Buddy_文案對照表.md](docs/pm_decisions_20260527/ECO_Buddy_文案對照表.md)
+> 完整對照表：[docs/design/COPY_TABLE.md](docs/design/COPY_TABLE.md)
 
 ## Change Management
 
@@ -76,3 +101,5 @@ eco-buddy/
 - `/opsx:apply` — 實作 change 中的任務
 - `/opsx:archive` — 歸檔已完成的 change
 - `/opsx:explore` — 探索 / 分析模式
+
+**何時開 change**：任何會改動 `docs/` 規範或新增頁面流程的工作，先用 `/opsx:propose` 建 change。單純套版型修文案可直接動。
