@@ -5,7 +5,7 @@
 | 角色 | 30 秒上手 | 必讀（順序） | 補充 |
 |------|----------|-------------|------|
 | **PM / CEO** | [onboarding/FOR_PM.md](onboarding/FOR_PM.md) | [decisions/CURRENT.md](decisions/CURRENT.md) → [briefs/UI_REDESIGN_BRIEF.md](briefs/UI_REDESIGN_BRIEF.md) | — |
-| **前端工程師** | [onboarding/FOR_FRONTEND.md](onboarding/FOR_FRONTEND.md) | [design/DESIGN_SYSTEM.md](design/DESIGN_SYSTEM.md) → [design/UI_SPEC.md](design/UI_SPEC.md) | [design/GAME_MECHANICS.md](design/GAME_MECHANICS.md) |
+| **前端工程師**（@shangchian） | [onboarding/FOR_FRONTEND.md](onboarding/FOR_FRONTEND.md) | [design/DESIGN_SYSTEM.md](design/DESIGN_SYSTEM.md) → [design/UI_SPEC.md](design/UI_SPEC.md) | [design/GAME_MECHANICS.md](design/GAME_MECHANICS.md) |
 | **後端工程師** | [onboarding/FOR_BACKEND.md](onboarding/FOR_BACKEND.md) | [design/GAME_MECHANICS.md](design/GAME_MECHANICS.md) → [decisions/CURRENT.md](decisions/CURRENT.md) | [product/USER_FLOW.md](product/USER_FLOW.md) |
 | **UI/UX 設計師** | — | [decisions/CURRENT.md](decisions/CURRENT.md) → [design/DESIGN_SYSTEM.md](design/DESIGN_SYSTEM.md) | [design/COPY_TABLE.md](design/COPY_TABLE.md) |
 | **窗口設計師（動畫對接）** | [onboarding/FOR_LIAISON_DESIGNER.md](onboarding/FOR_LIAISON_DESIGNER.md) | [animation/ANIMATION_BRIEF.md](animation/ANIMATION_BRIEF.md) → [animation/ANIMATION_LIST.md](animation/ANIMATION_LIST.md) | — |
@@ -27,7 +27,7 @@
 |------|------|---------|
 | `decisions/` | PM 所有定案決策 | PM |
 | `design/` | 設計系統、頁面規格、文案規則、**GAME_MECHANICS.md（所有數值）** | 設計師、前端、後端 |
-| `product/` | 使用者流程、對話文案、FAQ | PM、設計師 |
+| `product/` | 使用者流程、對話文案、FAQ、**ROADMAP.md（合作階段）** | PM、設計師 |
 | `animation/` | 動畫需求清單與發案規格 | 動畫師 |
 | `briefs/` | PM 核心原則與改版方向 | PM、設計師 |
 | `archive/` | 歷史版本，只讀不改 | — |
@@ -54,8 +54,8 @@
 
 ## 動畫外包協作
 
-**進 repo 的角色**：PM、UI/UX 設計師（你）、前端、後端、窗口設計師（對接外包用）
-**不進 repo**：外包 Rive 動畫師
+**進 repo 的角色**：PM、UI/UX 設計師（@chiamei-ui）、前端（@shangchian）、後端、窗口設計師（@idahsueh-cmd，對接外包用）
+**不進 repo**：外包 Rive 動畫師（Anastasiia，試作中）
 
 ### 動畫工作流
 
