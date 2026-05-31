@@ -8,7 +8,7 @@
 | **前端工程師**（@shangchian） | [onboarding/FOR_FRONTEND.md](onboarding/FOR_FRONTEND.md) | [design/DESIGN_SYSTEM.md](design/DESIGN_SYSTEM.md) → [design/UI_SPEC.md](design/UI_SPEC.md) | [design/GAME_MECHANICS.md](design/GAME_MECHANICS.md) |
 | **後端工程師** | [onboarding/FOR_BACKEND.md](onboarding/FOR_BACKEND.md) | [design/GAME_MECHANICS.md](design/GAME_MECHANICS.md) → [decisions/CURRENT.md](decisions/CURRENT.md) | [product/USER_FLOW.md](product/USER_FLOW.md) |
 | **UI/UX 設計師** | — | [decisions/CURRENT.md](decisions/CURRENT.md) → [design/DESIGN_SYSTEM.md](design/DESIGN_SYSTEM.md) | [design/COPY_TABLE.md](design/COPY_TABLE.md) |
-| **窗口設計師（動畫對接）** | [onboarding/FOR_LIAISON_DESIGNER.md](onboarding/FOR_LIAISON_DESIGNER.md) | [animation/ANIMATION_BRIEF.md](animation/ANIMATION_BRIEF.md) → [animation/ANIMATION_LIST.md](animation/ANIMATION_LIST.md) | — |
+| **窗口設計師（動畫對接）** | [onboarding/FOR_LIAISON_DESIGNER.md](onboarding/FOR_LIAISON_DESIGNER.md) | [animation/ANIMATION_BRIEF.md](animation/ANIMATION_BRIEF.md) → [animation/ANIMATION_LIST.md](animation/ANIMATION_LIST.md) → [animation/NAMING.md](animation/NAMING.md) → [animation/ROADMAP.md](animation/ROADMAP.md) | — |
 
 ---
 

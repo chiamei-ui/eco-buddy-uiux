@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**ECO BUDDY** — ECOCO App 內的養成遊戲模式。玩家透過現實回收、補充站消費等行為養育 Buddy（虛擬角色），Buddy 有精神／清爽／心情三個狀態值。
+**ECO BUDDY** — ECOCO App 內的養成遊戲模式。玩家透過現實回收、補充站消費等行為養育 Buddy（虛擬角色），Buddy 有體力／潔淨／心情三個狀態值。
 
 > 舊 Rive 動畫預覽工具計畫已封存至 `archive/rive-plan/`，程式碼封存至 `archive/rive-previewer/`。
 
@@ -12,34 +12,16 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Architecture
 
+完整目錄說明見 [@docs/README.md](docs/README.md)。
+
 ```
 eco-buddy/
-├── archive/               # 封存的舊計畫，不修改也不引用為現行依據
-├── docs/
-│   ├── README.md          # 所有角色的入口地圖（從這裡開始）
-│   ├── decisions/
-│   │   └── CURRENT.md     # PM 決策唯一寫入點（最高優先）
-│   ├── design/
-│   │   ├── DESIGN_SYSTEM.md  # 設計規範（色彩/字型/元件，唯一來源）
-│   │   ├── UI_SPEC.md        # 各頁面 UI 規格
-│   │   ├── COPY_TABLE.md     # 文案對照表
-│   │   └── DESIGN_NOTES.md   # 設計細節補充
-│   ├── product/
-│   │   ├── USER_FLOW.md      # 使用者流程圖
-│   │   ├── STAT_DIALOGUE.md  # 對話框文案
-│   │   └── FAQ.md
-│   ├── animation/
-│   │   ├── ANIMATION_LIST.md
-│   │   └── ANIMATION_BRIEF.md
-│   ├── briefs/
-│   │   └── UI_REDESIGN_BRIEF.md  # PM 8 條核心原則
-│   └── archive/           # 已過時，不作業
-├── openspec/
-│   ├── changes/           # 進行中的 change proposal
-│   └── specs/             # 已歸檔規格
-├── character/             # 設計師角色素材，唯讀參考
-├── reference/             # 外部參考資料，唯讀
-└── assets/                # 設計資源
+├── archive/      # 封存舊計畫，不引用
+├── docs/         # 所有規格文件（README.md 為導覽入口）
+├── openspec/     # change proposals & 規格
+├── character/    # 角色素材，唯讀
+├── reference/    # 外部參考，唯讀
+└── assets/       # 設計資源
 ```
 
 ## 文件優先順序（衝突時）
@@ -58,7 +40,7 @@ eco-buddy/
 - **Buddy 必須出現在每一頁**（全身／縮圖／對話泡泡至少一種）
 - **禁止功能語言**：「回收、投遞、掃描、任務、KPI」不得出現在用戶可見文字
 - **禁止工程師語言**：「Phase、Sprint、Milestone、SDK、TBD、TODO、即將推出」不得露出在用戶可見 UI（dev comment 可用）
-- HP → 精神；潔淨度 → 清爽；進化 → 變身
+- HP → 體力；潔淨度 → 潔淨；進化 → 變身
 - 主色：`#FF5000`（橘）、`#060E9F`（藍）；頁面底色：`#FAE0B8`（奶油膚）
 - 字體：Noto Sans TC（中文優先）
 - 按鈕：CTA 用 `rounded-full`，容器用 `rounded-2xl`
@@ -84,8 +66,8 @@ eco-buddy/
 | 回收 / 掃碼 | 帶食物回家 / 給 Buddy |
 | 任務 | 今日陪伴 |
 | 點數 | 點數（保留，不改為愛心）|
-| HP | 精神 |
-| 潔淨度 | 清爽 |
+| HP | 體力 |
+| 潔淨度 | 潔淨 |
 | 進化 | 變身 |
 | 角色 / 寵物 | Buddy |
 | 完成 | 一起做到 |
