@@ -14,7 +14,7 @@
 
 **完成項目**:
 - Rive Editor 版本號與 Runtime 版本號確認
-- 命名手冊 v1.0 發送與確認（見 [docs/animation/NAMING.md](../animation/NAMING.md)）
+- 命名手冊 v1.0 發送與確認（見 [NAMING.md](NAMING.md)）
 - 試用合約簽署
 
 ---
