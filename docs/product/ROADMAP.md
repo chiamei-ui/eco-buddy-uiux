@@ -1,6 +1,6 @@
 # ECO Buddy × Rive 動畫系統 — 合作階段說明
 
-**Owner**: PM  
+**Owner**: 窗口設計師 @idahsueh-cmd（狀態更新）/ PM @andrewtainan（節點推進決策）  
 **最後更新**: 2026-05-31  
 **說明**: 本文件描述 ECO Buddy Rive 動畫外包合作的三個節點，供所有 repo 成員了解目前進度與各階段範疇。
 
@@ -14,7 +14,7 @@
 
 **完成項目**:
 - Rive Editor 版本號與 Runtime 版本號確認
-- 命名手冊 v1.0 發送與確認（見 [docs/design/NAMING.md](../design/NAMING.md)）
+- 命名手冊 v1.0 發送與確認（見 [docs/animation/NAMING.md](../animation/NAMING.md)）
 - 試用合約簽署
 
 ---

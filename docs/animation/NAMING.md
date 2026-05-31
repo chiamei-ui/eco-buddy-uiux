@@ -2,7 +2,7 @@
 
 **版本 / Version**: v1.0  
 **對應 xlsx**: `ecoco-private/naming/ECOCO_naming_manual_v1_0_bilingual.xlsx`  
-**Owner**: 窗口設計師（主寫）/ 前端工程師 @shangchian（技術格式確認）  
+**Owner**: 窗口設計師 @idahsueh-cmd（主寫）/ 前端工程師 @shangchian（技術格式確認）  
 **Commit prefix**: `[anim]`
 
 ---
