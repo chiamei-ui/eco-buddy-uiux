@@ -1,7 +1,7 @@
 ## ADDED Requirements
 
-### Requirement: ROADMAP.md 存在於 docs/product/
-`docs/product/ROADMAP.md` SHALL 存在，列出 ECO Buddy Rive 動畫系統的三個合作節點：Phase 0B（對齊期）、Phase 1（試作期）、正式合約（P2 以後），各含範疇說明與現況標記。
+### Requirement: ROADMAP.md 存在於 docs/animation/
+`docs/animation/ROADMAP.md` SHALL 存在，列出 ECO Buddy Rive 動畫系統的三個合作節點：Phase 0B（對齊期）、Phase 1（試作期）、正式合約（P2 以後），各含範疇說明與現況標記。
 
 #### Scenario: 新成員了解專案目前進度
 - **WHEN** 新加入的工程師或設計師開啟 ROADMAP.md

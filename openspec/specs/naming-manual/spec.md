@@ -1,11 +1,11 @@
 ## ADDED Requirements
 
-### Requirement: NAMING.md 存在於 docs/design/
-`docs/design/NAMING.md` SHALL 存在，內容完整對應 `ecoco-private/naming/ECOCO_naming_manual_v1_0_bilingual.xlsx` v1.0，包含核心參數、Slot Boolean、Event Trigger 三個命名清單。
+### Requirement: NAMING.md 存在於 docs/animation/
+`docs/animation/NAMING.md` SHALL 存在，內容完整對應 `ecoco-private/naming/ECOCO_naming_manual_v1_0_bilingual.xlsx` v1.0，包含核心參數、Slot Boolean、Event Trigger 三個命名清單。
 
 #### Scenario: 前端查閱命名規格
 - **WHEN** 前端工程師（@shangchian）查閱 Rive 串接命名
-- **THEN** 可直接在 `docs/design/NAMING.md` 找到完整命名清單，無需開啟 xlsx
+- **THEN** 可直接在 `docs/animation/NAMING.md` 找到完整命名清單，無需開啟 xlsx
 
 #### Scenario: git diff 追蹤命名異動
 - **WHEN** NAMING.md 有任何欄位被修改並 commit
