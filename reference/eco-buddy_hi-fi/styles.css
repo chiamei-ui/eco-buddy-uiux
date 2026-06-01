@@ -938,12 +938,6 @@ img,svg{display:block;}
   background:#fff;border:1px solid var(--border);border-radius:16px;
   padding:10px 10px 8px;text-align:center;position:relative;
 }
-.bag-cell .use-btn{
-  display:block;width:100%;margin-top:8px;
-  background:var(--ecoco-orange);color:#fff;
-  font-size:11px;font-weight:800;
-  padding:6px 0;border-radius:999px;
-}
 .bag-cell .emoji{font-size:36px;line-height:1;margin:6px 0;}
 .bag-cell .name{font-size:11px;font-weight:700;color:#333;}
 .bag-cell .timer{font-family:var(--font-en);font-size:9px;color:#999;margin-top:2px;}
@@ -1305,3 +1299,131 @@ img,svg{display:block;}
 
 /* dispenser button big rounds */
 .tap-area{cursor:pointer;-webkit-tap-highlight-color:transparent;}
+
+/* ───── P4 · IAP 商品（月底衝刺禮包 + 月度通行證） ───── */
+
+/* 月底衝刺禮包 hero banner */
+.p4-sprint-hero{
+  margin:8px 18px 4px;
+  background:linear-gradient(130deg,#FF5000 0%,#FF8C00 100%);
+  border-radius:20px;padding:16px;color:#fff;
+  display:flex;align-items:flex-start;gap:14px;
+  cursor:pointer;box-shadow:0 8px 24px rgba(255,80,0,0.28);
+  transition:transform .15s;
+}
+.p4-sprint-hero:active{transform:scale(.97);}
+.p4-sprint-hero .sprint-icon{font-size:36px;flex:0 0 auto;line-height:1;margin-top:2px;}
+.p4-sprint-hero .sprint-body{flex:1;min-width:0;}
+.p4-sprint-hero .sprint-tag{
+  display:inline-block;background:rgba(255,255,255,0.22);
+  font-size:10px;font-weight:800;letter-spacing:.08em;
+  padding:3px 8px;border-radius:6px;margin-bottom:5px;
+}
+.p4-sprint-hero h3{font-size:16px;font-weight:900;line-height:1.2;}
+.p4-sprint-hero .sprint-brief{font-size:11px;opacity:.88;margin-top:3px;line-height:1.4;}
+.p4-sprint-hero .sprint-price{font-size:15px;font-weight:900;margin-top:6px;font-family:var(--font-en);}
+.p4-sprint-hero .sprint-cd{
+  flex:0 0 auto;background:rgba(255,255,255,0.18);
+  border-radius:12px;padding:8px 10px;text-align:center;min-width:52px;
+}
+.p4-sprint-hero .sprint-cd b{display:block;font-size:20px;font-weight:900;font-family:var(--font-en);line-height:1;}
+.p4-sprint-hero .sprint-cd span{font-size:9px;font-weight:700;opacity:.85;display:block;margin-top:2px;}
+.p4-sprint-hero.purchased{
+  background:linear-gradient(130deg,#aaa 0%,#888 100%);
+  box-shadow:none;cursor:default;
+}
+
+/* 月度通行證 card */
+.p4-pass-row{
+  margin:4px 18px 8px;
+  background:linear-gradient(130deg,#FFFBEC 0%,#FFF5CC 100%);
+  border:1.5px solid #FFCE00;border-radius:18px;
+  padding:14px 16px;display:flex;align-items:center;gap:12px;
+  cursor:pointer;transition:transform .15s;
+}
+.p4-pass-row:active{transform:scale(.97);}
+.p4-pass-row .pass-icon{font-size:28px;flex:0 0 auto;}
+.p4-pass-row .pass-body{flex:1;min-width:0;}
+.p4-pass-row .pass-body h4{font-size:14px;font-weight:900;color:#1a1a1a;}
+.p4-pass-row .pass-body .pass-desc{font-size:11px;color:#666;margin-top:2px;line-height:1.4;}
+.p4-pass-row .pass-price{
+  font-family:var(--font-en);font-weight:900;font-size:15px;
+  color:#060E9F;flex:0 0 auto;
+}
+.p4-pass-row.active{
+  background:linear-gradient(130deg,#FFF3B0 0%,#FFE55C 100%);
+  cursor:default;
+}
+.p4-pass-row .pass-active-badge{
+  background:#060E9F;color:#fff;
+  font-size:10px;font-weight:800;
+  padding:4px 9px;border-radius:7px;flex:0 0 auto;
+}
+
+/* 商品詳情 bottom sheet */
+.product-detail-sheet{
+  position:absolute;inset:0;z-index:60;
+  background:rgba(0,0,0,0.5);
+  display:flex;align-items:flex-end;
+  animation:fade-in .18s;
+}
+.product-detail-inner{
+  width:100%;background:#fff;
+  border-radius:24px 24px 0 0;
+  padding:8px 0 0;
+  max-height:88%;overflow-y:auto;
+  animation:slide-up .32s cubic-bezier(.16,1,.3,1);
+}
+.product-detail-inner::-webkit-scrollbar{width:0;}
+.product-detail-grip{
+  width:36px;height:4px;background:#E5E7EB;
+  border-radius:2px;margin:0 auto 14px;
+}
+.product-detail-head{
+  display:flex;align-items:center;gap:14px;
+  padding:0 20px 16px;
+  border-bottom:1px solid var(--border);
+}
+.product-detail-head .d-icon{
+  font-size:38px;width:64px;height:64px;
+  background:var(--gray-bg);border-radius:16px;
+  display:flex;align-items:center;justify-content:center;
+  flex:0 0 auto;
+}
+.product-detail-head h3{font-size:17px;font-weight:900;color:#1a1a1a;}
+.product-detail-head .d-sub{font-size:12px;color:#888;margin-top:3px;line-height:1.4;}
+.product-detail-section{padding:14px 20px 0;}
+.product-detail-section-title{
+  font-size:10px;font-weight:800;color:#888;letter-spacing:.08em;
+  text-transform:uppercase;margin-bottom:10px;
+}
+.detail-item-row{
+  display:flex;align-items:center;gap:12px;
+  padding:10px 0;border-bottom:1px solid var(--border);
+}
+.detail-item-row:last-child{border-bottom:none;}
+.detail-item-row .di-icon{
+  font-size:20px;width:38px;height:38px;
+  background:var(--gray-bg);border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  flex:0 0 auto;
+}
+.detail-item-row .di-body{flex:1;min-width:0;}
+.detail-item-row .di-name{font-size:13px;font-weight:700;color:#222;}
+.detail-item-row .di-sub{font-size:11px;color:#888;margin-top:1px;line-height:1.3;}
+.product-detail-footer{
+  padding:14px 20px 28px;
+  display:flex;align-items:center;gap:12px;
+  border-top:1px solid var(--border);
+  margin-top:4px;
+}
+.product-detail-footer .price-tag{
+  font-family:var(--font-en);font-size:22px;font-weight:900;color:#060E9F;
+}
+.product-detail-footer .buy-cta{
+  flex:1;background:var(--ecoco-orange);color:#fff;
+  border:none;border-radius:999px;padding:14px;
+  font-size:15px;font-weight:800;cursor:pointer;
+  transition:opacity .15s;
+}
+.product-detail-footer .buy-cta:active{opacity:.85;}

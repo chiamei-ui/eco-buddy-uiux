@@ -1473,11 +1473,6 @@ const P9Bag = ({ setScreen, state, dispatch }) => {
   const tools = state.tools;
   const filtered = tools.filter((t) => tab === 'free' ? !t.permanent : tab === 'paid' ? t.permanent : true);
 
-  const handleUse = (toolId) => {
-    dispatch({ type: 'USE_TOOL', tool: toolId });
-    setScreen('p9b');
-  };
-
   return (
     <div className="screen p9">
       <StatusBar />
@@ -1519,7 +1514,6 @@ const P9Bag = ({ setScreen, state, dispatch }) => {
           }
               <span className="effect-tag" style={{ color: toolEffectMap[t.id].color }}>{toolEffectMap[t.id].label}</span>
               {t.count > 1 && <span className="badge">{t.count}</span>}
-              <button className="use-btn" onClick={() => handleUse(t.id)}>使用</button>
             </div>
         )}
         </div>
@@ -1558,26 +1552,6 @@ const P9Bag = ({ setScreen, state, dispatch }) => {
 
 };
 
-/* ═══════════════ P9b · Tool use animation ═══════════════ */
-const P9bToolAnim = ({ setScreen }) => {
-  useEffect(() => {
-    const t = setTimeout(() => setScreen('p1'), 2000);
-    return () => clearTimeout(t);
-  }, [setScreen]);
-  return (
-    <div className="screen p1" style={{ background: "url('assets/bg.svg') center / cover no-repeat, #FFE9B7" }}>
-      <StatusBar />
-      <NavBack onClick={() => setScreen('p9')} />
-      <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
-        <div style={{ position: 'relative' }}>
-          <TurtleImg className="touched" />
-          <div className="value-rise" style={{ top: -10, left: 90, color: '#FFB000' }}>+15 心情</div>
-          <SpeechBubble text="哇～新玩具！" style={{ top: 30, right: -10 }} />
-        </div>
-      </div>
-    </div>);
-
-};
 
 /* ═══════════════ P10 · Month picker (overlay on P7) ═══════════════ */
 const P10Picker = ({ setScreen, state, dispatch, onClose }) => {
@@ -1895,7 +1869,7 @@ Object.assign(window, {
   P1Home, P2Scan, P2bResult,
   P4Shop, P5Missions, P6Ads, P7Dex,
   P8Profile, P8Faq,
-  P9Bag, P9bToolAnim,
+  P9Bag,
   P10Picker, P11Pack, P11PurchaseModal, P11SuccessModal,
   PNormalHome,
   ShopPurchaseModal, ShopSuccessModal, PointsSourceSheet,

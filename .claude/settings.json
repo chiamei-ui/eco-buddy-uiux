@@ -6,8 +6,6 @@
       "Write(archive/**)",
       "Edit(character/**)",
       "Write(character/**)",
-      "Edit(reference/**)",
-      "Write(reference/**)",
       "Edit(docs/archive/**)",
       "Write(docs/archive/**)"
     ]

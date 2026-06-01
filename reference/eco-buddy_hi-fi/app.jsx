@@ -200,7 +200,6 @@ const SCREENS = [
   { code:'P7', id:'p7',    label:'夥伴日誌' },
   { code:'P6', id:'p6',    label:'廣告 → 開箱', section:'道具' },
   { code:'P9', id:'p9',    label:'道具背包' },
-  { code:'P9b',id:'p9b',   label:'道具使用動畫' },
   { code:'P10',id:'p10',   label:'月末選擇彈窗', section:'收藏' },
   { code:'P11',id:'p11',   label:'更換次數包', phase:'partial' },
   { code:'P8', id:'p8',    label:'我的', section:'帳號' },
@@ -320,7 +319,6 @@ const App = () => {
       case 'p7':  return <P7Dex setScreen={setScreen} state={state} dispatch={dispatch} onOpenPicker={() => setDexPickerOpen(true)} />;
       case 'p8':  return <P8Profile setScreen={setScreen} state={state} />;
       case 'p9':  return <P9Bag setScreen={setScreen} state={state} dispatch={dispatch} />;
-      case 'p9b': return <P9bToolAnim setScreen={setScreen} />;
       case 'p10': return <P7Dex setScreen={setScreen} state={state} dispatch={dispatch} onOpenPicker={() => setDexPickerOpen(true)} />;
       case 'p11': return <P11Pack setScreen={setScreen} />;
       case 'p12': return <P12RefillResult setScreen={setScreen} state={state} dispatch={dispatch} payload={screenPayload} />;
