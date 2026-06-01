@@ -691,18 +691,19 @@ const P2bResult = ({ setScreen, dispatch, tweaks = {}, setTweak = () => {} }) =>
           <>
             <div className="section-title">本次獲得食物</div>
             <div className="gain-list gain-list--single">
-              <div className="gain"><div className="emoji">🌭</div><div className="qty">×6</div><div className="label">熱狗堡</div></div>
+              <div className="gain"><div className="emoji">🌭</div><div className="gain-name-block"><div className="label">熱狗堡</div><div className="qty">×6</div></div></div>
             </div>
           </>
         )}
-        <div className="hp-preview" style={{ display: 'flex', gap: 8, padding: 0, background: 'none' }}>
-          <div style={{ flex: 1, background: '#FFF3F0', borderRadius: 12, padding: '10px 12px', display: 'flex', flexDirection: 'column', gap: 2 }}>
-            <span style={{ fontSize: 12, color: '#888', fontWeight: 700 }}>❤ Buddy 體力</span>
-            <span style={{ fontSize: 20, fontWeight: 900, color: '#FF4D63', fontFamily: 'var(--font-en)' }}>+{HP_GAIN}</span>
+        <div className="section-title">Buddy 狀態更新</div>
+        <div className="stat-row">
+          <div className="stat-card stat-card--hp">
+            <span className="stat-label">❤ Buddy 體力</span>
+            <span className="stat-val">+{HP_GAIN}</span>
           </div>
-          <div style={{ flex: 1, background: '#EEF1FF', borderRadius: 12, padding: '10px 12px', display: 'flex', flexDirection: 'column', gap: 2 }}>
-            <span style={{ fontSize: 12, color: '#888', fontWeight: 700 }}>✨ Buddy 潔淨</span>
-            <span style={{ fontSize: 20, fontWeight: 900, color: '#1F3DBF', fontFamily: 'var(--font-en)' }}>+{CLEAN_GAIN}</span>
+          <div className="stat-card stat-card--clean">
+            <span className="stat-label">✨ Buddy 潔淨</span>
+            <span className="stat-val">+{CLEAN_GAIN}</span>
           </div>
         </div>
         <div className="next-week-preview">
@@ -1943,9 +1944,9 @@ const FAQ_DATA = [
   {
     cat: 'Buddy 養成', id: 'buddy',
     items: [
-      { q: 'Buddy 的體力怎麼補充？', a: '每天帶食物回家給 Buddy 吃就能補充體力。不同食材補充的體力不同——杯子 +1、寶特瓶／鋁罐／牛奶瓶 +2、大顆電池 +10、其他電池 +5。體力越高，Buddy 越活潑！' },
-      { q: 'Buddy 的潔淨怎麼提升？', a: '到補充站帶洗劑回家，每 NT$10 能讓 Buddy 同時 +10 體力、+10 潔淨。日常使用沐浴或梳子道具也能讓 Buddy 立刻潔淨起來。' },
-      { q: '怎麼讓 Buddy 心情變好？', a: '每天摸摸 Buddy（每日上限 10 次，每次 +1）、給 Buddy 玩玩具（逗貓棒、小球 +15）、完成今日陪伴，都能讓 Buddy 心情變好。' },
+      { q: 'Buddy 的體力怎麼補充？', a: '兩個方式都能補充體力：帶食物回家時 Buddy 立刻獲得體力（杯子 +1、瓶罐 +2；1號/2號乾電池/9V方形乾電池 +10，其他電池 +5）；把食物格的食物拖給 Buddy 吃，普通食物 +10，稀有食物（每月第四週）+15。體力越高，Buddy 越活潑！' },
+      { q: 'Buddy 的潔淨怎麼提升？', a: '帶食物回家（每個 +2 潔淨）和去補充站消費（每 NT$10 +10 潔淨，沒有上限）都能幫 Buddy 保持潔淨。注意：帶回來的東西如果被退件，每件會扣 Buddy 潔淨 -1；電池機只計體力，不給潔淨。使用梳子道具也能直接提升 Buddy 潔淨。' },
+      { q: '怎麼讓 Buddy 心情變好？', a: '每天摸摸 Buddy（每日上限 10 次，每次 +1）、給 Buddy 玩玩具（逗貓棒、小球、零食都能讓 Buddy 開心，梳子也會順帶提振心情）、完成今日陪伴，都能讓 Buddy 心情變好。' },
       { q: '為什麼 Buddy 的狀態會自己下降？', a: 'Buddy 想你了。三個狀態每天會各自慢慢下降一些，記得常回來看看牠。' },
       { q: 'Buddy 什麼時候可以變身？', a: '當 Buddy 三個狀態都達到一定數值，就會觸發變身機會。每隻 Buddy 有自己的變身條件，可在夥伴日誌查看目前進度。6 月小海龜共有 9 個樣子可以遇見。' },
       { q: 'Buddy 體力歸零會怎樣？', a: 'Buddy 會進入睡眠狀態，等你帶食物回家給牠補充體力就能喚醒。Buddy 不會消失，放心！' },
@@ -1955,7 +1956,8 @@ const FAQ_DATA = [
     cat: '食物與道具', id: 'items',
     items: [
       { q: '食物和道具有什麼差別？', a: '食物補充體力，每週能帶回家；道具有特定效果（提升潔淨、心情等），效果更強但數量有限，用完可在商店補充。' },
-      { q: '為什麼食物有「這週」配額？', a: '每種食物每週上限 5 個，週三中午 12:00 重置。週日中午 12:00 起會預告下週 Buddy 想吃什麼，可以提前期待。配額用完當週仍能補充 Buddy 體力，只是不會再產生食物。' },
+      { q: '為什麼食物有「這週」配額？', a: '每種食物每週上限 5 個，週三中午 12:00 重置。週日中午 12:00 起會預告下週 Buddy 想吃什麼，可以提前期待。配額用完後繼續帶食物回家，Buddy 仍能直接補充體力和潔淨，只是不會再多一個食物格。補充站消費不會產生食物，食物只在帶東西回家時才有。' },
+      { q: '食物有什麼效果？', a: '食物只補充體力。普通食物（W1–W3）每個 +10 體力，稀有食物（每月第四週 W4）每個 +15 體力。潔淨和心情不受食物影響——想提升這兩個狀態，可以去補充站消費或使用道具。' },
       { q: '道具會過期嗎？', a: '看來源而定。Buddy 的小驚喜（看廣告獲得）24 小時後消失；商店購買的消耗道具有 7 天有效期，可帶到下個月；裝扮與音樂盒類道具則永久綁定帳號，不會消失。剩餘時間會顯示在道具背包的卡片上，快過期時 Buddy 也會提醒你！' },
       { q: '道具可以一次用很多個嗎？', a: '每次只能用一個道具，但效果可以累積。依序對 Buddy 使用即可。' },
       { q: '一天可以看幾次廣告領道具？', a: '每天最多 5 次。連續 3 次沒抽到零食，第 4 次會保底給你一個。' },
@@ -1977,7 +1979,7 @@ const FAQ_DATA = [
     items: [
       { q: '怎麼取得 ECOCO 點數？', a: '帶食物回家給 Buddy、在補充站消費、完成今日陪伴，都能獲得 ECOCO 點數。' },
       { q: 'ECOCO 點數會過期嗎？', a: '詳細內容請至 ECOCO 官網常見問題查看。' },
-      { q: '商店可以買什麼？', a: '商店分為食物、道具、裝飾、音樂盒四個分類。每個分類內，上方為「現金商品」（如月底衝刺禮包、月度通行證、限定裝飾），下方為「點數商品」（用 ECOCO 點數購買的食物與道具）。點數與現金不互換、不互買，每張卡片都會標示「點數」或「NT$」。' },
+      { q: '商店可以買什麼？', a: '商店分為食物、道具、裝飾、禮包四個分類。食物與道具用 ECOCO 點數購買；裝飾與禮包（月底衝刺禮包、月度通行證等）用現金購買。點數與現金不互換、不互買，每張卡片都會標示「點數」或「NT$」。' },
       { q: '月底衝刺禮包是什麼？', a: '每月 22–28 日上架，幫 Buddy 在月底前衝一波狀態與日誌收藏的限時禮包，商店頁會置頂顯示倒數天數。' },
     ],
   },
