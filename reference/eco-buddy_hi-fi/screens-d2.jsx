@@ -7,7 +7,7 @@ const REFILL_SESSION = {
   emoji: '🧺',
   capacity: '500 ml',
   hp: 20,
-  clean: 25,
+  clean: 20,
   location: '台南 仁德補充站',
   time: '2026.06.15 14:32',
 };
@@ -27,7 +27,7 @@ const P12RefillResult = ({ setScreen, state, dispatch, payload }) => {
   };
 
   useEffect(() => {
-    // 沒有金流：僅把現實購買回饋的 HP/潔淨度寫入 state
+    // 沒有金流：僅把現實購買回饋的 體力/潔淨寫入 state
     dispatch({ type: 'REFILL_RESULT', hpGain: session.hp, cleanGain: session.clean });
     const t = setTimeout(() => setPhase('done'), 1600);
     return () => clearTimeout(t);
@@ -37,8 +37,8 @@ const P12RefillResult = ({ setScreen, state, dispatch, payload }) => {
   useEffect(() => {
     if (phase === 'done') {
       setHappy(true);
-      addRise(`+${session.hp} 精神`, { x: 40, y: 50 }, '#FF4D63');
-      setTimeout(() => addRise(`+${session.clean} 清爽`, { x: 140, y: 70 }, '#1F3DBF'), 250);
+      addRise(`+${session.hp} 體力`, { x: 40, y: 50 }, '#FF4D63');
+      setTimeout(() => addRise(`+${session.clean} 潔淨`, { x: 140, y: 70 }, '#1F3DBF'), 250);
       const t = setTimeout(() => setHappy(false), 2500);
       return () => clearTimeout(t);
     }
@@ -57,8 +57,12 @@ const P12RefillResult = ({ setScreen, state, dispatch, payload }) => {
             style={{ background: '#fff', borderRadius: 20, padding: '24px 22px', width: '78%', maxWidth: 300 }}
           >
             <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 12, color: '#1a1a1a' }}>換算說明</div>
-            <div style={{ fontSize: 13, lineHeight: 2, color: '#555' }}>
-              <div>NT$10 = 精神 +10 + 清爽 +10</div>
+            <div style={{ fontSize: 13, lineHeight: 1.9, color: '#555' }}>
+              <div style={{ fontWeight: 700, marginBottom: 4 }}>補充站消費</div>
+              <div>每消費 NT$10 = 體力 +10 ・ 潔淨 +10</div>
+              <div style={{ fontSize: 11, color: '#888', marginTop: 8, lineHeight: 1.5 }}>
+                註：體力與潔淨為兩條獨立帳本，數值相同也分開記錄。
+              </div>
             </div>
             <button
               onClick={() => setShowInfo(false)}
@@ -89,11 +93,11 @@ const P12RefillResult = ({ setScreen, state, dispatch, payload }) => {
           </div>
           <div className="gain-preview">
             <div className="g hp">
-              <span className="lbl">精神</span>
+              <span className="lbl">體力</span>
               <b>+{session.hp}</b>
             </div>
             <div className="g clean">
-              <span className="lbl">清爽</span>
+              <span className="lbl">潔淨</span>
               <b>+{session.clean}</b>
             </div>
           </div>

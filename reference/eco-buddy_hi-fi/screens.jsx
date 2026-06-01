@@ -5,11 +5,11 @@ const OB_STEPS = [
   { refKey: 'turtleWrapRef', pad: 24, radius: 99,
     title: '本月夥伴✨',            text: '點一下，看牠會怎麼反應' },
   { refKey: 'statRowRef',    pad: 6, padRight: 22, padBottom: 16, radius: 14,
-    title: '精神・清爽・心情',      text: '點圖示看夥伴目前的狀態' },
+    title: '體力・潔淨・心情',      text: '點圖示看夥伴目前的狀態' },
   { refKey: 'modeBtnRef',    pad: 8,  radius: 20, textRight: true,
     title: '切換一般模式',          text: '點這裡可以回到 ECOCO 的一般功能' },
   { refKey: 'scanBtnRef',    pad: 8,  radius: 24, textRight: true,
-    title: '帶食物回家 📦',         text: '回收後，掃描機台螢幕條碼，有機會換到食物哦！' },
+    title: '帶食物回家 📦',         text: '投瓶後對準機台螢幕條碼，就有機會換到食物哦！' },
   { refKey: 'adsBtnRef',     pad: 8,  radius: 24, textRight: true,
     title: '免費道具 🎁',           text: '看廣告領道具，每天最多 5 次' },
   { refKey: 'dockTabsRef',   pad: 6,  radius: 16,
@@ -199,12 +199,23 @@ const P1Home = ({ state, dispatch, setScreen, dragManager, payload, showTutorial
     return () => clearTimeout(t);
   }, []);
 
-  // tap turtle = touch reaction (and check special states)
-  const handleTurtleTap = () => {
+  // tap turtle = touch reaction，每次心情 +1，每日上限 10（#2）
+  const TOUCH_DAILY_CAP = 10;
+  const [touchCount, setTouchCount] = useState(0);
+  const handleTurtleTap = (e) => {
     setTouched(true);
     const special = specialState(state.stats);
+    const overCap = touchCount >= TOUCH_DAILY_CAP;
+    if (!overCap && special !== 'dying') {
+      dispatch({ type: 'TOUCH' });
+      setTouchCount(c => c + 1);
+      const rect = e?.currentTarget?.getBoundingClientRect();
+      const pos = rect ? { x: rect.width * 0.55, y: rect.height * 0.25 } : null;
+      addRise('+1 心情', pos, '#FFB000');
+    }
     const text = special === 'legendary' ? DIALOGUES.special.legendary
                : special === 'dying'     ? DIALOGUES.special.dying
+               : overCap                 ? '今天已經摸夠多次了～明天再來！'
                : touchDialogue();
     showBubble({ text, error: special === 'dying' });
     setTimeout(() => setTouched(false), 1000);
@@ -221,7 +232,7 @@ const P1Home = ({ state, dispatch, setScreen, dragManager, payload, showTutorial
   };
 
   // tap stat pip → show stat value + dialogue
-  const STAT_LABELS = { hp: '精神', clean: '清爽', mood: '心情' };
+  const STAT_LABELS = { hp: '體力', clean: '潔淨', mood: '心情' };
   const handleStatTap = (kind) => {
     const value = state.stats[kind];
     showBubble({ text: `${STAT_LABELS[kind]} ${value}%　${statDialogue(kind, value)}`, error: statLevel(value)==='low' });
@@ -242,7 +253,7 @@ const P1Home = ({ state, dispatch, setScreen, dragManager, payload, showTutorial
       // good drop → feeding mini animation in place
       setEating(true);
       dispatch({ type: 'FEED', food: payload.id, hpGain: 5 });
-      addRise('+5 精神', pos);
+      addRise('+5 體力', pos);
       showBubble({ text: '好好吃！謝謝你～', error: false });
       setTimeout(() => setEating(false), 1500);
     } else if (payload.kind === 'tool') {
@@ -256,11 +267,16 @@ const P1Home = ({ state, dispatch, setScreen, dragManager, payload, showTutorial
         showBubble({ text: DIALOGUES.err.moodMax, error: true });
         return;
       }
-      // drop tool item → use animation
+      // drop tool item → use animation；雙效果道具序列浮起兩個 rise
       setEating(true);
       dispatch({ type: 'USE_TOOL', tool });
-      const gainMap = { feather: '+15 心情', brush: '+15 清爽', ball: '+15 心情', snack: '+15 精神' };
-      addRise(gainMap[tool] || '+5', pos, tool === 'brush' ? '#1F3DBF' : tool === 'snack' ? '#FF4D63' : '#FFB000');
+      const gainSeq = {
+        feather: [{ txt: '+15 心情', color: '#FFB000' }],
+        brush:   [{ txt: '+15 潔淨', color: '#1F3DBF' }, { txt: '+10 心情', color: '#FFB000' }],
+        ball:    [{ txt: '+15 心情', color: '#FFB000' }],
+        snack:   [{ txt: '+15 體力', color: '#FF4D63' }, { txt: '+15 心情', color: '#FFB000' }],
+      }[tool] || [{ txt: '+5', color: '#FFB000' }];
+      gainSeq.forEach((g, i) => setTimeout(() => addRise(g.txt, pos, g.color), i * 250));
       showBubble({ text: '好玩好玩！', error: false });
       setTimeout(() => setEating(false), 1500);
     } else if (payload.kind === 'locked') {
@@ -432,9 +448,9 @@ const P1Home = ({ state, dispatch, setScreen, dragManager, payload, showTutorial
 
 const toolEffectMap = {
   feather: { label: '+15 心情', color: '#FFB000' },
-  brush:   { label: '+15 清爽', color: '#1F3DBF' },
+  brush:   { label: '+15 潔淨 ・ +10 心情', color: '#1F3DBF' },
   ball:    { label: '+15 心情', color: '#FFB000' },
-  snack:   { label: '+15 精神', color: '#FF4D63' },
+  snack:   { label: '+15 體力 ・ +15 心情', color: '#FF4D63' },
 };
 
 /* food cell with drag */
@@ -480,7 +496,7 @@ const FoodCell = ({ food, dragManager, onDrop, showBubble, pulsing }) => {
       {food.state !== 'locked' && (
         <div className="food-label">
           <span className="name">{food.name}</span>
-          <span className="effect-tag" style={{ color: '#FF4D63' }}>+5 精神</span>
+          <span className="effect-tag" style={{ color: '#FF4D63' }}>+5 體力</span>
         </div>
       )}
     </div>);
@@ -593,18 +609,19 @@ const P2bResult = ({ setScreen, dispatch, tweaks = {}, setTweak = () => {} }) =>
   const quotaFull = tweaks.p2bQuotaFull || false;
   const [showInfo, setShowInfo] = useState(false);
 
-  const handleFeed = () => {
-    dispatch({ type: 'COLLECT_BATCH', quotaFull: false });
-    setScreen('p3');
-  };
+  // mock 本批投瓶組成 — PET 12 個 / 電池 3 顆 / 退瓶 0
+  // 體力：PET 12*2 + 電池 3*5 = 39；潔淨：投入 12*2 - 退瓶 0*1 = 24（電池機不給潔淨）
+  const HP_GAIN = 39;
+  const CLEAN_GAIN = 24;
+  const POINTS_GAIN = 18;
 
   const handleStore = () => {
-    dispatch({ type: 'COLLECT_BATCH', quotaFull: false });
+    dispatch({ type: 'COLLECT_BATCH', quotaFull: false, hpGain: HP_GAIN, cleanGain: CLEAN_GAIN, pointsGain: POINTS_GAIN });
     setScreen('p1', { foodStored: true });
   };
 
   const handleComplete = () => {
-    dispatch({ type: 'COLLECT_BATCH', quotaFull: true });
+    dispatch({ type: 'COLLECT_BATCH', quotaFull: true, hpGain: HP_GAIN, cleanGain: CLEAN_GAIN, pointsGain: POINTS_GAIN });
     setScreen('p1');
   };
 
@@ -620,12 +637,22 @@ const P2bResult = ({ setScreen, dispatch, tweaks = {}, setTweak = () => {} }) =>
             onClick={e => e.stopPropagation()}
             style={{ background: '#fff', borderRadius: 20, padding: '24px 22px', width: '78%', maxWidth: 300 }}
           >
-            <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 12, color: '#1a1a1a' }}>精神換算說明</div>
-            <div style={{ fontSize: 13, lineHeight: 2, color: '#555' }}>
-              <div>杯子 → 精神 +1</div>
-              <div>寶特瓶 / 鋁罐 / 牛奶瓶 → 精神 +2</div>
-              <div>電池（1號/2號）→ 精神 +10</div>
-              <div>其餘電池 → 精神 +5</div>
+            <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 12, color: '#1a1a1a' }}>換算說明</div>
+            <div style={{ fontSize: 13, lineHeight: 1.85, color: '#555' }}>
+              <div style={{ fontWeight: 700, color: '#1a1a1a', marginBottom: 2 }}>體力（收瓶機）</div>
+              <div>PP 杯子 → 體力 +1 / 個</div>
+              <div>PET 寶特瓶 / 鋁罐 / HDPE 牛奶瓶 → 體力 +2 / 個</div>
+              <div style={{ marginBottom: 6 }}>退瓶不計入體力</div>
+              <div style={{ fontWeight: 700, color: '#1a1a1a', marginBottom: 2 }}>體力（電池機）</div>
+              <div>1 號 / 2 號 / 9V 乾電池 → 體力 +10 / 顆</div>
+              <div style={{ marginBottom: 6 }}>3–6 號乾電池 → 體力 +5 / 顆</div>
+              <div style={{ fontWeight: 700, color: '#1a1a1a', marginBottom: 2 }}>潔淨（收瓶機）</div>
+              <div>投入 → 潔淨 +2 / 個</div>
+              <div>退瓶 → 潔淨 -1 / 個</div>
+              <div style={{ marginBottom: 6 }}>電池機不影響潔淨</div>
+              <div style={{ fontSize: 11, color: '#888', marginTop: 4, lineHeight: 1.5 }}>
+                註：體力 / 潔淨 / ECOCO 點數為三條獨立帳本，由同一次投瓶分別計算。
+              </div>
             </div>
             <button
               onClick={() => setShowInfo(false)}
@@ -649,7 +676,8 @@ const P2bResult = ({ setScreen, dispatch, tweaks = {}, setTweak = () => {} }) =>
         <div className="recycle-stats">
           <div><b>12</b><span>投入瓶罐</span></div>
           <div><b>3</b><span>投電池數</span></div>
-          <div><b>+18</b><span>ECOCO 點數</span></div>
+          <div><b>0</b><span>退瓶數</span></div>
+          <div><b>+{POINTS_GAIN}</b><span>ECOCO 點數</span></div>
         </div>
       </div>
 
@@ -658,7 +686,7 @@ const P2bResult = ({ setScreen, dispatch, tweaks = {}, setTweak = () => {} }) =>
           <div style={{ marginBottom: 12 }}>
             <div className="section-title" style={{ color: '#888' }}>本週食物已領完</div>
             <div style={{ fontSize: 13, color: '#aaa', lineHeight: 1.5, marginTop: 4 }}>
-              本週食物已領滿，Buddy 的精神 +18！
+              本週食物已領滿，Buddy 的體力 +{HP_GAIN} ・ 潔淨 +{CLEAN_GAIN}！
             </div>
           </div>
         ) : (
@@ -669,19 +697,25 @@ const P2bResult = ({ setScreen, dispatch, tweaks = {}, setTweak = () => {} }) =>
             </div>
           </>
         )}
-        <div className="hp-preview">
-          <span className="label">❤ Buddy 精神預計補充</span>
-          <span className="gain">+15</span>
+        <div className="hp-preview" style={{ display: 'flex', gap: 8, padding: 0, background: 'none' }}>
+          <div style={{ flex: 1, background: '#FFF3F0', borderRadius: 12, padding: '10px 12px', display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <span style={{ fontSize: 12, color: '#888', fontWeight: 700 }}>❤ Buddy 體力</span>
+            <span style={{ fontSize: 20, fontWeight: 900, color: '#FF4D63', fontFamily: 'var(--font-en)' }}>+{HP_GAIN}</span>
+          </div>
+          <div style={{ flex: 1, background: '#EEF1FF', borderRadius: 12, padding: '10px 12px', display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <span style={{ fontSize: 12, color: '#888', fontWeight: 700 }}>✨ Buddy 潔淨</span>
+            <span style={{ fontSize: 20, fontWeight: 900, color: '#1F3DBF', fontFamily: 'var(--font-en)' }}>+{CLEAN_GAIN}</span>
+          </div>
         </div>
         <div className="next-week-preview">
           <div className="nwp-badge">下週預告</div>
           <div className="nwp-body">
             <div className="nwp-title">🥦 花椰菜</div>
-            <div className="nwp-hp">每份讓 Buddy +8 精神</div>
+            <div className="nwp-hp">每份讓 Buddy +8 體力</div>
           </div>
           <div className="nwp-time">
             <div className="nwp-time-label">開搶時間</div>
-            <div className="nwp-time-val">週一 00:00</div>
+            <div className="nwp-time-val">週三 12:00</div>
           </div>
         </div>
       </div>
@@ -690,64 +724,15 @@ const P2bResult = ({ setScreen, dispatch, tweaks = {}, setTweak = () => {} }) =>
         {quotaFull ? (
           <button className="btn-primary" onClick={handleComplete}>完成</button>
         ) : (
-          <>
-            <button className="btn-primary" onClick={handleFeed}>馬上餵 Buddy</button>
-            <button className="btn-ghost" onClick={handleStore}>先放食物欄</button>
-          </>
+          <button className="btn-primary" onClick={handleStore}>先放食物欄</button>
         )}
       </div>
     </div>);
 
 };
 
-/* ═══════════════ P3 · Feeding sequence ═══════════════ */
-const P3Feeding = ({ setScreen, dispatch }) => {
-  const stages = [
-  { name: 'Idle', t: 300 },
-  { name: '轉身 0.3s', t: 300 },
-  { name: '伸手 0.5s', t: 500 },
-  { name: '拿取 0.4s', t: 400 },
-  { name: '吃入 0.5s', t: 500 },
-  { name: '滿足 0.8s', t: 800 }];
-
-  const [idx, setIdx] = useState(0);
-  useEffect(() => {
-    if (idx >= stages.length) {
-      dispatch({ type: 'FEED', hpGain: 15 });
-      setTimeout(() => setScreen('p1'), 600);
-      return;
-    }
-    const t = setTimeout(() => setIdx((i) => i + 1), stages[idx].t);
-    return () => clearTimeout(t);
-  }, [idx]);
-
-  const turtleClass = idx === 1 ? 'touched' :
-  idx >= 2 && idx <= 4 ? 'eating' : '';
-
-  return (
-    <div className="screen p1" style={{ background: "url('assets/bg.svg') center / cover no-repeat, #FFE9B7" }}>
-      <StatusBar />
-      <NavBack onClick={() => setScreen('p1')} />
-      <div className="p3-stage-name">餵食中 · {stages[Math.min(idx, stages.length - 1)].name}</div>
-      <div style={{ flex: 1, position: 'relative', display: 'flex', alignItems: 'flex-end', justifyContent: 'center', paddingBottom: 160 }}>
-        <div style={{ position: 'relative' }}>
-          {idx === 2 && <div style={{ position: 'absolute', top: -20, left: 90, fontSize: 46, animation: 'rise .8s ease-out' }}>🌭</div>}
-          {idx === 3 && <div style={{ position: 'absolute', top: 80, left: 50, fontSize: 36 }}>🌭</div>}
-          <TurtleImg className={turtleClass} />
-          {idx === 5 &&
-          <>
-              <div className="value-rise" style={{ top: -20, left: 110, color: '#FF4D63' }}>+15 精神</div>
-              <SpeechBubble text="超滿足～謝謝！" style={{ top: 0, right: -20 }} />
-            </>
-          }
-        </div>
-      </div>
-      <div style={{ position: 'absolute', bottom: 30, left: 18, right: 18 }}>
-        <button className="btn-primary" style={{ width: '100%' }} onClick={() => {setIdx(0);}}>再餵一份</button>
-      </div>
-    </div>);
-
-};
+/* P3 餵食動畫頁已依 #22（2026-05-29）廢除：餵食改在 P1 原地播放。
+   殘留路由與側欄入口同步移除。 */
 
 /* ═══════════════ P4 · Shop ═══════════════ */
 const P4Shop = ({ setScreen, state, dispatch }) => {
@@ -763,18 +748,18 @@ const P4Shop = ({ setScreen, state, dispatch }) => {
 
   const items = {
     food: [
-    { id: 'hotdog-pack', emoji: '🌭', name: '熱狗堡 ×5', desc: '+5 精神/個', price: 50, ribbon: '熱賣', currency: 'heart' },
-    { id: 'salad', emoji: '🥬', name: '蔬菜 ×5', desc: '+5 精神/個', price: 60, currency: 'heart' },
-    { id: 'berry', emoji: '🍓', name: '莓果 ×3', desc: '+5 精神/個', price: 80, soldOut: true, currency: 'heart' },
-    { id: 'fish', emoji: '🐟', name: '小魚 ×5', desc: '+5 精神/個', price: 90, currency: 'heart' },
+    { id: 'hotdog-pack', emoji: '🌭', name: '熱狗堡 ×5', desc: '+5 體力/個', price: 50, ribbon: '熱賣', currency: 'heart' },
+    { id: 'salad', emoji: '🥬', name: '蔬菜 ×5', desc: '+5 體力/個', price: 60, currency: 'heart' },
+    { id: 'berry', emoji: '🍓', name: '莓果 ×3', desc: '+5 體力/個', price: 80, soldOut: true, currency: 'heart' },
+    { id: 'fish', emoji: '🐟', name: '小魚 ×5', desc: '+5 體力/個', price: 90, currency: 'heart' },
     { id: 'sprint-pack', emoji: '🎁', name: '月底衝刺禮包', desc: '限時限量豪華組', price: 199, currency: 'cash' },
     { id: 'monthly-pass', emoji: '🎫', name: '月度通行證', desc: '30 天進階陪伴', price: 149, currency: 'cash' }],
 
     tool: [
     { id: 'feather', emoji: '🪶', name: '逗貓棒', desc: '心情 +15', price: 30, currency: 'heart' },
-    { id: 'brush', emoji: '🪮', name: '梳子', desc: '清爽 +15、心情 +10', price: 35, currency: 'heart' },
+    { id: 'brush', emoji: '🪮', name: '梳子', desc: '潔淨 +15、心情 +10', price: 35, currency: 'heart' },
     { id: 'ball', emoji: '⚾', name: '小球', desc: '心情 +15', price: 25, currency: 'heart' },
-    { id: 'snack', emoji: '🍪', name: '零食', desc: '精神 +15、心情 +15', price: 20, currency: 'heart' }],
+    { id: 'snack', emoji: '🍪', name: '零食', desc: '體力 +15、心情 +15', price: 20, currency: 'heart' }],
 
     decor: [
     { id: 'star-hat', emoji: '⭐', name: '星辰帽', desc: '限定裝飾 · 閃閃發光', price: 299, currency: 'cash' },
@@ -1086,7 +1071,7 @@ const P5Missions = ({ setScreen, state, dispatch }) => {
   const handleClaim = (m) => {
     setClaimedIds(prev => [...prev, m.id]);
     dispatch({ type: 'CLAIM_MISSION' });
-    setToast('一起做到！心情 +3 ✨');
+    setToast('一起做到！食物 ×1 ・ 心情 +3 ✨');
   };
 
   const sortedMissions = [...missionData].sort((a, b) => {
@@ -1129,10 +1114,10 @@ const P5Missions = ({ setScreen, state, dispatch }) => {
         <div style={{ padding: '40px 20px', textAlign: 'center', color: '#888' }}>
           <div style={{ fontSize: 48, opacity: .4, marginBottom: 10 }}>🌱</div>
           <h3 style={{ fontSize: 14, color: '#222', marginBottom: 4 }}>
-            {tab === 'week' ? '本週陪伴任務' : tab === 'month' ? '月度陪伴任務' : '成就'}
+            {tab === 'week' ? '本週陪伴' : tab === 'month' ? '月度陪伴' : '成就'}
           </h3>
           <p style={{ fontSize: 12 }}>
-            {tab === 'week' ? '本週陪伴任務，敬請期待！' : tab === 'month' ? '月度陪伴任務，敬請期待！' : '成就系統，敬請期待！'}
+            {tab === 'week' ? 'Buddy 還在準備本週的陪伴清單～' : tab === 'month' ? 'Buddy 還在規劃本月份的長線陪伴～' : 'Buddy 還在為你收集這份成就～'}
           </p>
         </div>
       ) : (
@@ -1228,12 +1213,11 @@ const P6Ads = ({ setScreen, state, dispatch }) => {
             <div className="reward-card">
               <div className="emoji">{reward.emoji}</div>
               <h3>{reward.name}</h3>
-              <p>{reward.id === 'snack' ? '拖到夥伴身上 精神 +15、心情 +15' : reward.id === 'brush' ? '拖到夥伴身上 清爽 +15、心情 +10' : '拖到夥伴身上 心情 +15'}</p>
+              <p>{reward.id === 'snack' ? '拖到夥伴身上 體力 +15、心情 +15' : reward.id === 'brush' ? '拖到夥伴身上 潔淨 +15、心情 +10' : '拖到夥伴身上 心情 +15'}</p>
             </div>
           </div>
           <div className="reward-actions">
-            <button className="btn-primary" onClick={() => {dispatch({ type: 'ADD_TOOL', tool: reward });setScreen('p3');}}>立即使用</button>
-            <button className="btn-ghost" style={{ color: '#fff', borderColor: 'rgba(255,255,255,0.4)' }} onClick={() => {dispatch({ type: 'ADD_TOOL', tool: reward });setScreen('p9');}}>放入背包</button>
+            <button className="btn-primary" onClick={() => {dispatch({ type: 'ADD_TOOL', tool: reward });setScreen('p9');}}>放入背包</button>
           </div>
         </div>
       }
@@ -1243,13 +1227,16 @@ const P6Ads = ({ setScreen, state, dispatch }) => {
 
 /* ═══════════════ P7 · Dex ═══════════════ */
 const P7Dex = ({ setScreen, state, dispatch, onOpenPicker }) => {
+  const lockedCode = state.lockedMonthCode;
   const months = [
   { m: 1, filled: true, icon: '🐢', code: '07' },
   { m: 2, filled: true, icon: '🐢', code: '13' },
   { m: 3, filled: true, icon: '🐢', code: '17' },
   { m: 4, filled: true, icon: '🐢', code: '26' },
   { m: 5, filled: true, icon: '🐢', code: '08' },
-  { m: 6, filled: false, current: true },
+  lockedCode
+    ? { m: 6, filled: true, icon: '🐢', code: lockedCode, current: true }
+    : { m: 6, filled: false, current: true },
   { m: 7, locked: true },
   { m: 8, locked: true },
   { m: 9, locked: true },
@@ -1288,15 +1275,23 @@ const P7Dex = ({ setScreen, state, dispatch, onOpenPicker }) => {
       <div className="section-h">
         <div className="section-h-row">
           <span>年度收藏</span>
-          <span className="alert-hint" onClick={() => onOpenPicker && onOpenPicker()}>本月角色尚未選入收藏夾 ›</span>
+          {!state.lockedMonthCode && (
+            <span className="alert-hint" onClick={() => onOpenPicker && onOpenPicker()}>本月角色尚未選入收藏夾 ›</span>
+          )}
+          {state.lockedMonthCode && state.swapLeft > 0 && (
+            <span className="alert-hint" onClick={() => onOpenPicker && onOpenPicker()} style={{ color: '#1A7A46' }}>已鎖入本月夥伴 · 還可更換 {state.swapLeft} 次 ›</span>
+          )}
+          {state.lockedMonthCode && state.swapLeft <= 0 && (
+            <span className="alert-hint" onClick={() => setScreen('p11')} style={{ color: '#999', cursor: 'pointer' }}>已達本月更換上限 · 購買更換次數包 ›</span>
+          )}
         </div>
       </div>
       <div className="year-strip" ref={stripRef}>
         {months.map((mo) =>
-        <div key={mo.m} ref={mo.current ? currentCellRef : null} className={`year-cell ${mo.filled ? 'filled' : ''} ${mo.current ? 'current' : ''} ${mo.locked ? 'locked' : ''}`} onClick={() => handleCellClick(mo)} style={(mo.filled || mo.current) ? { cursor: 'pointer' } : undefined}>
+        <div key={mo.m} ref={mo.current ? currentCellRef : null} className={`year-cell ${mo.filled ? 'filled' : ''} ${mo.current && !mo.filled ? 'current' : ''} ${mo.locked ? 'locked' : ''}`} onClick={() => handleCellClick(mo)} style={(mo.filled || mo.current) ? { cursor: 'pointer' } : undefined}>
             <span className="month">{String(mo.m).padStart(2, '0')}</span>
             {mo.filled && <><span className="icon">{mo.icon}</span><span style={{ fontSize: 13, opacity: .55 }}>#{mo.code}</span></>}
-            {mo.current && <span style={{ fontSize: 42, marginTop: 6 }}>?</span>}
+            {mo.current && !mo.filled && <span style={{ fontSize: 42, marginTop: 6 }}>?</span>}
             {mo.locked && <span style={{ fontSize: 33, marginTop: 6, opacity: .18 }}>?</span>}
           </div>
         )}
@@ -1378,19 +1373,19 @@ const P8Profile = ({ setScreen, state }) => {
     title: '遊戲功能',
     en: 'GAME',
     items: [
-    { icon: '🐢', label: '角色狀態', sub: `精神 ${state.stats.hp} · 清爽 ${state.stats.clean} · 心情 ${state.stats.mood}`, go: 'p1' },
-    { icon: '📖', label: '圖鑑進度', sub: `已解鎖 ${state.dexStates.filter((s) => s.unlocked).length} / 9 種型態`, go: 'p7' },
+    { icon: '🐢', label: '夥伴狀態', sub: `體力 ${state.stats.hp} · 潔淨 ${state.stats.clean} · 心情 ${state.stats.mood}`, go: 'p1' },
+    { icon: '📖', label: '夥伴日誌', sub: `已解鎖 ${state.dexStates.filter((s) => s.unlocked).length} / 9 種樣子`, go: 'p7' },
     { icon: '🎒', label: '道具背包', sub: `${state.tools.length} 個道具`, go: 'p9' },
-    { icon: '✅', label: '今日陪伴', sub: '每日任務 3 個進行中', go: 'p5' },
+    { icon: '✅', label: '今日陪伴', sub: '每日陪伴 3 項進行中', go: 'p5' },
     { icon: '🛒', label: '商店', sub: `點數 ${state.points.toLocaleString()}`, go: 'p4' },
-    { icon: 'pt', label: '點數明細', sub: '本月 +382 · 回收 12 次', action: () => setShowPointSrc(true) }]
+    { icon: 'pt', label: '點數明細', sub: '本月 +382 · 帶食物回家 12 次', action: () => setShowPointSrc(true) }]
 
   },
   {
     title: '使用教學',
     en: 'GUIDE',
     items: [
-    { icon: '🌱', label: '新手引導', sub: '認識三維屬性、餵食、進化', go: 'p0a' },
+    { icon: '🌱', label: '新手引導', sub: '認識體力／潔淨／心情、陪 Buddy 吃飯、變身', go: 'p0a' },
     { icon: '💬', label: '常見問題', sub: '更換次數、過期道具、課金', go: 'p8-faq' }]
 
   }];
@@ -1414,8 +1409,8 @@ const P8Profile = ({ setScreen, state }) => {
         </div>
 
         <div className="stats-row">
-          <div className="stat-card"><b>238</b><div className="label">總回收次數</div></div>
-          <div className="stat-card"><b>156</b><div className="label">餵食次數</div></div>
+          <div className="stat-card"><b>238</b><div className="label">帶食物回家</div></div>
+          <div className="stat-card"><b>156</b><div className="label">陪 Buddy 吃飯</div></div>
           <div className="stat-card"><b>4.2 <span style={{ fontSize: 11 }}>kg</span></b><div className="label">減碳量</div></div>
         </div>
 
@@ -1461,7 +1456,7 @@ const P8Profile = ({ setScreen, state }) => {
             切換到一般模式（ECOCO 主 App）
           </button>
           <div style={{ textAlign: 'center', marginTop: 14, fontSize: 11, color: '#999' }}>
-            ECO BUDDY v1.0 · Phase 1<br />© 2026 ECOCO 凡立橙股份有限公司
+            ECO BUDDY v1.0<br />© 2026 ECOCO 凡立橙股份有限公司
           </div>
         </div>
 
@@ -1588,6 +1583,8 @@ const P9bToolAnim = ({ setScreen }) => {
 const P10Picker = ({ setScreen, state, dispatch, onClose }) => {
   const [selected, setSelected] = useState(null);
   const states = state.dexStates;
+  const isFirstLock = !state.lockedMonthCode;
+  const capExceeded = !isFirstLock && state.swapLeft <= 0;
 
   const handleClose = () => {
     if (onClose) onClose();
@@ -1601,9 +1598,16 @@ const P10Picker = ({ setScreen, state, dispatch, onClose }) => {
           <h3>選擇你的 6 月夥伴</h3>
           <p>從本月觸發過的狀態中挑一個鎖入年度圖鑑</p>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 8 }}>
-            <p style={{ fontSize: 12, color: 'var(--ecoco-orange)', fontWeight: 700, margin: 0 }}>尚可更換 {state.swapLeft} 次</p>
+            <p style={{ fontSize: 12, color: capExceeded ? '#D9382A' : 'var(--ecoco-orange)', fontWeight: 700, margin: 0 }}>
+              {capExceeded ? '已達本月更換上限' : isFirstLock ? '首次鎖入免費' : `尚可更換 ${state.swapLeft} 次`}
+            </p>
             <button onClick={() => { handleClose(); setScreen('p11'); }} style={{ fontSize: 11, fontWeight: 800, color: 'var(--ecoco-blue)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, textDecoration: 'underline' }}>增加更換次數 →</button>
           </div>
+          {capExceeded && (
+            <div style={{ marginTop: 10, padding: '10px 12px', background: '#FFF3F0', borderRadius: 10, fontSize: 12, color: '#D9382A', lineHeight: 1.5 }}>
+              本月更換次數已用完。可購買「更換次數包」繼續調整，或等下個月重置。
+            </div>
+          )}
         </div>
         <div className="grid">
           {states.map((s) =>
@@ -1623,7 +1627,7 @@ const P10Picker = ({ setScreen, state, dispatch, onClose }) => {
         </div>
         <div className="actions">
           <button className="later" onClick={handleClose}>稍後再選</button>
-          <button className="confirm" disabled={!selected} onClick={() => {dispatch({ type: 'LOCK_DEX', code: selected });handleClose();}}>確認鎖入</button>
+          <button className="confirm" disabled={!selected || capExceeded} onClick={() => {dispatch({ type: 'LOCK_DEX', code: selected });handleClose();}}>{capExceeded ? '次數已用完' : '確認鎖入'}</button>
         </div>
       </div>
     </div>);
@@ -1764,19 +1768,19 @@ const FAQ_DATA = [
   {
     cat: 'Buddy 養成', id: 'buddy',
     items: [
-      { q: 'Buddy 的精神怎麼補充？', a: '每天帶食物回家給 Buddy 吃就能補充精神。不同食材補充的精神不同——杯子 +1、寶特瓶／鋁罐／牛奶瓶 +2、大顆電池 +10、其他電池 +5。精神越高，Buddy 越活潑！' },
-      { q: 'Buddy 的清爽怎麼提升？', a: '到補充站帶洗劑回家，每 NT$10 能讓 Buddy 同時 +10 精神、+10 清爽。日常使用沐浴或梳子道具也能讓 Buddy 立刻清爽起來。' },
+      { q: 'Buddy 的體力怎麼補充？', a: '每天帶食物回家給 Buddy 吃就能補充體力。不同食材補充的體力不同——杯子 +1、寶特瓶／鋁罐／牛奶瓶 +2、大顆電池 +10、其他電池 +5。體力越高，Buddy 越活潑！' },
+      { q: 'Buddy 的潔淨怎麼提升？', a: '到補充站帶洗劑回家，每 NT$10 能讓 Buddy 同時 +10 體力、+10 潔淨。日常使用沐浴或梳子道具也能讓 Buddy 立刻潔淨起來。' },
       { q: '怎麼讓 Buddy 心情變好？', a: '每天摸摸 Buddy（每日上限 10 次，每次 +1）、給 Buddy 玩玩具（逗貓棒、小球 +15）、完成今日陪伴，都能讓 Buddy 心情變好。' },
       { q: '為什麼 Buddy 的狀態會自己下降？', a: 'Buddy 想你了。三個狀態每天會各自慢慢下降一些，記得常回來看看牠。' },
-      { q: 'Buddy 什麼時候可以變身？', a: '當 Buddy 三個狀態都達到一定數值，就會觸發變身機會。每隻 Buddy 有自己的變身條件，可在夥伴日誌查看目前進度。Phase 1 小海龜共有 9 個樣子可以遇見。' },
-      { q: 'Buddy 精神歸零會怎樣？', a: 'Buddy 會進入睡眠狀態，等你帶食物回家給牠補充精神就能喚醒。Buddy 不會消失，放心！' },
+      { q: 'Buddy 什麼時候可以變身？', a: '當 Buddy 三個狀態都達到一定數值，就會觸發變身機會。每隻 Buddy 有自己的變身條件，可在夥伴日誌查看目前進度。6 月小海龜共有 9 個樣子可以遇見。' },
+      { q: 'Buddy 體力歸零會怎樣？', a: 'Buddy 會進入睡眠狀態，等你帶食物回家給牠補充體力就能喚醒。Buddy 不會消失，放心！' },
     ],
   },
   {
     cat: '食物與道具', id: 'items',
     items: [
-      { q: '食物和道具有什麼差別？', a: '食物補充精神，每週能帶回家；道具有特定效果（提升清爽、心情等），效果更強但數量有限，用完可在商店補充。' },
-      { q: '為什麼食物有「這週」配額？', a: '每種食物每週上限 5 個，週三中午 12:00 重置。週日中午 12:00 起會預告下週 Buddy 想吃什麼，可以提前期待。配額用完當週仍能補充 Buddy 精神，只是不會再產生食物。' },
+      { q: '食物和道具有什麼差別？', a: '食物補充體力，每週能帶回家；道具有特定效果（提升潔淨、心情等），效果更強但數量有限，用完可在商店補充。' },
+      { q: '為什麼食物有「這週」配額？', a: '每種食物每週上限 5 個，週三中午 12:00 重置。週日中午 12:00 起會預告下週 Buddy 想吃什麼，可以提前期待。配額用完當週仍能補充 Buddy 體力，只是不會再產生食物。' },
       { q: '道具會過期嗎？', a: '看來源而定。Buddy 的小驚喜（看廣告獲得）24 小時後消失；商店購買的消耗道具有 7 天有效期，可帶到下個月；裝扮與音樂盒類道具則永久綁定帳號，不會消失。剩餘時間會顯示在道具背包的卡片上，快過期時 Buddy 也會提醒你！' },
       { q: '道具可以一次用很多個嗎？', a: '每次只能用一個道具，但效果可以累積。依序對 Buddy 使用即可。' },
       { q: '一天可以看幾次廣告領道具？', a: '每天最多 5 次。連續 3 次沒抽到零食，第 4 次會保底給你一個。' },
@@ -1888,7 +1892,7 @@ const PNormalHome = ({ setScreen }) => (
 
 /* ───── Export ───── */
 Object.assign(window, {
-  P1Home, P2Scan, P2bResult, P3Feeding,
+  P1Home, P2Scan, P2bResult,
   P4Shop, P5Missions, P6Ads, P7Dex,
   P8Profile, P8Faq,
   P9Bag, P9bToolAnim,

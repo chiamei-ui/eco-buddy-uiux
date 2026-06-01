@@ -7,6 +7,7 @@ const DEFAULT_STATE = {
   points: 1280,
   adRemaining: 5,
   swapLeft: 3,
+  lockedMonthCode: null, // 本月鎖入的角色 code（#10 月末選擇）
   pity: 1,
   food: [
     { id:'hotdog-w1', name:'熱狗堡', emoji:'🌭', stock:2, state:'has' },
@@ -61,13 +62,18 @@ function stateReducer(state, action){
       return {...state, tools:[...state.tools, {...action.tool, count:1, hoursLeft:24}], adRemaining: Math.max(0, state.adRemaining-1)};
     }
     case 'COLLECT_BATCH':
+      // 三帳本：體力 / 潔淨 / ECOCO 點數 各自獨立由 P2b 帶入
       return {
         ...state,
-        stats: { ...state.stats, hp: Math.min(100, state.stats.hp + 15) },
+        stats: {
+          ...state.stats,
+          hp: Math.min(100, state.stats.hp + (action.hpGain || 0)),
+          clean: Math.min(100, state.stats.clean + (action.cleanGain || 0)),
+        },
         ...(!action.quotaFull && {
           food: state.food.map((f,i) => i<3 ? {...f, stock:f.stock + (i===0?3:i===1?2:1)} : f),
         }),
-        points: state.points + 18,
+        points: state.points + (action.pointsGain || 0),
       };
     case 'BUY':
       return {
@@ -78,7 +84,7 @@ function stateReducer(state, action){
           : [...state.tools.filter(t=>t.id!==action.item.id), {id:action.item.id, name:action.item.name.split(' ')[0], emoji:action.item.emoji, count:(state.tools.find(t=>t.id===action.item.id)?.count||0)+1, hoursLeft:24*7}],
       };
     case 'REFILL_RESULT':
-      // 補充站掃碼只寫入現實購買的 HP / 潔淨度回饋；App 不收取任何點數或現金
+      // 補充站掃碼只寫入現實購買的 體力 / 潔淨 回饋；App 不收取任何點數或現金
       return {
         ...state,
         stats: {
@@ -88,13 +94,43 @@ function stateReducer(state, action){
         },
       };
     case 'LOCK_DEX':
-      return state; // could persist
+      // #10 月末鎖入本月角色 → 寫入 lockedMonthCode，扣 1 次更換次數（首次鎖入免費）
+      return {
+        ...state,
+        lockedMonthCode: action.code,
+        swapLeft: state.lockedMonthCode ? Math.max(0, state.swapLeft - 1) : state.swapLeft,
+      };
     case 'RESET_STATS': return {...state, stats:action.stats};
     case 'SET_STAT': return {...state, stats:{...state.stats, [action.kind]: Math.min(100, Math.max(0, action.value))}};
     case 'SET_STOCK': return {...state, food: state.food.map((f,i)=>({...f, stock:action.stocks[i] ?? f.stock, state:action.stocks[i]===0?(f.state==='locked'?'locked':'low'):f.state}))};
     case 'CLEAR_BAG': return {...state, tools:[]};
+    case 'TOUCH':
+      // #2 觸碰角色：心情 +1，每日上限由 caller (P1Home) 自行追蹤
+      return { ...state, stats: { ...state.stats, mood: Math.min(100, state.stats.mood + 1) } };
+    case 'DECAY': {
+      // #4 衰減：每日 -5%（三維同步），預設 1 天，可由 action.days 指定
+      const days = action.days || 1;
+      const drop = 5 * days;
+      return {
+        ...state,
+        stats: {
+          hp:    Math.max(0, state.stats.hp    - drop),
+          clean: Math.max(0, state.stats.clean - drop),
+          mood:  Math.max(0, state.stats.mood  - drop),
+        },
+      };
+    }
     case 'CLAIM_MISSION':
-      return { ...state, stats: { ...state.stats, mood: Math.min(100, state.stats.mood + 3) } };
+      // #21 日常任務獎勵：食物 ×1 + 心情 +3（食物加在第一個未鎖食物格）
+      return {
+        ...state,
+        stats: { ...state.stats, mood: Math.min(100, state.stats.mood + 3) },
+        food: (() => {
+          const idx = state.food.findIndex(f => f.state !== 'locked');
+          if (idx < 0) return state.food;
+          return state.food.map((f, i) => i === idx ? { ...f, stock: f.stock + 1 } : f);
+        })(),
+      };
     default: return state;
   }
 }
@@ -156,9 +192,8 @@ const SCREENS = [
   { code:'OB', id:'p0a',   label:'新手引導 Overlay', section:'新手引導' },
   { code:'P0', id:'p0',    label:'一般模式-首頁', section:'主流程' },
   { code:'P1', id:'p1',    label:'夥伴首頁 · Hub' },
-  { code:'P2', id:'p2',    label:'掃描 QR Code' },
-  { code:'P2b',id:'p2b',   label:'回收結果頁' },
-  { code:'P3', id:'p3',    label:'餵食動畫流程' },
+  { code:'P2', id:'p2',    label:'機台條碼' },
+  { code:'P2b',id:'p2b',   label:'帶食物回家結果' },
   { code:'P12',id:'p12',   label:'補充站消費結果', section:'補充站 Loop' },
   { code:'P4', id:'p4',    label:'商店', section:'底部 Tab' },
   { code:'P5', id:'p5',    label:'今日陪伴' },
@@ -188,8 +223,8 @@ const ScreenNav = ({ screen, setScreen }) => (
 /* ───────── Push notification entry mock ───────── */
 const PushDemo = ({ setScreen }) => {
   const samples = [
-    { trigger:'精神低', msg:'Buddy 想念你了… 快帶食物回家給我 😫' },
-    { trigger:'清爽低', msg:'Buddy 想洗個澡 🛁 帶我去補充站沖一沖！' },
+    { trigger:'體力低', msg:'Buddy 想念你了… 快帶食物回家給我 😫' },
+    { trigger:'潔淨低', msg:'Buddy 想洗個澡 🛁 帶我去補充站沖一沖！' },
     { trigger:'心情低', msg:'Buddy 有點寂寞 😞 快來陪我玩一玩！' },
     { trigger:'月底倒數', msg:'5 天後結算 · 還沒選 6 月夥伴喔' },
     { trigger:'道具即將過期', msg:'⏰ 你的逗貓棒還剩 6 小時！' },
@@ -279,7 +314,6 @@ const App = () => {
       case 'p1':  return <P1Home state={state} dispatch={dispatch} setScreen={setScreen} dragManager={dragManager} payload={screenPayload} />;
       case 'p2':  return <P2Scan setScreen={setScreen} dispatch={dispatch} tweaks={tweaks} setTweak={setTweak} />;
       case 'p2b': return <P2bResult setScreen={setScreen} dispatch={dispatch} state={state} tweaks={tweaks} setTweak={setTweak} />;
-      case 'p3':  return <P3Feeding setScreen={setScreen} dispatch={dispatch} />;
       case 'p4':  return <P4Shop setScreen={setScreen} state={state} dispatch={dispatch} />;
       case 'p5':  return <P5Missions setScreen={setScreen} state={state} dispatch={dispatch} />;
       case 'p6':  return <P6Ads setScreen={setScreen} state={state} dispatch={dispatch} payload={screenPayload} />;
@@ -366,8 +400,8 @@ const InlineTweaks = ({ tweaks, setTweak, setScreen, state, dispatch }) => {
     }}>
       <div style={tweakLabel}>三維數值</div>
       {[
-        { kind:'hp',    label:'精神', color:'#D4251C' },
-        { kind:'clean', label:'清爽', color:'#060E9F' },
+        { kind:'hp',    label:'體力', color:'#D4251C' },
+        { kind:'clean', label:'潔淨', color:'#060E9F' },
         { kind:'mood',  label:'心情', color:'#FFCE00' },
       ].map(({ kind, label, color }) => (
         <div key={kind} style={{marginBottom:8}}>
@@ -406,6 +440,18 @@ const InlineTweaks = ({ tweaks, setTweak, setScreen, state, dispatch }) => {
             {o.label}
           </button>
         ))}
+      </div>
+
+      <div style={{marginTop:10,paddingTop:10,borderTop:'1px solid rgba(255,255,255,0.08)'}}>
+        <div style={tweakLabel}>#4 衰減模擬 · 每日 -5%</div>
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:6}}>
+          <button onClick={()=>dispatch({ type:'DECAY', days:1 })} style={tweakBtn}>-1 天</button>
+          <button onClick={()=>dispatch({ type:'DECAY', days:3 })} style={tweakBtn}>-3 天</button>
+          <button onClick={()=>dispatch({ type:'DECAY', days:7 })} style={tweakBtn}>-7 天</button>
+        </div>
+        <div style={{fontSize:10,color:'rgba(255,255,255,0.3)',marginTop:4,lineHeight:1.4}}>
+          7 天 ≈ 35% 下降，三維低於 30% 會觸發召回推播
+        </div>
       </div>
 
       <div style={{marginTop:10,paddingTop:10,borderTop:'1px solid rgba(255,255,255,0.08)'}}>
