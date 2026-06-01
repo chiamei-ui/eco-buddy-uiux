@@ -9,6 +9,8 @@ const DEFAULT_STATE = {
   swapLeft: 3,
   lockedMonthCode: null, // 本月鎖入的角色 code（#10 月末選擇）
   pity: 1,
+  hasPass: false,
+  sprintPurchased: false,
   food: [
     { id:'hotdog-w1', name:'熱狗堡', emoji:'🌭', stock:2, state:'has' },
     { id:'hotdog-w2', name:'熱狗堡', emoji:'🌭', stock:12, state:'has' },
@@ -76,6 +78,8 @@ function stateReducer(state, action){
         points: state.points + (action.pointsGain || 0),
       };
     case 'BUY':
+      if (action.item.id === 'monthly-pass') return { ...state, hasPass: true };
+      if (action.item.id === 'sprint-pack') return { ...state, sprintPurchased: true };
       return {
         ...state,
         points: Math.max(0, state.points - action.item.price),
@@ -259,7 +263,11 @@ const PushDemo = ({ setScreen }) => {
 const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
   "p2DemoType": "recycle",
   "p2ErrKind": null,
-  "p2bQuotaFull": false
+  "p2bQuotaFull": false,
+  "shopSprint": false,
+  "sprintPrice": null,
+  "passPrice": null,
+  "sprintDaysLeft": null
 }/*EDITMODE-END*/;
 
 const P8_SUBS = new Set(['p8-faq']);
@@ -313,7 +321,7 @@ const App = () => {
       case 'p1':  return <P1Home state={state} dispatch={dispatch} setScreen={setScreen} dragManager={dragManager} payload={screenPayload} />;
       case 'p2':  return <P2Scan setScreen={setScreen} dispatch={dispatch} tweaks={tweaks} setTweak={setTweak} />;
       case 'p2b': return <P2bResult setScreen={setScreen} dispatch={dispatch} state={state} tweaks={tweaks} setTweak={setTweak} />;
-      case 'p4':  return <P4Shop setScreen={setScreen} state={state} dispatch={dispatch} />;
+      case 'p4':  return <P4Shop setScreen={setScreen} state={state} dispatch={dispatch} tweaks={tweaks} />;
       case 'p5':  return <P5Missions setScreen={setScreen} state={state} dispatch={dispatch} />;
       case 'p6':  return <P6Ads setScreen={setScreen} state={state} dispatch={dispatch} payload={screenPayload} />;
       case 'p7':  return <P7Dex setScreen={setScreen} state={state} dispatch={dispatch} onOpenPicker={() => setDexPickerOpen(true)} />;
@@ -459,6 +467,36 @@ const InlineTweaks = ({ tweaks, setTweak, setScreen, state, dispatch }) => {
           onChange={v => setTweak('p2bQuotaFull', v === 'full')}
           options={[{v:'normal',l:'配額未滿'},{v:'full',l:'本週已領完'}]}
         />
+      </div>
+
+      <div style={{marginTop:10,paddingTop:10,borderTop:'1px solid rgba(255,255,255,0.08)'}}>
+        <div style={tweakLabel}>P4 · 月底模式（22–28 日）</div>
+        <Segmented
+          value={tweaks.shopSprint ? 'sprint' : 'normal'}
+          onChange={v => setTweak('shopSprint', v === 'sprint')}
+          options={[{v:'normal',l:'一般'},{v:'sprint',l:'月底 22–28 日'}]}
+        />
+      </div>
+
+      <div style={{marginTop:10,paddingTop:10,borderTop:'1px solid rgba(255,255,255,0.08)'}}>
+        <div style={tweakLabel}>P4 · IAP 後台設定（模擬 CMS）</div>
+        <div style={{fontSize:10,color:'rgba(255,255,255,0.35)',marginBottom:8,lineHeight:1.5}}>
+          以下值模擬後台可動態設定，前端不寫死
+        </div>
+        {[
+          { label:'衝刺禮包 NT$', key:'sprintPrice', def:199 },
+          { label:'通行證 NT$',   key:'passPrice',   def:149 },
+          { label:'衝刺倒數天數', key:'sprintDaysLeft', def:6, min:1, max:7 },
+        ].map(({ label, key, def, min=1, max=9999 }) => (
+          <div key={key} style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:6}}>
+            <span style={{fontSize:11,color:'rgba(255,255,255,0.7)'}}>{label}</span>
+            <input type="number" min={min} max={max}
+              value={tweaks[key] ?? def}
+              onChange={e => setTweak(key, Number(e.target.value))}
+              style={{width:64,background:'rgba(255,255,255,0.08)',border:'1px solid rgba(255,255,255,0.15)',
+                borderRadius:6,color:'#fff',fontSize:12,padding:'4px 6px',textAlign:'right'}} />
+          </div>
+        ))}
       </div>
 
       <div style={{marginTop:10,paddingTop:10,borderTop:'1px solid rgba(255,255,255,0.08)'}}>

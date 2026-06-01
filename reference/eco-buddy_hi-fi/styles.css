@@ -489,7 +489,7 @@ img,svg{display:block;}
 }
 .p2b .hero .meta .dot{width:5px;height:5px;border-radius:50%;background:var(--ecoco-orange);}
 .p2b .recycle-stats{
-  display:grid;grid-template-columns:repeat(3,1fr);gap:8px;
+  display:grid;grid-template-columns:repeat(2,1fr);gap:8px;
   margin-top:12px;
 }
 .p2b .recycle-stats > div{
@@ -514,19 +514,23 @@ img,svg{display:block;}
   display:flex;align-items:center;gap:14px;
   padding:14px 18px;text-align:left;
 }
-.p2b .gain-list--single .gain .emoji{font-size:40px;line-height:1;}
-.p2b .gain-list--single .gain .label{font-size:14px;font-weight:700;color:#333;margin-top:0;}
-.p2b .gain-list--single .gain .qty{font-family:var(--font-en);font-weight:900;color:var(--ecoco-orange);font-size:20px;}
+.p2b .gain-list--single .gain .emoji{font-size:38px;line-height:1;flex-shrink:0;}
+.p2b .gain-list--single .gain .label{font-size:15px;font-weight:700;color:#333;margin-top:0;}
+.p2b .gain-list--single .gain .qty{font-family:var(--font-en);font-weight:800;color:var(--ecoco-orange);font-size:13px;}
+.p2b .gain-row{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:8px;margin-bottom:12px;}
+.p2b .gain-card{background:#fff;border:1px solid #F0E0CE;border-radius:14px;padding:12px 8px;display:flex;flex-direction:column;align-items:center;gap:3px;text-align:center;}
+.p2b .gain-card .gc-emoji{font-size:26px;line-height:1;}
+.p2b .gain-card .gc-label{font-size:10px;font-weight:700;color:#888;margin-top:1px;}
+.p2b .gain-card .gc-val{font-family:var(--font-en);font-size:18px;font-weight:900;color:var(--ecoco-orange);line-height:1.1;}
+.p2b .gain-card--hp{background:#FFF3F0;border-color:#FFD6DD;}
+.p2b .gain-card--hp .gc-val{color:#FF4D63;}
+.p2b .gain-card--clean{background:#EEF1FF;border-color:#C8CFFF;}
+.p2b .gain-card--clean .gc-val{color:#1F3DBF;}
+.p2b .gain-card--locked{background:#F5F5F5;border-color:#E0E0E0;}
+.p2b .gc-val--muted{color:#AAA !important;font-size:12px !important;}
 .p2b .gain .emoji{font-size:32px;}
 .p2b .gain .label{font-size:11px;color:#555;margin-top:2px;}
 .p2b .gain .qty{font-family:var(--font-en);font-weight:900;color:var(--ecoco-orange);font-size:14px;}
-.p2b .hp-preview{
-  display:flex;align-items:center;justify-content:space-between;
-  background:#FFF0F2;border-radius:14px;padding:12px 14px;
-  border:1px solid #FFD6DD;
-}
-.p2b .hp-preview .label{font-size:13px;font-weight:700;color:#B0203A;}
-.p2b .hp-preview .gain{font-family:var(--font-en);font-weight:900;color:var(--hp-red);font-size:22px;}
 
 .p2b .next-week-preview{
   display:flex;align-items:center;gap:10px;

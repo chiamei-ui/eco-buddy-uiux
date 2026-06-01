@@ -680,30 +680,22 @@ const P2bResult = ({ setScreen, dispatch, tweaks = {}, setTweak = () => {} }) =>
       </div>
 
       <div className="result-body">
-        {quotaFull ? (
-          <div style={{ marginBottom: 12 }}>
-            <div className="section-title" style={{ color: '#888' }}>本週食物已領完</div>
-            <div style={{ fontSize: 13, color: '#aaa', lineHeight: 1.5, marginTop: 4 }}>
-              本週食物已領滿，Buddy 的體力 +{HP_GAIN} ・ 潔淨 +{CLEAN_GAIN}！
-            </div>
+        <div className="section-title">本次獲得</div>
+        <div className="gain-row">
+          <div className={`gain-card gain-card--food${quotaFull ? ' gain-card--locked' : ''}`}>
+            {quotaFull
+              ? <><div className="gc-emoji">🔒</div><div className="gc-label">本週食物</div><div className="gc-val gc-val--muted">已領完</div></>
+              : <><div className="gc-emoji">🌭</div><div className="gc-label">熱狗堡</div><div className="gc-val">×5</div></>}
           </div>
-        ) : (
-          <>
-            <div className="section-title">本次獲得食物</div>
-            <div className="gain-list gain-list--single">
-              <div className="gain"><div className="emoji">🌭</div><div className="gain-name-block"><div className="label">熱狗堡</div><div className="qty">×6</div></div></div>
-            </div>
-          </>
-        )}
-        <div className="section-title">Buddy 狀態更新</div>
-        <div className="stat-row">
-          <div className="stat-card stat-card--hp">
-            <span className="stat-label">❤ Buddy 體力</span>
-            <span className="stat-val">+{HP_GAIN}</span>
+          <div className="gain-card gain-card--hp">
+            <div className="gc-emoji">❤</div>
+            <div className="gc-label">Buddy 體力</div>
+            <div className="gc-val">+{HP_GAIN}</div>
           </div>
-          <div className="stat-card stat-card--clean">
-            <span className="stat-label">✨ Buddy 潔淨</span>
-            <span className="stat-val">+{CLEAN_GAIN}</span>
+          <div className="gain-card gain-card--clean">
+            <div className="gc-emoji">✨</div>
+            <div className="gc-label">Buddy 潔淨</div>
+            <div className="gc-val">+{CLEAN_GAIN}</div>
           </div>
         </div>
         <div className="next-week-preview">
