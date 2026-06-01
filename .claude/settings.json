@@ -2,12 +2,14 @@
   "_comment": "共用層：所有角色都不該編輯的目錄。個人角色禁區請見 docs/templates/claude-settings/ 並複製到 .claude/settings.local.json。",
   "permissions": {
     "deny": [
-      "Edit(archive/**)",
-      "Write(archive/**)",
       "Edit(character/**)",
       "Write(character/**)",
       "Edit(docs/archive/**)",
-      "Write(docs/archive/**)"
+      "Write(docs/archive/**)",
+      "Edit(archive/rive-plan/**)",
+      "Write(archive/rive-plan/**)",
+      "Edit(archive/rive-previewer/**)",
+      "Write(archive/rive-previewer/**)"
     ]
   }
 }

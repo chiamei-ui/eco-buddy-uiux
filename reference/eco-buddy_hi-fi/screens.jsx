@@ -447,10 +447,10 @@ const P1Home = ({ state, dispatch, setScreen, dragManager, payload, showTutorial
 };
 
 const toolEffectMap = {
-  feather: { label: '+15 心情', color: '#FFB000' },
-  brush:   { label: '+15 潔淨 ・ +10 心情', color: '#1F3DBF' },
-  ball:    { label: '+15 心情', color: '#FFB000' },
-  snack:   { label: '+15 體力 ・ +15 心情', color: '#FF4D63' },
+  feather: { label: '心情+15' },
+  brush:   { label: '潔+15・心+10' },
+  ball:    { label: '心情+15' },
+  snack:   { label: '體+15・心+15' },
 };
 
 /* food cell with drag */
@@ -496,7 +496,7 @@ const FoodCell = ({ food, dragManager, onDrop, showBubble, pulsing }) => {
       {food.state !== 'locked' && (
         <div className="food-label">
           <span className="name">{food.name}</span>
-          <span className="effect-tag" style={{ color: '#FF4D63' }}>+5 體力</span>
+          <span className="effect-tag">體力+5</span>
         </div>
       )}
     </div>);
@@ -528,9 +528,7 @@ const ToolCell = ({ tool, dragManager, onDrop }) => {
       </div>
       <div className="food-label">
         <span className="name">{tool.name}</span>
-        <span className="effect-tag" style={{ color: toolEffectMap[tool.id].color }}>
-          {toolEffectMap[tool.id].label}
-        </span>
+        <span className="effect-tag">{toolEffectMap[tool.id].label}</span>
       </div>
     </div>);
 
@@ -734,17 +732,122 @@ const P2bResult = ({ setScreen, dispatch, tweaks = {}, setTweak = () => {} }) =>
 /* P3 餵食動畫頁已依 #22（2026-05-29）廢除：餵食改在 P1 原地播放。
    殘留路由與側欄入口同步移除。 */
 
+/* ----- P4 IAP Config (模擬後台 CMS/API 設定，前端不寫死任何商品內容) ----- */
+const SHOP_IAP_CONFIG = {
+  sprintPack: {
+    id: 'sprint-pack', emoji: '🎁', name: '月底衝刺禮包', price: 199, currency: 'cash',
+    desc: '幫 Buddy 在月底衝到最佳狀態，選出最美的夥伴日誌',
+    activeWindow: '每月 22–28 日',
+    contents: [
+      { emoji: '🍔', name: '月份限定食物 ×10', sub: '不佔週配額，直接存入食物欄' },
+      { emoji: '🪮', name: '精華梳 ×3', sub: '潔淨 +30 · 心情 +20' },
+      { emoji: '🍪', name: '豪華零食 ×3', sub: '體力 +30 · 心情 +25' },
+      { emoji: '🎀', name: '月份限定裝飾 ×1', sub: '永久穿戴，當月主題' },
+      { emoji: '🎬', name: '廣告道具加速', sub: '本月剩餘天數：每日上限 5→8 次' },
+    ],
+  },
+  monthlyPass: {
+    id: 'monthly-pass', emoji: '🎫', name: '月度通行證', price: 149, currency: 'cash',
+    desc: '整個月都是你和 Buddy 的專屬時光，每天都有小驚喜',
+    validDays: 30,
+    benefits: [
+      { emoji: '📅', name: '每日通行禮', sub: '登入領月份限定食物 ×1（不佔週配額）' },
+      { emoji: '🎬', name: '廣告道具加碼', sub: '每日上限 5→8 次' },
+      { emoji: '🍔', name: '週配額加量', sub: '每種食物每週 5→8 個' },
+      { emoji: '🏅', name: '通行者稱號', sub: 'P8 個人頁金邊框 + 通行者稱號' },
+      { emoji: '📖', name: '夥伴日誌禮遇', sub: '月底可選 2 個狀態收入日誌' },
+    ],
+  },
+};
+
+/* ----- P4 helper: SprintHeroBanner (月底衝刺禮包) ----- */
+const SprintHeroBanner = ({ purchased, daysLeft = 6, onClick }) => (
+  <div className={`p4-sprint-hero${purchased ? ' purchased' : ''}`} onClick={!purchased ? onClick : undefined}>
+    <div className="sprint-icon">🎁</div>
+    <div className="sprint-body">
+      <div className="sprint-tag">限時優惠 · 22–28 日</div>
+      <h3>月底衝刺禮包</h3>
+      <div className="sprint-brief">食物 ×10 ・ 稀有道具 ×6 ・ 月份限定裝飾</div>
+      <div className="sprint-price">NT$ 199</div>
+    </div>
+    <div className="sprint-cd">
+      {purchased
+        ? <><b>✓</b><span>本月已領</span></>
+        : <><b>{daysLeft}</b><span>天後結束</span></>
+      }
+    </div>
+  </div>
+);
+
+/* ----- P4 helper: MonthlyPassCard (月度通行證) ----- */
+const MonthlyPassCard = ({ hasPass, validUntil = '6/30', onClick }) => (
+  <div className={`p4-pass-row${hasPass ? ' active' : ''}`} onClick={!hasPass ? onClick : undefined}>
+    <div className="pass-icon">🎫</div>
+    <div className="pass-body">
+      <h4>月度通行證</h4>
+      <div className="pass-desc">
+        {hasPass ? `啟用中 · 有效至 ${validUntil}` : '每日通行禮 ・ 廣告加碼 ・ 通行者稱號'}
+      </div>
+    </div>
+    {hasPass
+      ? <span className="pass-active-badge">啟用中</span>
+      : <div className="pass-price">NT$ 149</div>
+    }
+  </div>
+);
+
+/* ----- P4 helper: ProductDetailSheet (商品詳情 bottom sheet) ----- */
+const ProductDetailSheet = ({ item, onClose, onBuy }) => {
+  const isSprint = item.id === 'sprint-pack';
+  const rows = isSprint ? (item.contents || []) : (item.benefits || []);
+  const sectionTitle = isSprint ? '禮包內容' : '通行福利';
+  return (
+    <div className="product-detail-sheet" onClick={onClose}>
+      <div className="product-detail-inner" onClick={e => e.stopPropagation()}>
+        <div className="product-detail-grip" />
+        <div className="product-detail-head">
+          <div className="d-icon">{item.emoji}</div>
+          <div>
+            <h3>{item.name}</h3>
+            <div className="d-sub">{item.desc}</div>
+          </div>
+        </div>
+        <div className="product-detail-section">
+          <div className="product-detail-section-title">{sectionTitle}</div>
+          {rows.map((row, i) => (
+            <div key={i} className="detail-item-row">
+              <div className="di-icon">{row.emoji}</div>
+              <div className="di-body">
+                <div className="di-name">{row.name}</div>
+                <div className="di-sub">{row.sub}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="product-detail-footer">
+          <div className="price-tag">NT$ {item.price}</div>
+          <button className="buy-cta" onClick={() => onBuy(item)}>確認購買</button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 /* ═══════════════ P4 · Shop ═══════════════ */
-const P4Shop = ({ setScreen, state, dispatch }) => {
+const P4Shop = ({ setScreen, state, dispatch, tweaks }) => {
   const [tab, setTab] = useState('food');
   const [purchasing, setPurchasing] = useState(null);
   const [successItem, setSuccessItem] = useState(null);
   const [showPointSrc, setShowPointSrc] = useState(false);
+  const [detailItem, setDetailItem] = useState(null);
+  const isSprintPeriod = tweaks?.shopSprint ?? false;
+
   const cats = [
   { id: 'food', label: '食物' },
   { id: 'tool', label: '道具' },
   { id: 'decor', label: '裝飾' },
-  { id: 'music', label: '音樂盒' }];
+  { id: 'music', label: '音樂盒' },
+  { id: 'package', label: '禮包' }];
 
   const items = {
     food: [
@@ -752,8 +855,12 @@ const P4Shop = ({ setScreen, state, dispatch }) => {
     { id: 'salad', emoji: '🥬', name: '蔬菜 ×5', desc: '+5 體力/個', price: 60, currency: 'heart' },
     { id: 'berry', emoji: '🍓', name: '莓果 ×3', desc: '+5 體力/個', price: 80, soldOut: true, currency: 'heart' },
     { id: 'fish', emoji: '🐟', name: '小魚 ×5', desc: '+5 體力/個', price: 90, currency: 'heart' },
-    { id: 'sprint-pack', emoji: '🎁', name: '月底衝刺禮包', desc: '限時限量豪華組', price: 199, currency: 'cash' },
-    { id: 'monthly-pass', emoji: '🎫', name: '月度通行證', desc: '30 天進階陪伴', price: 149, currency: 'cash' }],
+    ],
+
+    package: [
+    { ...SHOP_IAP_CONFIG.monthlyPass, price: tweaks?.passPrice ?? SHOP_IAP_CONFIG.monthlyPass.price },
+    ...(isSprintPeriod ? [{ ...SHOP_IAP_CONFIG.sprintPack, price: tweaks?.sprintPrice ?? SHOP_IAP_CONFIG.sprintPack.price, daysLeft: tweaks?.sprintDaysLeft ?? 6 }] : []),
+    ],
 
     tool: [
     { id: 'feather', emoji: '🪶', name: '逗貓棒', desc: '心情 +15', price: 30, currency: 'heart' },
@@ -785,30 +892,91 @@ const P4Shop = ({ setScreen, state, dispatch }) => {
           {visibleCats.map((c) =>
           <button key={c.id} className={`tab-chip ${tab === c.id ? 'active' : ''}`} onClick={() => setTab(c.id)}>
               {c.label}
+              {c.id === 'package' && isSprintPeriod && (
+                <span className="tab-chip-badge">{tweaks?.sprintDaysLeft ?? 6}天</span>
+              )}
             </button>
           )}
         </div>
       </div>
 
+{/* 禮包分頁 — 2-column grid */}
+      {(() => {
+        if (tab !== 'package') return null;
+        const pkgItems = items['package'] || [];
+        if (!pkgItems.length) return null;
+        return (
+          <div>
+            <div style={{ fontSize: 13, fontWeight: 800, color: '#888', letterSpacing: '.04em', padding: '10px 18px 4px' }}>現金商品</div>
+            <div className="shop-grid">
+              {pkgItems.map(it => {
+                const hasDetail = !!(it.contents || it.benefits);
+                const isBought = (it.id === 'sprint-pack' && state.sprintPurchased) ||
+                                  (it.id === 'monthly-pass' && state.hasPass);
+                return (
+                  <div key={it.id} className={`shop-card${isBought ? ' purchased' : ''}`}
+                    onClick={isBought ? undefined : () => hasDetail ? setDetailItem(it) : setPurchasing(it)}
+                    style={isBought ? { cursor: 'default' } : {}}>
+                    <div className="thumb">{it.emoji}</div>
+                    <h4>{it.name}</h4>
+                    <div className="desc">{it.desc}</div>
+                    <div className="price">
+                      {isBought ? (
+                        <span style={{ fontWeight: 800, color: '#22A55C', fontSize: 12 }}>
+                          {it.id === 'monthly-pass' ? '✓ 啟用中' : '✓ 本月已領'}
+                        </span>
+                      ) : (
+                        <>
+                          <b style={{ fontFamily: 'var(--font-en)', fontWeight: 900, color: '#060E9F', fontSize: 15 }}>NT$ {it.price}</b>
+                          <button className="buy-btn" onClick={(e) => { e.stopPropagation(); hasDetail ? setDetailItem(it) : setPurchasing(it); }}>
+                            {hasDetail ? '查看' : '購買'}
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        );
+      })()}
 
-{/* 現金商品 — 橫向 strip，固定在點數商品上方 */}
+{/* 現金商品 — 橫向滑動卡片 strip（禮包 tab 不使用） */}
       {(() => {
         const cashItems = (items[tab] || []).filter(it => it.currency === 'cash');
-        if (!cashItems.length) return null;
+        if (!cashItems.length || tab === 'package') return null;
         return (
           <div>
             <div style={{ fontSize: 13, fontWeight: 800, color: '#888', letterSpacing: '.04em', padding: '10px 18px 4px' }}>現金商品</div>
             <div className="cash-strip">
-              {cashItems.map(it => (
-                <div key={it.id} className="cash-card" onClick={() => setPurchasing(it)}>
-                  <div className="cash-thumb">{it.emoji}</div>
-                  <div className="cash-info">
-                    <h4>{it.name}</h4>
-                    <div className="desc">{it.desc}</div>
-                    <div style={{ fontWeight: 800, color: '#060E9F', fontSize: 13, marginTop: 6, fontFamily: 'var(--font-en)' }}>NT$ {it.price}</div>
+              {cashItems.map(it => {
+                const hasDetail = !!(it.contents || it.benefits);
+                const isBought = (it.id === 'sprint-pack' && state.sprintPurchased) ||
+                                  (it.id === 'monthly-pass' && state.hasPass);
+                return (
+                  <div key={it.id}
+                    className={`cash-card${isBought ? ' purchased' : ''}`}
+                    onClick={isBought ? undefined : () => hasDetail ? setDetailItem(it) : setPurchasing(it)}
+                    style={isBought ? { cursor: 'default' } : {}}>
+                    <div className="cash-thumb">{it.emoji}</div>
+                    <div className="cash-info">
+                      <h4>{it.name}</h4>
+                      <div className="desc">{it.desc}</div>
+                      {isBought ? (
+                        <div style={{ fontWeight: 800, color: '#22A55C', fontSize: 12, marginTop: 6 }}>
+                          {it.id === 'monthly-pass' ? '✓ 啟用中' : '✓ 本月已領'}
+                        </div>
+                      ) : (
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 6 }}>
+                          <span style={{ fontWeight: 800, color: '#060E9F', fontSize: 13, fontFamily: 'var(--font-en)' }}>NT$ {it.price}</span>
+                          {hasDetail && <span style={{ fontSize: 10, color: '#888' }}>查看 ›</span>}
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         );
@@ -841,6 +1009,14 @@ const P4Shop = ({ setScreen, state, dispatch }) => {
           </div>
         );
       })()}
+
+      {detailItem &&
+        <ProductDetailSheet
+          item={detailItem}
+          onClose={() => setDetailItem(null)}
+          onBuy={(item) => { setDetailItem(null); setPurchasing(item); }}
+        />
+      }
 
       {purchasing &&
         <ShopPurchaseModal
@@ -990,16 +1166,26 @@ const ShopSuccessModal = ({ item, state, onClose, onGoToBag }) => {
           )}
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
-          <button onClick={onGoToBag} style={{
-            flex: 1, background: 'var(--ecoco-orange)', color: '#fff',
-            border: 'none', borderRadius: 999, padding: '13px 0',
-            fontWeight: 800, fontSize: 14, cursor: 'pointer',
-          }}>去背包查看</button>
-          <button onClick={onClose} style={{
-            flex: 1, background: 'var(--gray-light)', color: '#555',
-            border: 'none', borderRadius: 999, padding: '13px 0',
-            fontWeight: 700, fontSize: 14, cursor: 'pointer',
-          }}>繼續逛</button>
+          {item.id === 'monthly-pass' ? (
+            <button onClick={onClose} style={{
+              flex: 1, background: 'var(--ecoco-orange)', color: '#fff',
+              border: 'none', borderRadius: 999, padding: '13px 0',
+              fontWeight: 800, fontSize: 14, cursor: 'pointer',
+            }}>好的，繼續</button>
+          ) : (
+            <>
+              <button onClick={onGoToBag} style={{
+                flex: 1, background: 'var(--ecoco-orange)', color: '#fff',
+                border: 'none', borderRadius: 999, padding: '13px 0',
+                fontWeight: 800, fontSize: 14, cursor: 'pointer',
+              }}>去背包查看</button>
+              <button onClick={onClose} style={{
+                flex: 1, background: 'var(--gray-light)', color: '#555',
+                border: 'none', borderRadius: 999, padding: '13px 0',
+                fontWeight: 700, fontSize: 14, cursor: 'pointer',
+              }}>繼續逛</button>
+            </>
+          )}
         </div>
       </div>
     </div>
@@ -1414,6 +1600,17 @@ const P8Profile = ({ setScreen, state }) => {
           <div className="stat-card"><b>4.2 <span style={{ fontSize: 11 }}>kg</span></b><div className="label">減碳量</div></div>
         </div>
 
+        {state.hasPass && (
+          <div className="pass-card" onClick={() => setScreen('p4')} style={{ cursor: 'pointer' }}>
+            <div className="gem">🎫</div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <h3>月度通行證啟用中</h3>
+              <p>有效至 6/30 · 每日通行禮 ・ 廣告加碼 ・ 通行者稱號</p>
+            </div>
+            <div className="arrow">›</div>
+          </div>
+        )}
+
         {featureGroups.map((group) =>
         <div key={group.title} style={{ marginTop: 18 }}>
             <div className="p8-group-h">
@@ -1512,7 +1709,7 @@ const P9Bag = ({ setScreen, state, dispatch }) => {
                   剩 {t.hoursLeft}h
                 </div>
           }
-              <span className="effect-tag" style={{ color: toolEffectMap[t.id].color }}>{toolEffectMap[t.id].label}</span>
+              <span className="effect-tag">{toolEffectMap[t.id].label}</span>
               {t.count > 1 && <span className="badge">{t.count}</span>}
             </div>
         )}

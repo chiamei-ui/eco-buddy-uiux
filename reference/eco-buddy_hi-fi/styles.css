@@ -130,6 +130,8 @@ img,svg{display:block;}
 .cash-strip::-webkit-scrollbar{display:none;}
 .cash-card{flex:0 0 auto;width:200px;background:#fff;border-radius:16px;padding:12px;display:flex;align-items:center;gap:12px;box-shadow:0 4px 14px rgba(0,0,0,0.06);cursor:pointer;transition:transform .15s;}
 .cash-card:active{transform:scale(0.97);}
+.cash-card.purchased{opacity:.72;background:#F7F9FC;cursor:default;}
+.cash-card.purchased:active{transform:none;}
 .cash-card .cash-thumb{flex:0 0 56px;height:56px;background:var(--gray-bg);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:28px;}
 .cash-card .cash-info{flex:1;min-width:0;}
 .cash-card .cash-info h4{font-size:13px;font-weight:700;color:#222;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
@@ -335,20 +337,19 @@ img,svg{display:block;}
 .food-cell.low{ background:#fff; border:1.5px dashed #FFB28A; opacity:.85; }
 .food-cell.locked{ background:#F4F6FA; border:1.5px dashed #D0D5DD; cursor:not-allowed; }
 .food-cell .badge{
-  position:absolute;top:-6px;right:-6px;
+  position:absolute;top:5px;right:5px;
   background:var(--ecoco-orange);color:#fff;
-  font-family:var(--font-en);font-weight:800;font-size:11px;
-  min-width:22px;height:22px;border-radius:11px;
-  padding:0 5px;display:flex;align-items:center;justify-content:center;
-  border:2px solid #fff;
+  font-family:var(--font-en);font-weight:800;font-size:10px;
+  min-width:18px;height:18px;border-radius:9px;
+  padding:0 4px;display:flex;align-items:center;justify-content:center;
 }
 .food-cell .name{font-size:11px;color:#444;font-weight:700;margin-top:2px;}
 .food-cell .emoji{font-size:36px;line-height:1;}
-.effect-tag{font-size:11px;font-weight:800;font-family:var(--font-en);letter-spacing:0.02em;line-height:1;opacity:0.85;}
-.food-slot{display:flex;flex-direction:column;align-items:center;gap:6px;}
-.food-slot .food-label{text-align:center;display:flex;flex-direction:column;gap:3px;}
+.effect-tag{font-size:10px;font-weight:500;font-family:var(--font-en);letter-spacing:0.01em;line-height:1;color:#999;white-space:nowrap;}
+.food-slot{display:flex;flex-direction:column;align-items:center;gap:6px;width:100%;}
+.food-slot .food-label{text-align:center;display:flex;flex-direction:column;gap:3px;width:100%;min-width:0;overflow:hidden;min-height:30px;justify-content:center;}
 .food-slot .food-label .name{font-size:12px;font-weight:700;color:#444;line-height:1.1;}
-.food-slot .food-label .effect-tag{margin-top:0;}
+.food-slot .food-label .effect-tag{margin-top:0;overflow:hidden;text-overflow:ellipsis;display:block;min-width:0;width:100%;}
 .food-cell .lock{font-size:18px;color:#9aa0aa;}
 @keyframes ring-pulse{
   0%  {box-shadow:0 0 0 0 rgba(255,80,0,.55);border-color:#FF5000;}
@@ -612,11 +613,19 @@ img,svg{display:block;}
 }
 .shop-card .price b img{display:block;}
 .p4 .tab-chip{
+  position:relative;
   padding:7px 14px;border-radius:999px;font-size:13px;font-weight:700;
   background:#fff;color:#666;flex:0 0 auto;border:1px solid var(--border);
   white-space:nowrap;display:inline-flex;align-items:center;gap:4px;
 }
 .p4 .tab-chip.active{background:var(--ecoco-orange);color:#fff;border-color:transparent;}
+.tab-chip-badge{
+  position:absolute;top:-6px;right:-6px;
+  background:#FFCE00;color:#000;
+  font-size:10px;font-weight:800;
+  padding:1px 5px;border-radius:999px;
+  line-height:1.4;
+}
 .p4 .sprint-banner{
   margin:6px 18px 12px;
   background:linear-gradient(135deg, #FF5000, #FF7E00);
@@ -1130,7 +1139,9 @@ img,svg{display:block;}
 
 /* ───── P4 商店 · 售罄不足提示 ───── */
 
-/* shop card 售罄 */
+/* shop card 售罄 / 已購 */
+.shop-card.purchased{opacity:.72;background:#F7F9FC;cursor:default;}
+.shop-card.purchased:active{pointer-events:none;}
 .shop-card.sold-out{opacity:.7;}
 .shop-card.sold-out .thumb{filter:grayscale(.6);}
 .shop-card .oos-overlay{

@@ -11,7 +11,7 @@ P4 商店 SHALL 分為「ECOCO 點數消費區」與「真實金流 IAP 區」�
 
 #### Scenario: IAP 區商品內容
 - **WHEN** 用戶查看真實金流 IAP 區
-- **THEN** 該區僅包含月底衝刺禮包 NT$199、月度通行證 NT$149、稀有限定裝飾、圖鑑加速 / 特殊道具，且每項商品 data `currency` 為 `'cash'`
+- **THEN** 該區僅包含月底衝刺禮包 NT$199、月度通行證 NT$149、稀有限定裝飾、圖鑑加速 / 特殊道具，且每項商品 data `currency` 為 `'cash'`，並出現在「禮包」tab
 
 #### Scenario: 點數與現金不互換
 - **WHEN** 用戶嘗試以點數購買 IAP 區商品（或反之）
@@ -31,15 +31,17 @@ P4 商店 SHALL 分為「ECOCO 點數消費區」與「真實金流 IAP 區」�
 - **THEN** 卡片右上 Badge 為 `💳`，價格文字格式為「NT$ N」，顏色採品牌藍 `#060E9F`
 
 ### Requirement: 月底衝刺禮包置頂
-P4 SHALL 於每月 22–28 日將月底衝刺禮包置頂顯示，並有倒數天數與樣式區隔。
+P4 SHALL 於每月 22–28 日在**「禮包」tab** 顯示月底衝刺禮包，並於「禮包」tab chip 上附倒數天數 badge。
+
+**NOTE（p4-shop-package-tab）**：置頂語意改為「禮包 tab 內顯示」，tab chip 上顯示倒數 badge 作為月底期間的視覺提示，取代原「商店頂部橫幅」定義。
 
 #### Scenario: 進入置頂期
-- **WHEN** 當前日期介於每月 22–28 日
-- **THEN** 月底衝刺禮包卡片置於商店頂部，附倒數天數，視覺上與一般卡片區隔
+- **WHEN** 當前日期介於每月 22–28 日（原型以 `isSprintPeriod` 模擬）
+- **THEN** 月底衝刺禮包出現在「禮包」tab cash-strip，且「禮包」tab chip 右上顯示倒數天數 badge
 
 #### Scenario: 離開置頂期
 - **WHEN** 當前日期不在 22–28 日
-- **THEN** 月底衝刺禮包不置頂
+- **THEN** 月底衝刺禮包不出現在「禮包」tab，tab chip 也無 badge
 
 ### Requirement: 點數餘額與來源
 P4 右上 SHALL 顯示 ECOCO 點數餘額（icon-ecoco-point.svg + 數字）；點擊展開底部 Sheet 顯示來源明細。
