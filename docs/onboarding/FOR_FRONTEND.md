@@ -3,6 +3,28 @@
 ## 你的角色
 你拿 PM × 設計師的成果做實作。文件已經幫你整理好，不用問「要看哪份」。
 
+## 設計稿在哪裡
+
+本專案**沒有 Figma**，設計稿是一份互動 HTML 原型：
+
+```
+reference/eco-buddy_hi-fi/index.html
+```
+
+用瀏覽器打開它，整個 App 流程都可以點。這是你最主要的視覺參考。
+
+### 從原型撈數值
+
+| 需要什麼 | 去哪裡找 |
+|---------|---------|
+| 所有色彩 token（hex 值） | `reference/eco-buddy_hi-fi/styles.css` `:root` 區塊 |
+| 元件尺寸、間距、圓角 | 同一個 `styles.css` 各 class |
+| 元件結構與互動邏輯 | `reference/eco-buddy_hi-fi/components.jsx` |
+| 各頁面佈局 | `reference/eco-buddy_hi-fi/screens.jsx` / `screens-d2.jsx` |
+| 對話文案 | `reference/eco-buddy_hi-fi/dialogues.jsx` |
+
+手機基準尺寸：**390 × 844**（iPhone 14）。
+
 ## 你要看的檔案（依重要度排序）
 
 | 檔案 | 內容 | 什麼時候看 |
@@ -13,7 +35,7 @@
 | `docs/product/USER_FLOW.md` | 使用者流程圖 | 不確定流程時 |
 | `docs/decisions/CURRENT.md` | PM 最新定案 | 收到 `[pm]` commit 通知時 |
 
-**你絕對不用看**：`docs/archive/`、`reference/`、`openspec/changes/archive/`。
+**你絕對不用看**：`docs/archive/`、`openspec/changes/archive/`。
 
 ## 怎麼操作（推薦：Cursor 或 Claude Code）
 
@@ -22,7 +44,7 @@
    ```
    git clone https://github.com/chiamei-ui/eco-buddy-uiux.git
    ```
-3. 開資料夾後，叫 AI：「讀 docs/design/DESIGN_SYSTEM.md 與 UI_SPEC.md，幫我用 React + Tailwind 實作 P1 夥伴首頁」
+3. 開資料夾後，叫 AI：「讀 reference/eco-buddy_hi-fi/screens.jsx 與 docs/design/DESIGN_SYSTEM.md，幫我用 Flutter + Riverpod 實作 P1 夥伴首頁」
 
 AI 會自動跨檔案閱讀，不用你手動切換。
 
