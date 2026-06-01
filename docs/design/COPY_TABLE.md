@@ -213,6 +213,22 @@
 
 ---
 
+## 十三、Onboarding Spotlight(首次進入遊戲模式 7 步驟)
+
+對應 [reference/eco-buddy_hi-fi/screens.jsx](../../reference/eco-buddy_hi-fi/screens.jsx) 的 `OB_STEPS` 陣列。
+
+| Step | 對應元素 | title | text |
+|------|---------|-------|------|
+| 1 | turtleWrapRef · Buddy 本人 | 本月夥伴✨ | 點一下,看牠會怎麼反應 |
+| 2 | statRowRef · 三維數值 | 精神・清爽・心情 | 點圖示看夥伴目前的狀態 |
+| 3 | modeBtnRef · 切換一般模式 | 切換一般模式 | 點這裡可以回到 ECOCO 的一般功能 |
+| 4 | scanBtnRef · 掃碼 | 帶食物回家 📦 | 回收後,掃描機台螢幕條碼,有機會換到食物哦! |
+| 5 | adsBtnRef · 免費道具 | 免費道具 🎁 | 看廣告領道具,每天最多 5 次 |
+| 6 | dockTabsRef · 食物欄 / 道具包 | 食物欄 & 道具包 | 切換查看食物和道具,拖到夥伴身上使用 |
+| 7 | tabbarRef · 底部導覽列 | 四大功能 | 快來探索遊戲中的每個小驚喜吧! |
+
+---
+
 ## 通用替換規則(全 App 搜尋取代)
 
 | 找到 | 換成 |
