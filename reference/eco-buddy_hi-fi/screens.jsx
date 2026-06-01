@@ -406,8 +406,8 @@ const P1Home = ({ state, dispatch, setScreen, dragManager, payload, showTutorial
         </div>
       </div>
       {p6SheetOpen && (
-        <div className="p6-confirm-backdrop" onClick={() => setP6SheetOpen(false)}>
-          <div className="p6-confirm-sheet" onClick={e => e.stopPropagation()}>
+        <div className="sheet-backdrop" onClick={() => setP6SheetOpen(false)}>
+          <div className="sheet-panel" onClick={e => e.stopPropagation()}>
             <div className="sheet-grip" />
             <h3 style={{ fontSize: 18, fontWeight: 900, textAlign: 'center', marginBottom: 6 }}>免費道具</h3>
             <div style={{ textAlign: 'center', color: 'var(--gray-text)', fontSize: 13, marginBottom: 12 }}>
@@ -802,9 +802,9 @@ const ProductDetailSheet = ({ item, onClose, onBuy }) => {
   const rows = isSprint ? (item.contents || []) : (item.benefits || []);
   const sectionTitle = isSprint ? '禮包內容' : '通行福利';
   return (
-    <div className="product-detail-sheet" onClick={onClose}>
-      <div className="product-detail-inner" onClick={e => e.stopPropagation()}>
-        <div className="product-detail-grip" />
+    <div className="sheet-backdrop" onClick={onClose}>
+      <div className="sheet-panel scrollable product-detail-inner" onClick={e => e.stopPropagation()}>
+        <div className="sheet-grip" />
         <div className="product-detail-head">
           <div className="d-icon">{item.emoji}</div>
           <div>
@@ -1201,9 +1201,9 @@ const PointsSourceSheet = ({ state, onClose }) => {
   ];
   const monthTotal = sources.reduce((a, b) => a + b.value, 0);
   return (
-    <div className="points-source-sheet" onClick={onClose}>
-      <div className="sheet" onClick={(e) => e.stopPropagation()}>
-        <div className="grip"></div>
+    <div className="sheet-backdrop" onClick={onClose}>
+      <div className="sheet-panel points-source-sheet" onClick={(e) => e.stopPropagation()}>
+        <div className="sheet-grip"></div>
         <h3>ECOCO 點數來源</h3>
         <div className="total-row">
           <span className="lbl">目前 ECOCO 點數</span>
@@ -1332,7 +1332,7 @@ const P5Missions = ({ setScreen, state, dispatch }) => {
         </div>
       )}
 
-      {toast && <SystemToast text={toast} bottom onClose={() => setToast(null)} duration={2200} />}
+      {toast && <SystemToast text={toast} bottom icon={false} onClose={() => setToast(null)} duration={2200} />}
     </div>
   );
 };
@@ -1667,8 +1667,11 @@ const P8Profile = ({ setScreen, state }) => {
 const P9Bag = ({ setScreen, state, dispatch }) => {
   const [tab, setTab] = useState('free');
   const [p6SheetOpen, setP6SheetOpen] = useState(false);
+  const [snackText, setSnackText] = useState(null);
   const tools = state.tools;
   const filtered = tools.filter((t) => tab === 'free' ? !t.permanent : tab === 'paid' ? t.permanent : true);
+
+  const showSnack = () => setSnackText('回夥伴首頁，拖曳到 Buddy 身上使用');
 
   return (
     <div className="screen p9">
@@ -1700,7 +1703,7 @@ const P9Bag = ({ setScreen, state, dispatch }) => {
 
       <div className="bag-grid">
           {filtered.map((t) =>
-        <div key={t.id} className="bag-cell">
+        <div key={t.id} className="bag-cell" onClick={showSnack} style={{ cursor: 'pointer' }}>
               {t.permanent && <div className="perm">永久</div>}
               <div className="emoji">{t.emoji}</div>
               <div className="name">{t.name}</div>
@@ -1715,10 +1718,11 @@ const P9Bag = ({ setScreen, state, dispatch }) => {
         )}
         </div>
       }
-      <div style={{ paddingBottom: 40 }}></div>
+      <div style={{ paddingBottom: 100 }}></div>
+      <SystemToast bottom icon={false} text={snackText} onClose={() => setSnackText(null)} duration={2500} />
       {p6SheetOpen && (
-        <div className="p6-confirm-backdrop" onClick={() => setP6SheetOpen(false)}>
-          <div className="p6-confirm-sheet" onClick={e => e.stopPropagation()}>
+        <div className="sheet-backdrop" onClick={() => setP6SheetOpen(false)}>
+          <div className="sheet-panel" onClick={e => e.stopPropagation()}>
             <div className="sheet-grip" />
             <h3 style={{ fontSize: 18, fontWeight: 900, textAlign: 'center', marginBottom: 6 }}>免費道具</h3>
             <div style={{ textAlign: 'center', color: 'var(--gray-text)', fontSize: 13, marginBottom: 12 }}>

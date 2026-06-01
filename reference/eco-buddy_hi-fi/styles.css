@@ -574,13 +574,6 @@ img,svg{display:block;}
   animation:flash 1.6s ease-out;
 }
 @keyframes flash{0%,100%{opacity:0;}10%{opacity:.5;}}
-.p3-toast{
-  position:absolute;top:140px;left:50%;transform:translateX(-50%);
-  background:rgba(0,0,0,0.78);color:#fff;font-weight:700;
-  padding:10px 22px;border-radius:999px;font-size:14px;
-  animation:bubble-pop .3s;display:flex;align-items:center;gap:8px;
-}
-.p3-toast b{color:var(--hp-red);font-family:var(--font-en);font-size:16px;}
 .p3-stage-name{font-size:11px;color:rgba(255,255,255,0.85);background:rgba(0,0,0,0.5);padding:4px 10px;border-radius:999px;font-weight:700;position:absolute;top:64px;left:50%;transform:translateX(-50%);}
 
 .value-rise{
@@ -888,18 +881,20 @@ img,svg{display:block;}
 .pack-card .buy{background:var(--ecoco-orange);color:#fff;padding:8px 18px;border-radius:999px;font-weight:700;font-size:13px;}
 .pack-card.featured .buy{box-shadow:0 6px 16px rgba(255,80,0,0.3);}
 
-/* ───── P6 confirm sheet (overlay on P1) ───── */
-.p6-confirm-backdrop{
+/* ───── Unified bottom sheet ───── */
+.sheet-backdrop{
   position:absolute;inset:0;z-index:60;
-  background:rgba(0,0,0,0.45);
+  background:rgba(0,0,0,0.5);
   display:flex;align-items:flex-end;
   animation:fade-in .2s;
 }
-.p6-confirm-sheet{
+.sheet-panel{
   background:#fff;border-radius:24px 24px 0 0;
-  padding:12px 18px 32px;width:100%;
+  padding:12px 20px 32px;width:100%;
   animation:slide-up .35s cubic-bezier(.16,1,.3,1);
 }
+.sheet-panel.scrollable{padding:8px 0 0;max-height:88%;overflow-y:auto;}
+.sheet-panel.scrollable::-webkit-scrollbar{width:0;}
 .sheet-grip{
   width:36px;height:4px;border-radius:2px;
   background:#E5E7EB;margin:0 auto 16px;
@@ -1093,18 +1088,6 @@ img,svg{display:block;}
 .points-pill.tappable::after{
   content:"›";margin-left:4px;color:#999;font-weight:700;
 }
-.points-source-sheet{
-  position:absolute;inset:0;z-index:60;
-  background:rgba(0,0,0,0.5);
-  display:flex;align-items:flex-end;
-  animation:fade-in .2s;
-}
-.points-source-sheet .sheet{
-  width:100%;background:#fff;border-radius:28px 28px 0 0;
-  padding:14px 20px 24px;
-  animation:slide-up .35s cubic-bezier(.16,1,.3,1);
-}
-.points-source-sheet .grip{width:42px;height:4px;border-radius:2px;background:#D0D5DD;margin:0 auto 12px;}
 .points-source-sheet h3{font-size:17px;font-weight:900;color:#222;text-align:center;margin-bottom:4px;}
 .points-source-sheet .total-row{
   text-align:center;margin-bottom:18px;
@@ -1227,7 +1210,7 @@ img,svg{display:block;}
   animation:sys-toast-in .28s cubic-bezier(.16,1,.3,1);
 }
 .sys-toast.bottom{
-  top:auto;bottom:100px;
+  top:auto;bottom:94px;
   animation:sys-toast-in-bottom .28s cubic-bezier(.16,1,.3,1);
 }
 .sys-toast-inner{
@@ -1277,24 +1260,6 @@ img,svg{display:block;}
 .sys-alert-btn:active{background:rgba(60,60,67,0.08);}
 
 
-/* ───── Snack Bar (底部系統提示 — 導覽列上方 10px, z-index 35 在 tabbar 之下) ───── */
-.snackbar{
-  position:absolute;bottom:94px;left:12px;right:12px;
-  z-index:35;
-  background:rgba(26,26,26,0.93);backdrop-filter:blur(16px);
-  color:#fff;border-radius:14px;padding:11px 12px 11px 14px;
-  display:flex;align-items:center;gap:10px;
-  box-shadow:0 4px 20px rgba(0,0,0,0.22);
-  animation:snack-up .3s cubic-bezier(.16,1,.3,1);
-}
-.snackbar-msg{flex:1;font-size:13px;font-weight:500;line-height:1.4;}
-.snackbar-close{
-  flex:0 0 auto;width:22px;height:22px;border-radius:50%;
-  background:rgba(255,255,255,0.15);border:none;color:#fff;
-  font-size:11px;font-weight:700;cursor:pointer;
-  display:flex;align-items:center;justify-content:center;
-}
-.snackbar-close:hover{background:rgba(255,255,255,0.25);}
 @keyframes snack-up{from{transform:translateY(20px);opacity:0;}to{transform:translateY(0);opacity:1;}}
 
 /* drag ghost following pointer */
@@ -1372,24 +1337,6 @@ img,svg{display:block;}
 }
 
 /* 商品詳情 bottom sheet */
-.product-detail-sheet{
-  position:absolute;inset:0;z-index:60;
-  background:rgba(0,0,0,0.5);
-  display:flex;align-items:flex-end;
-  animation:fade-in .18s;
-}
-.product-detail-inner{
-  width:100%;background:#fff;
-  border-radius:24px 24px 0 0;
-  padding:8px 0 0;
-  max-height:88%;overflow-y:auto;
-  animation:slide-up .32s cubic-bezier(.16,1,.3,1);
-}
-.product-detail-inner::-webkit-scrollbar{width:0;}
-.product-detail-grip{
-  width:36px;height:4px;background:#E5E7EB;
-  border-radius:2px;margin:0 auto 14px;
-}
 .product-detail-head{
   display:flex;align-items:center;gap:14px;
   padding:0 20px 16px;
