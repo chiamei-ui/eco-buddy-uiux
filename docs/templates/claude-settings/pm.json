@@ -1,0 +1,21 @@
+{
+  "_comment": "PM (@andrewtainan) — 可編輯 docs/decisions/, docs/briefs/, docs/product/。其他目錄唯讀。",
+  "permissions": {
+    "deny": [
+      "Edit(docs/design/**)",
+      "Write(docs/design/**)",
+      "Edit(docs/animation/**)",
+      "Write(docs/animation/**)",
+      "Edit(assets/animations/**)",
+      "Write(assets/animations/**)",
+      "Edit(openspec/**)",
+      "Write(openspec/**)",
+      "Edit(archive/**)",
+      "Write(archive/**)",
+      "Edit(character/**)",
+      "Write(character/**)",
+      "Edit(reference/**)",
+      "Write(reference/**)"
+    ]
+  }
+}

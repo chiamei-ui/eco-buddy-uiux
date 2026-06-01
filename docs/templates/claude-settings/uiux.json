@@ -1,0 +1,21 @@
+{
+  "_comment": "UI/UX 設計師 (@chiamei-ui) — 可編輯 docs/design/, docs/product/, openspec/, 根目錄文件。其他目錄唯讀。",
+  "permissions": {
+    "deny": [
+      "Edit(docs/decisions/**)",
+      "Write(docs/decisions/**)",
+      "Edit(docs/briefs/**)",
+      "Write(docs/briefs/**)",
+      "Edit(docs/animation/**)",
+      "Write(docs/animation/**)",
+      "Edit(assets/animations/**)",
+      "Write(assets/animations/**)",
+      "Edit(archive/**)",
+      "Write(archive/**)",
+      "Edit(character/**)",
+      "Write(character/**)",
+      "Edit(reference/**)",
+      "Write(reference/**)"
+    ]
+  }
+}

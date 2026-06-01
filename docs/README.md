@@ -23,14 +23,17 @@
 
 ## 目錄說明
 
-| 目錄 | 內容 | 誰會動到 |
-|------|------|---------|
-| `decisions/` | PM 所有定案決策 | PM |
-| `design/` | 設計系統、頁面規格、文案規則、**GAME_MECHANICS.md（所有數值）** | 設計師、前端、後端 |
-| `product/` | 使用者流程、對話文案、FAQ | PM、設計師 |
-| `animation/` | 動畫需求清單、發案規格、**NAMING.md（命名手冊）**、**ROADMAP.md（合作階段）** | 窗口設計師、前端 |
-| `briefs/` | PM 核心原則與改版方向 | PM、設計師 |
-| `archive/` | 歷史版本，只讀不改 | — |
+| 目錄 | 內容 | 誰會動到 | 可編輯（write owner） |
+|------|------|---------|---------------------|
+| `decisions/` | PM 所有定案決策 | PM | PM (@andrewtainan) |
+| `design/` | 設計系統、頁面規格、文案規則、**GAME_MECHANICS.md（所有數值）** | 設計師、前端、後端 | UI/UX (@chiamei-ui) |
+| `product/` | 使用者流程、對話文案、FAQ | PM、設計師 | PM、UI/UX |
+| `animation/` | 動畫需求清單、發案規格、**NAMING.md（命名手冊）**、**ROADMAP.md（合作階段）** | 窗口設計師、前端 | 窗口設計師 (@idahsueh-cmd) |
+| `briefs/` | PM 核心原則與改版方向 | PM、設計師 | PM (@andrewtainan) |
+| `archive/` | 歷史版本，只讀不改 | — | 無人（全員唯讀） |
+
+> 「可編輯」欄表示**只有該角色的 AI 與 commit 可以寫入此目錄**。其他角色 read-only。
+> PR 層由 [.github/CODEOWNERS](../.github/CODEOWNERS) 把關；本地 AI 編輯權限由 [docs/templates/claude-settings/](templates/claude-settings/) 控制——每人複製對應範本到 `.claude/settings.local.json`。
 
 ---
 

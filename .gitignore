@@ -1,3 +1,6 @@
 # 本機私有文件，不進 repo
 CLAUDE.local.md
 ecoco-private/
+
+# Claude Code 個人本地設定（每人角色不同，不共用）
+.claude/settings.local.json
