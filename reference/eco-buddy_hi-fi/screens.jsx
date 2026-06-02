@@ -13,7 +13,7 @@ const OB_STEPS = [
   { refKey: 'adsBtnRef',     pad: 8,  radius: 24, textRight: true,
     title: '免費道具 🎁',           text: '看廣告領道具，每天最多 5 次' },
   { refKey: 'dockTabsRef',   pad: 6,  radius: 16,
-    title: '食物欄 & 道具包',       text: '切換查看食物和道具，拖到夥伴身上使用' },
+    title: '食物欄 & 玩具箱',       text: '切換查看食物和道具，拖到夥伴身上使用' },
   { refKey: 'tabbarRef',     pad: 4,  radius: 12,
     title: '四大功能',              text: '快來探索遊戲中的每個小驚喜吧！' },
 ];
@@ -146,11 +146,12 @@ const OnboardingSpotlight = ({ step, refs, onNext, onSkip }) => {
 };
 
 /* ═══════════════ P1 · Buddy Home ═══════════════ */
-const P1Home = ({ state, dispatch, setScreen, dragManager, payload, showTutorial, onTutorialDone }) => {
+const P1Home = ({ state, dispatch, setScreen, dragManager, payload, showTutorial, onTutorialDone, tweaks = {} }) => {
   const [dockTab, setDockTab] = useState('food'); // food | tools
   const [touched, setTouched] = useState(false);
   const [eating, setEating] = useState(false);
   const [bubble, setBubble] = useState(null); // {text, error}
+  const [showEvolve, setShowEvolve] = useState(false);
   const [p6SheetOpen, setP6SheetOpen] = useState(false);
   const [ambientVisible, setAmbientVisible] = useState(true);
   const [ambientDismissing, setAmbientDismissing] = useState(false);
@@ -255,7 +256,10 @@ const P1Home = ({ state, dispatch, setScreen, dragManager, payload, showTutorial
       dispatch({ type: 'FEED', food: payload.id, hpGain: 5 });
       addRise('+5 體力', pos);
       showBubble({ text: '好好吃！謝謝你～', error: false });
-      setTimeout(() => setEating(false), 1500);
+      setTimeout(() => {
+        setEating(false);
+        if (tweaks.p1Evolve) setShowEvolve(true);
+      }, 1500);
     } else if (payload.kind === 'tool') {
       const tool = payload.id;
       // tool max-stat guards
@@ -294,6 +298,7 @@ const P1Home = ({ state, dispatch, setScreen, dragManager, payload, showTutorial
 
   return (
     <div className="screen p1">
+      {showEvolve && <EvolveOverlay onDone={() => setShowEvolve(false)} />}
       <StatusBar />
       <div className="p1-header">
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -305,12 +310,12 @@ const P1Home = ({ state, dispatch, setScreen, dragManager, payload, showTutorial
         <AvatarButton onClick={() => setScreen('p8')} />
       </div>
 
-      <div className="welcome" style={{ color: "rgb(128, 128, 128)" }}>可可粉，歡迎回來！</div>
+      <div className="welcome" style={{ color: "rgb(128, 128, 128)" }}>可可粉，Buddy 等你好久了</div>
       <div className="charinfo">
         <span className="name" style={{ fontWeight: "700" }}>海龜</span>
         <div className="charinfo-divider"></div>
         <div className="meta" style={{ color: "rgb(51, 51, 51)" }}>
-          <b>6月角色</b>
+          <b>6月的 Buddy</b>
           狀態：日常待機
         </div>
       </div>
@@ -378,11 +383,11 @@ const P1Home = ({ state, dispatch, setScreen, dragManager, payload, showTutorial
       <div className="dock-shell" ref={dockRef}>
         <div className="dock-tabs" ref={dockTabsRef}>
           <button className={`dock-tab ${dockTab === 'food' ? 'active' : ''}`} onClick={() => setDockTab('food')}>食物欄</button>
-          <button className={`dock-tab ${dockTab === 'tools' ? 'active' : ''}`} onClick={() => setDockTab('tools')}>道具包</button>
+          <button className={`dock-tab ${dockTab === 'tools' ? 'active' : ''}`} onClick={() => setDockTab('tools')}>玩具箱</button>
         </div>
         <div className="dock">
         {dockTab === 'food' ? <>
-          <div className="dock-hint">每週限量配額，拖曳至角色即可餵食</div>
+          <div className="dock-hint">每週限量食物！拖曳餵食 Buddy 吧</div>
           <div className="dock-grid">
             {state.food.map((f, i) => <FoodCell key={f.id} food={f} dragManager={dragManager} onDrop={onDrop} index={i} showBubble={showBubble} pulsing={pulsingIds.has(f.id)} />
             )}
@@ -602,10 +607,44 @@ const P2Scan = ({ setScreen, dispatch, tweaks = {}, setTweak = () => {} }) => {
 
 };
 
+/* ═══════════════ EvolveOverlay · 變身過場（演示用，實際動畫由動畫師執行）═══════════════ */
+const EvolveOverlay = ({ onDone, newFormName = '夏日龜 ☀️' }) => {
+  const [phase, setPhase] = useState('flash'); // flash | reveal | hold
+
+  useEffect(() => {
+    const t1 = setTimeout(() => setPhase('reveal'), 450);
+    const t2 = setTimeout(() => setPhase('hold'), 950);
+    const t3 = setTimeout(onDone, 3200);
+    return () => [t1, t2, t3].forEach(clearTimeout);
+  }, []);
+
+  return (
+    <div className="evolve-overlay">
+      {phase === 'flash' && <div className="p3-flash" />}
+      <div className="evolve-buddy-wrap">
+        <TurtleImg
+          className={phase !== 'flash' ? 'evolving' : ''}
+          style={{ width: 190, opacity: phase === 'flash' ? 0 : 1, transition: 'opacity 0.1s' }}
+        />
+        {phase === 'hold' && (
+          <SpeechBubble text="我有新的樣子了！✨" style={{ top: -68, right: -54 }} />
+        )}
+      </div>
+      <div className="evolve-text" style={{ opacity: phase === 'flash' ? 0 : 1 }}>
+        <div className="evolve-headline">Buddy 變身了！</div>
+        <div className="evolve-form">{newFormName}</div>
+      </div>
+    </div>
+  );
+};
+
 /* ═══════════════ P2b · 回收結果頁（滿版·對齊 P12）═══════════════ */
 const P2bResult = ({ setScreen, dispatch, tweaks = {}, setTweak = () => {} }) => {
   const quotaFull = tweaks.p2bQuotaFull || false;
+  const willEvolve = tweaks.p2bEvolve || false;
   const [showInfo, setShowInfo] = useState(false);
+  const [showEvolve, setShowEvolve] = useState(false);
+  const evolveNavRef = React.useRef(null);
 
   // mock 本批投瓶組成 — PET 12 個 / 電池 3 顆 / 退瓶 0
   // 體力：PET 12*2 + 電池 3*5 = 39；潔淨：投入 12*2 - 退瓶 0*1 = 24（電池機不給潔淨）
@@ -613,18 +652,30 @@ const P2bResult = ({ setScreen, dispatch, tweaks = {}, setTweak = () => {} }) =>
   const CLEAN_GAIN = 24;
   const POINTS_GAIN = 18;
 
+  const navigate = (navFn) => {
+    if (willEvolve) {
+      evolveNavRef.current = navFn;
+      setShowEvolve(true);
+    } else {
+      navFn();
+    }
+  };
+
   const handleStore = () => {
     dispatch({ type: 'COLLECT_BATCH', quotaFull: false, hpGain: HP_GAIN, cleanGain: CLEAN_GAIN, pointsGain: POINTS_GAIN });
-    setScreen('p1', { foodStored: true });
+    navigate(() => setScreen('p1', { foodStored: true }));
   };
 
   const handleComplete = () => {
     dispatch({ type: 'COLLECT_BATCH', quotaFull: true, hpGain: HP_GAIN, cleanGain: CLEAN_GAIN, pointsGain: POINTS_GAIN });
-    setScreen('p1');
+    navigate(() => setScreen('p1'));
   };
 
   return (
     <div className="screen p2b">
+      {showEvolve && (
+        <EvolveOverlay onDone={() => { setShowEvolve(false); evolveNavRef.current?.(); }} />
+      )}
       <StatusBar />
       {showInfo && (
         <div
@@ -665,8 +716,8 @@ const P2bResult = ({ setScreen, dispatch, tweaks = {}, setTweak = () => {} }) =>
           onClick={() => setShowInfo(true)}
           style={{ position: 'absolute', top: 10, right: 12, width: 22, height: 22, borderRadius: '50%', border: 'none', background: 'rgba(0,0,0,0.08)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0, color: '#888', fontSize: 13, fontWeight: 700, fontFamily: 'serif', lineHeight: 1 }}
         >i</button>
-        <div className="eyebrow">RECYCLE COMPLETE · 帶食物回家</div>
-        <h2>Buddy 收到禮物了！</h2>
+        <div className="eyebrow">BUDDY GIFT · 給 Buddy 的禮物</div>
+        <h2>Buddy 收到你的心意了</h2>
         <div className="meta">
           <span className="dot"></span>
           2026.06.15 14:32 · 家樂福 仁德店
@@ -680,7 +731,7 @@ const P2bResult = ({ setScreen, dispatch, tweaks = {}, setTweak = () => {} }) =>
       </div>
 
       <div className="result-body">
-        <div className="section-title">本次獲得</div>
+        <div className="section-title">你帶回了這些</div>
         <div className="gain-row">
           <div className={`gain-card gain-card--food${quotaFull ? ' gain-card--locked' : ''}`}>
             {quotaFull
@@ -838,9 +889,9 @@ const P4Shop = ({ setScreen, state, dispatch, tweaks }) => {
 
   const cats = [
   { id: 'food', label: '食物' },
-  { id: 'tool', label: '道具' },
-  { id: 'decor', label: '裝飾' },
-  { id: 'music', label: '音樂盒' },
+  { id: 'tool', label: '玩具' },
+  { id: 'decor', label: '裝扮' },
+  { id: 'music', label: '氣氛' },
   { id: 'package', label: '禮包' }];
 
   const items = {
@@ -901,11 +952,6 @@ const P4Shop = ({ setScreen, state, dispatch, tweaks }) => {
         if (!pkgItems.length) return null;
         return (
           <div>
-            {!isPhase2 && (
-              <div style={{ margin: '10px 14px 0', padding: '10px 14px', background: '#FFFFFF', borderRadius: 12, fontSize: 12, color: '#555555', fontWeight: 600, lineHeight: 1.5 }}>
-                💳 禮包即將推出，敬請期待
-              </div>
-            )}
             <div style={{ fontSize: 13, fontWeight: 800, color: '#888', letterSpacing: '.04em', padding: '10px 18px 4px' }}>現金商品</div>
             <div className="shop-grid">
               {pkgItems.map(it => {
@@ -1237,12 +1283,13 @@ const PointsSourceSheet = ({ state, onClose }) => {
 const P5Missions = ({ setScreen, state, dispatch, tweaks }) => {
   const [tab, setTab] = useState('daily');
   const [toast, setToast] = useState(null);
+  const [pulsing, setPulsing] = useState(false);
   const isPhase2 = (tweaks?.phase ?? 1) >= 2;
   const tabs = [
-    { id: 'daily',   label: '每日' },
+    { id: 'daily',   label: '今日' },
     ...(isPhase2 ? [
-      { id: 'week',    label: '本週' },
-      { id: 'month',   label: '月度' },
+      { id: 'week',    label: '這週' },
+      { id: 'month',   label: '這個月' },
       { id: 'achieve', label: '成就' },
     ] : []),
   ];
@@ -1259,12 +1306,6 @@ const P5Missions = ({ setScreen, state, dispatch, tweaks }) => {
     missionData.filter(m => m.claimed).map(m => m.id)
   );
 
-  const handleClaim = (m) => {
-    setClaimedIds(prev => [...prev, m.id]);
-    dispatch({ type: 'CLAIM_MISSION' });
-    setToast('一起做到！食物 ×1 ・ 心情 +3 ✨');
-  };
-
   const sortedMissions = [...missionData].sort((a, b) => {
     const rank = (m) => {
       if (claimedIds.includes(m.id)) return 2;   // 已領 → 最下
@@ -1273,6 +1314,22 @@ const P5Missions = ({ setScreen, state, dispatch, tweaks }) => {
     };
     return rank(a) - rank(b);
   });
+
+  const hasClaimable = sortedMissions.some(m => !claimedIds.includes(m.id) && m.progress >= m.total);
+
+  React.useEffect(() => {
+    if (tab !== 'daily' || !hasClaimable) return;
+    setPulsing(true);
+    const t = setTimeout(() => setPulsing(false), 2100);
+    return () => clearTimeout(t);
+  }, [tab]);
+
+  const handleClaim = (m) => {
+    setPulsing(false);
+    setClaimedIds(prev => [...prev, m.id]);
+    dispatch({ type: 'CLAIM_MISSION' });
+    setToast('一起做到！食物 ×1 ・ 心情 +3 ✨');
+  };
 
   return (
     <div className="screen p5">
@@ -1305,10 +1362,10 @@ const P5Missions = ({ setScreen, state, dispatch, tweaks }) => {
         <div style={{ padding: '40px 20px', textAlign: 'center', color: '#888' }}>
           <div style={{ fontSize: 48, opacity: .4, marginBottom: 10 }}>🌱</div>
           <h3 style={{ fontSize: 14, color: '#222', marginBottom: 4 }}>
-            {tab === 'week' ? '本週陪伴' : tab === 'month' ? '月度陪伴' : '成就'}
+            {tab === 'week' ? '這週陪伴' : tab === 'month' ? '這個月陪伴' : '成就'}
           </h3>
           <p style={{ fontSize: 12 }}>
-            {tab === 'week' ? 'Buddy 還在準備本週的陪伴清單～' : tab === 'month' ? 'Buddy 還在規劃本月份的長線陪伴～' : 'Buddy 還在為你收集這份成就～'}
+            {tab === 'week' ? 'Buddy 還在準備這週的陪伴清單～' : tab === 'month' ? 'Buddy 還在規劃這個月的長線陪伴～' : 'Buddy 還在為你收集這份成就～'}
           </p>
         </div>
       ) : (
@@ -1326,10 +1383,10 @@ const P5Missions = ({ setScreen, state, dispatch, tweaks }) => {
                   <div className="progress-text">{m.progress}/{m.total}</div>
                 </div>
                 <button
-                  className={`claim ${isClaimed ? 'done' : isLocked ? 'locked' : ''}`}
+                  className={`claim ${isClaimed ? 'done' : isLocked ? 'locked' : pulsing ? 'pulse' : ''}`}
                   onClick={!isClaimed && !isLocked ? () => handleClaim(m) : undefined}
                 >
-                  {isClaimed ? '已完成' : isLocked ? '進行中' : '領取'}
+                  {isClaimed ? '已完成' : isLocked ? '進行中' : '可領取'}
                 </button>
               </div>
             );
@@ -1385,13 +1442,13 @@ const P6Ads = ({ setScreen, state, dispatch }) => {
 
       {step === 1 &&
       <div className="ad-screen">
-          <div className="ad-label">AD · 廣告</div>
+          <div className="ad-label">一段小廣告（讓 Buddy 開心）</div>
           <div className={`skip ${adTime <= 0 ? 'ready' : ''}`} onClick={adTime <= 0 ? skipAd : undefined}>
             {adTime > 0 ? `${adTime}s` : '領道具 ›'}
           </div>
           <div className="ad-mock">
             <div className="play">▶</div>
-            <div style={{ fontSize: 18 }}>合作品牌廣告</div>
+            <div style={{ fontSize: 18 }}>廣告播放中</div>
             <div style={{ fontSize: 12, fontWeight: 500, opacity: .85 }}>{adTime > 0 ? `${adTime} 秒` : '廣告結束'}</div>
           </div>
         </div>
@@ -1497,14 +1554,14 @@ const P7Dex = ({ setScreen, state, dispatch, onOpenPicker, tweaks }) => {
       <StatusBar />
       <div className="header">
         <h2>夥伴日誌</h2>
-        <div className="en">DEX · 2026</div>
+        <div className="en">2026</div>
       </div>
 
       <div className="section-h">
         <div className="section-h-row">
-          <span>年度收藏</span>
+          <span>今年的 Buddy 們</span>
           {!state.lockedMonthCode && (
-            <span className="alert-hint" onClick={() => onOpenPicker && onOpenPicker()}>本月角色尚未選入收藏夾 ›</span>
+            <span className="alert-hint" onClick={() => onOpenPicker && onOpenPicker()}>6 月的 Buddy 還沒選進日誌 ›</span>
           )}
           {state.lockedMonthCode && state.swapLeft > 0 && (
             <span className="alert-hint" onClick={() => onOpenPicker && onOpenPicker()} style={{ color: '#1A7A46' }}>已鎖入本月夥伴 · 還可更換 {state.swapLeft} 次 ›</span>
@@ -1627,13 +1684,13 @@ const P8Profile = ({ setScreen, state }) => {
   const [showPointSrc, setShowPointSrc] = useState(false);
   const featureGroups = [
   {
-    title: '遊戲功能',
+    title: '',
     en: 'GAME',
     items: [
     { icon: '🐢', label: '夥伴狀態', sub: `體力 ${state.stats.hp} · 潔淨 ${state.stats.clean} · 心情 ${state.stats.mood}`, go: 'p1' },
-    { icon: '📖', label: '夥伴日誌', sub: `已解鎖 ${state.dexStates.filter((s) => s.unlocked).length} / 9 種樣子`, go: 'p7' },
-    { icon: '🎒', label: '道具背包', sub: `${state.tools.length} 個道具`, go: 'p9' },
-    { icon: '✅', label: '今日陪伴', sub: '每日陪伴 3 項進行中', go: 'p5' },
+    { icon: '📖', label: '夥伴日誌', sub: `認識了 ${state.dexStates.filter((s) => s.unlocked).length} / 9 個樣子`, go: 'p7' },
+    { icon: '🎒', label: '玩具箱', sub: `${state.tools.length} 個玩具`, go: 'p9' },
+    { icon: '✅', label: '今日陪伴', sub: '還有 3 件事可以做', go: 'p5' },
     { icon: '🛒', label: '商店', sub: `點數 ${state.points.toLocaleString()}`, go: 'p4' },
     { icon: 'pt', label: '點數明細', sub: '本月 +382 · 帶食物回家 12 次', action: () => setShowPointSrc(true) }]
 
@@ -1659,16 +1716,16 @@ const P8Profile = ({ setScreen, state }) => {
             <div className="avatar"><img src="assets/btn/avatar.svg" alt="" draggable="false" /></div>
             <div style={{ flex: 1 }}>
               <h2>可可粉</h2>
-              <div className="id">ID · ECOCO_9999 · 已驗證</div>
-              <div style={{ fontSize: 11, marginTop: 4, opacity: .85 }}>Lv.12 · 環保大使 · 5 天連登</div>
+              <div className="id">ID · ECOCO_9999</div>
+              <div style={{ fontSize: 11, marginTop: 4, opacity: .85 }}>Lv.12｜和 Buddy 已經 5 天</div>
             </div>
           </div>
         </div>
 
         <div className="stats-row">
-          <div className="stat-card"><b>238</b><div className="label">帶食物回家</div></div>
-          <div className="stat-card"><b>156</b><div className="label">陪 Buddy 吃飯</div></div>
-          <div className="stat-card"><b>4.2 <span style={{ fontSize: 11 }}>kg</span></b><div className="label">減碳量</div></div>
+          <div className="stat-card"><b>238</b><div className="label">次相遇</div></div>
+          <div className="stat-card"><b>156</b><div className="label">次餵食</div></div>
+          <div className="stat-card"><b>4.2 <span style={{ fontSize: 11 }}>kg</span></b><div className="label">為地球做的事</div></div>
         </div>
 
         {state.hasPass && (
@@ -1683,11 +1740,11 @@ const P8Profile = ({ setScreen, state }) => {
         )}
 
         {featureGroups.map((group) =>
-        <div key={group.title} style={{ marginTop: 18 }}>
-            <div className="p8-group-h">
+        <div key={group.en} style={{ marginTop: 18 }}>
+            {group.title && <div className="p8-group-h">
               <span>{group.title}</span>
               <span className="en">{group.en}</span>
-            </div>
+            </div>}
             <div className="menu">
               {group.items.map((it, i) =>
             <div key={i} className={`menu-item ${it.go || it.comingSoon || it.action ? 'tap-area' : ''}`}
@@ -1752,8 +1809,8 @@ const P9Bag = ({ setScreen, state, dispatch }) => {
         <h2>道具背包</h2>
       </div>
       <div className="tabs">
-        <button className={`tab ${tab === 'free' ? 'active' : ''}`} onClick={() => setTab('free')}>免費道具 ({tools.filter((t) => !t.permanent).length})</button>
-        <button className={`tab ${tab === 'paid' ? 'active' : ''}`} onClick={() => setTab('paid')}>付費道具 ({tools.filter((t) => t.permanent).length})</button>
+        <button className={`tab ${tab === 'free' ? 'active' : ''}`} onClick={() => setTab('free')}>Buddy 的禮物 ({tools.filter((t) => !t.permanent).length})</button>
+        <button className={`tab ${tab === 'paid' ? 'active' : ''}`} onClick={() => setTab('paid')}>收藏品 ({tools.filter((t) => t.permanent).length})</button>
       </div>
       {tab === 'free' && tools.some((t) => !t.permanent && t.hoursLeft <= 6) &&
       <div className="expire-banner">
@@ -1841,13 +1898,13 @@ const P10Picker = ({ setScreen, state, dispatch, onClose }) => {
     <div className="screen p10">
       <div className="sheet">
         <div className="title">
-          <h3>選擇你的 6 月夥伴</h3>
-          <p>從本月觸發過的狀態中挑一個鎖入年度圖鑑</p>
+          <h3>選擇你的 6 月 Buddy</h3>
+          <p>從這個月遇到的樣子裡挑一個記下來</p>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 8 }}>
             <p style={{ fontSize: 12, color: capExceeded ? '#D9382A' : 'var(--ecoco-orange)', fontWeight: 700, margin: 0 }}>
-              {capExceeded ? '已達本月更換上限' : isFirstLock ? '首次鎖入免費' : `尚可更換 ${state.swapLeft} 次`}
+              {capExceeded ? '已達本月更換上限' : isFirstLock ? '首次鎖入免費' : `還能換 ${state.swapLeft} 次`}
             </p>
-            <button onClick={() => { handleClose(); setScreen('p11'); }} style={{ fontSize: 11, fontWeight: 800, color: 'var(--ecoco-blue)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, textDecoration: 'underline' }}>增加更換次數 →</button>
+            <button onClick={() => { handleClose(); setScreen('p11'); }} style={{ fontSize: 11, fontWeight: 800, color: 'var(--ecoco-blue)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, textDecoration: 'underline' }}>多一點選擇 →</button>
           </div>
           {capExceeded && (
             <div style={{ marginTop: 10, padding: '10px 12px', background: '#FFF3F0', borderRadius: 10, fontSize: 12, color: '#D9382A', lineHeight: 1.5 }}>
@@ -1872,8 +1929,8 @@ const P10Picker = ({ setScreen, state, dispatch, onClose }) => {
           )}
         </div>
         <div className="actions">
-          <button className="later" onClick={handleClose}>稍後再選</button>
-          <button className="confirm" disabled={!selected || capExceeded} onClick={() => {dispatch({ type: 'LOCK_DEX', code: selected });handleClose();}}>{capExceeded ? '次數已用完' : '確認鎖入'}</button>
+          <button className="later" onClick={handleClose}>等等再說</button>
+          <button className="confirm" disabled={!selected || capExceeded} onClick={() => {dispatch({ type: 'LOCK_DEX', code: selected });handleClose();}}>{capExceeded ? '次數已用完' : '收進日誌'}</button>
         </div>
       </div>
     </div>);
@@ -1882,8 +1939,8 @@ const P10Picker = ({ setScreen, state, dispatch, onClose }) => {
 
 /* ═══════════════ P11 · Swap pack purchase ═══════════════ */
 const SWAP_PACKS = [
-  { id: 'swap-10', name: '標準包',   qty: 10, desc: '適合偶爾調整年度收藏',          price: 99,  featured: false },
-  { id: 'swap-50', name: '進階包',   qty: 50, desc: '換到滿意為止 · 平均 NT$6/次',   price: 299, featured: true  },
+  { id: 'swap-10', name: '標準包',   qty: 10, desc: '偶爾想換一下',                  price: 99,  featured: false },
+  { id: 'swap-50', name: '進階包',   qty: 50, desc: '換到滿意為止',                  price: 299, featured: true  },
 ];
 
 const P11PurchaseModal = ({ item, onClose, onConfirm }) => {
@@ -1962,32 +2019,32 @@ const P11Pack = ({ setScreen }) => {
       <StatusBar />
       <NavBack onClick={() => setScreen('p7')} light />
       <div className="header">
-        <h2 style={{ marginTop: 8 }}>更換次數包</h2>
-        <p>用於修改年度圖鑑已鎖入的格子</p>
+        <h2 style={{ marginTop: 8 }}>多一點選擇</h2>
+        <p>想換掉日誌裡的 Buddy 時用</p>
       </div>
       <div className="stash">
         <span className="ticket">🎫</span>
         <div>
           <b>3</b><span style={{ fontSize: 11, color: '#666', marginLeft: 4, fontWeight: 700 }}>次</span>
-          <div className="label">目前可用更換次數</div>
+          <div className="label">你還有 3 次機會</div>
         </div>
       </div>
       <div className="packs">
         {SWAP_PACKS.map((pack) => (
           <div key={pack.id} className={`pack-card ${pack.featured ? 'featured' : ''}`}>
-            {pack.featured && <div className="ribbon">划算 5 折</div>}
+            {pack.featured && <div className="ribbon">最划算</div>}
             <h3>{pack.name}</h3>
             <div className="qty">{pack.qty}<span> 次</span></div>
             <div className="desc">{pack.desc}</div>
             <div className="price-row">
               <b>NT$ {pack.price}</b>
-              <button className="buy" onClick={() => setPurchasing(pack)}>購買</button>
+              <button className="buy" onClick={() => setPurchasing(pack)}>帶回家</button>
             </div>
           </div>
         ))}
       </div>
       <div style={{ padding: '16px 18px 80px', fontSize: 11, color: '#888', lineHeight: 1.6 }}>
-        ※ 更換次數永久有效，不會過期。<br />
+        ※ 機會永遠有效。<br />
         ※ 購買即扣款 · 不退費。
       </div>
 
