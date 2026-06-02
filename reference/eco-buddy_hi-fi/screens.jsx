@@ -779,19 +779,19 @@ const P2bResult = ({ setScreen, dispatch, tweaks = {}, setTweak = () => {} }) =>
 /* ----- P4 IAP Config (模擬後台 CMS/API 設定，前端不寫死任何商品內容) ----- */
 const SHOP_IAP_CONFIG = {
   sprintPack: {
-    id: 'sprint-pack', emoji: '🎁', name: '月底衝刺禮包', price: 199, currency: 'cash',
+    id: 'sprint-pack', emoji: '🎁', name: '月底衝刺禮包', price: 199, currency: 'cash', cashChannel: 'newebpay',
     desc: '幫 Buddy 在月底衝到最佳狀態，選出最美的夥伴日誌',
     activeWindow: '每月 22–28 日',
     contents: [
       { emoji: '🍔', name: '月份限定食物 ×10', sub: '不佔週配額，直接存入食物欄' },
       { emoji: '🪮', name: '精華梳 ×3', sub: '潔淨 +30 · 心情 +20' },
       { emoji: '🍪', name: '豪華零食 ×3', sub: '體力 +30 · 心情 +25' },
-      { emoji: '🎀', name: '月份限定裝飾 ×1', sub: '永久穿戴，當月主題' },
+      { emoji: '🎀', name: '月份限定裝扮 ×1', sub: '永久穿戴，當月主題' },
       { emoji: '🎬', name: '廣告道具加速', sub: '本月剩餘天數：每日上限 5→8 次' },
     ],
   },
   monthlyPass: {
-    id: 'monthly-pass', emoji: '🎫', name: '月度通行證', price: 149, currency: 'cash',
+    id: 'monthly-pass', emoji: '🎫', name: '月度通行證', price: 149, currency: 'cash', cashChannel: 'newebpay',
     desc: '整個月都是你和 Buddy 的專屬時光，每天都有小驚喜',
     validDays: 30,
     benefits: [
@@ -811,7 +811,7 @@ const SprintHeroBanner = ({ purchased, daysLeft = 6, onClick }) => (
     <div className="sprint-body">
       <div className="sprint-tag">限時優惠 · 22–28 日</div>
       <h3>月底衝刺禮包</h3>
-      <div className="sprint-brief">食物 ×10 ・ 稀有道具 ×6 ・ 月份限定裝飾</div>
+      <div className="sprint-brief">食物 ×10 ・ 稀有道具 ×6 ・ 月份限定裝扮</div>
       <div className="sprint-price">NT$ 199</div>
     </div>
     <div className="sprint-cd">
@@ -839,6 +839,76 @@ const MonthlyPassCard = ({ hasPass, validUntil = '6/30', onClick }) => (
     }
   </div>
 );
+
+/* ----- P4 helper: CosmeticDetailModal (裝扮商品詳情 + 試穿 — 彈窗) ----- */
+const CosmeticDetailSheet = ({ item, isPhase2, onClose, onBuy }) => {
+  const [tryingOn, setTryingOn] = useState(false);
+  return (
+    <div className="modal-backdrop" onClick={onClose}>
+      <div onClick={e => e.stopPropagation()} style={{
+        background: '#fff', borderRadius: 24, width: '100%', maxWidth: 340,
+        animation: 'slide-up .35s cubic-bezier(.16,1,.3,1)',
+        overflow: 'hidden',
+      }}>
+
+        {/* 試穿 Buddy 預覽區 — 大尺寸 */}
+        <div style={{
+          background: 'linear-gradient(160deg,#FFF0DC,#FAE0B8)',
+          padding: '32px 0 20px',
+          display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
+        }}>
+          <div style={{ fontSize: 110, position: 'relative', lineHeight: 1 }}>
+            🐢
+            {tryingOn && (
+              <div style={{
+                position: 'absolute', top: -14, right: -18,
+                fontSize: 48,
+              }}>{item.emoji}</div>
+            )}
+          </div>
+          <div style={{ fontSize: 13, color: '#A06030', fontWeight: 700, marginTop: 10 }}>
+            {tryingOn ? `正在試穿「${item.name}」` : 'Buddy 預覽'}
+          </div>
+          <button
+            onClick={() => setTryingOn(v => !v)}
+            style={{
+              marginTop: 6, fontSize: 13, fontWeight: 700,
+              background: tryingOn ? '#FFEFE0' : '#FFF',
+              color: tryingOn ? '#FF5000' : '#666',
+              border: `1px solid ${tryingOn ? '#FF5000' : '#DDD'}`,
+              borderRadius: 999, padding: '7px 22px', cursor: 'pointer',
+            }}>
+            {tryingOn ? '還原' : '試穿看看'}
+          </button>
+        </div>
+
+        {/* 商品資訊 */}
+        <div style={{ padding: '16px 20px 20px' }}>
+          <div className="product-detail-head" style={{ marginBottom: 12 }}>
+            <div className="d-icon">{item.emoji}</div>
+            <div>
+              <h3>{item.name}</h3>
+              <div className="d-sub">{item.desc}</div>
+            </div>
+          </div>
+          <div style={{ fontSize: 11, color: '#AAA', marginBottom: 16, lineHeight: 1.5 }}>
+            購買即視為同意
+            <span style={{ color: '#060E9F', textDecoration: 'underline' }}>退款政策</span>
+            。裝扮退款請洽平台客服。
+          </div>
+          <div className="product-detail-footer">
+            <div className="price-tag">NT$ {item.price}</div>
+            {isPhase2 ? (
+              <button className="buy-cta" onClick={() => onBuy(item)}>確認購買</button>
+            ) : (
+              <button className="buy-cta" disabled style={{ background: '#E0E0E0', color: '#999', cursor: 'default' }}>即將開放</button>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 /* ----- P4 helper: ProductDetailSheet (商品詳情 bottom sheet) ----- */
 const ProductDetailSheet = ({ item, onClose, onBuy }) => {
@@ -884,13 +954,14 @@ const P4Shop = ({ setScreen, state, dispatch, tweaks }) => {
   const [successItem, setSuccessItem] = useState(null);
   const [showPointSrc, setShowPointSrc] = useState(false);
   const [detailItem, setDetailItem] = useState(null);
+  const [cosmeticDetail, setCosmeticDetail] = useState(null);
   const isSprintPeriod = tweaks?.shopSprint ?? false;
-  const isPhase2 = (tweaks?.phase ?? 1) >= 2;
+  const isPhase2 = (tweaks?.shopPhase ?? 1) >= 2;
 
   const cats = [
   { id: 'food', label: '食物' },
   { id: 'tool', label: '玩具' },
-  { id: 'decor', label: '裝扮' },
+  { id: 'cosmetic', label: '裝扮' },
   { id: 'music', label: '氣氛' },
   { id: 'package', label: '禮包' }];
 
@@ -913,9 +984,10 @@ const P4Shop = ({ setScreen, state, dispatch, tweaks }) => {
     { id: 'ball', emoji: '⚾', name: '小球', desc: '心情 +15', price: 25, currency: 'heart' },
     { id: 'snack', emoji: '🍪', name: '零食', desc: '體力 +15、心情 +15', price: 20, currency: 'heart' }],
 
-    decor: [
-    { id: 'star-hat', emoji: '⭐', name: '星辰帽', desc: '限定裝飾 · 閃閃發光', price: 299, currency: 'cash' },
-    { id: 'crystal-bow', emoji: '🎀', name: '水晶蝴蝶結', desc: '限定裝飾 · 精緻優雅', price: 249, currency: 'cash' }],
+    cosmetic: [
+    { id: 'star-hat', emoji: '⭐', name: '星辰帽', desc: '限定裝扮 · 閃閃發光', price: 299, currency: 'cash', cashChannel: 'platform-iap' },
+    { id: 'crystal-bow', emoji: '🎀', name: '水晶蝴蝶結', desc: '限定裝扮 · 精緻優雅', price: 249, currency: 'cash', cashChannel: 'platform-iap' },
+    { id: 'rainbow-halo', emoji: '🌈', name: '彩虹光暈', desc: 'Phase 1 預覽款 · 閃耀登場', price: 199, currency: 'cash', cashChannel: 'platform-iap' }],
 
     music: []
 
@@ -944,6 +1016,24 @@ const P4Shop = ({ setScreen, state, dispatch, tweaks }) => {
           )}
         </div>
       </div>
+
+{/* Coming Soon bar — 禮包 / 裝扮 Phase 1 時顯示 */}
+      {!isPhase2 && (tab === 'package' || tab === 'cosmetic') && (
+        <div style={{
+          margin: '0 18px 12px',
+          background: '#FFF3E0',
+          borderRadius: 12,
+          padding: '10px 16px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 8,
+        }}>
+          <span style={{ fontSize: 18 }}>🔔</span>
+          <span style={{ fontSize: 13, fontWeight: 700, color: '#7A4800' }}>
+            付費道具即將推出，敬請期待
+          </span>
+        </div>
+      )}
 
 {/* 禮包分頁 — 2-column grid */}
       {(() => {
@@ -974,6 +1064,7 @@ const P4Shop = ({ setScreen, state, dispatch, tweaks }) => {
                       ) : (
                         <>
                           <b style={{ fontFamily: 'var(--font-en)', fontWeight: 900, color: '#060E9F', fontSize: 15 }}>NT$ {it.price}</b>
+
                           <button className="buy-btn" disabled={!isPhase2}
                             onClick={(e) => { e.stopPropagation(); if (isPhase2) { hasDetail ? setDetailItem(it) : setPurchasing(it); } }}
                             style={!isPhase2 ? { opacity: 0.45, cursor: 'default' } : {}}>
@@ -990,10 +1081,45 @@ const P4Shop = ({ setScreen, state, dispatch, tweaks }) => {
         );
       })()}
 
-{/* 現金商品 — 橫向滑動卡片 strip（禮包 tab 不使用） */}
+{/* 裝扮分頁 — 2-column grid，Phase 1 disabled CTA */}
+      {(() => {
+        if (tab !== 'cosmetic') return null;
+        const cosItems = items['cosmetic'] || [];
+        return (
+          <div>
+            <div style={{ fontSize: 13, fontWeight: 800, color: '#888', letterSpacing: '.04em', padding: '10px 18px 4px' }}>
+              {isPhase2 ? '限定裝扮' : '即將上架'}
+            </div>
+            <div className="shop-grid">
+              {cosItems.map(it => {
+                const canBuy = isPhase2;
+                return (
+                  <div key={it.id} className="shop-card"
+                    onClick={() => setCosmeticDetail(it)}
+                    style={{ cursor: 'pointer' }}>
+                    <div className="thumb">{it.emoji}</div>
+                    <h4>{it.name}</h4>
+                    <div className="desc">{it.desc}</div>
+                    <div className="price">
+                      <b style={{ fontFamily: 'var(--font-en)', fontWeight: 900, color: '#060E9F', fontSize: 15 }}>NT$ {it.price}</b>
+                      <button className="buy-btn" disabled={!isPhase2}
+                        onClick={(e) => { e.stopPropagation(); setCosmeticDetail(it); }}
+                        style={!isPhase2 ? { background: '#E0E0E0', color: '#999', cursor: 'default' } : {}}>
+                        {!isPhase2 ? '即將開放' : '查看'}
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        );
+      })()}
+
+{/* 現金商品 — 橫向滑動卡片 strip（禮包 / 裝扮 tab 有專屬 section，不使用） */}
       {(() => {
         const cashItems = (items[tab] || []).filter(it => it.currency === 'cash');
-        if (!cashItems.length || tab === 'package') return null;
+        if (!cashItems.length || tab === 'package' || tab === 'cosmetic') return null;
         return (
           <div>
             <div style={{ fontSize: 13, fontWeight: 800, color: '#888', letterSpacing: '.04em', padding: '10px 18px 4px' }}>現金商品</div>
@@ -1066,6 +1192,15 @@ const P4Shop = ({ setScreen, state, dispatch, tweaks }) => {
         />
       }
 
+      {cosmeticDetail &&
+        <CosmeticDetailSheet
+          item={cosmeticDetail}
+          isPhase2={isPhase2}
+          onClose={() => setCosmeticDetail(null)}
+          onBuy={(item) => { setCosmeticDetail(null); setPurchasing(item); }}
+        />
+      }
+
       {purchasing &&
         <ShopPurchaseModal
           item={purchasing}
@@ -1074,6 +1209,9 @@ const P4Shop = ({ setScreen, state, dispatch, tweaks }) => {
           onConfirm={(method) => {
             const item = purchasing;
             dispatch({ type: 'BUY', item });
+            if (method === 'cash') {
+              dispatch({ type: 'PURCHASE_CASH', id: `ORD-${String(Date.now()).slice(-8)}`, name: item.name, price: item.price, date: new Date().toISOString().slice(0, 10) });
+            }
             setPurchasing(null);
             setSuccessItem({ ...item, paidWith: method });
           }}
@@ -1086,6 +1224,8 @@ const P4Shop = ({ setScreen, state, dispatch, tweaks }) => {
           state={state}
           onClose={() => setSuccessItem(null)}
           onGoToBag={() => { setSuccessItem(null); setScreen('p9'); }}
+          onGoToWardrobe={() => { setSuccessItem(null); setScreen('p8'); }}
+          setScreen={setScreen}
         />
       }
 
@@ -1095,17 +1235,30 @@ const P4Shop = ({ setScreen, state, dispatch, tweaks }) => {
 };
 
 /* ----- P4 helper: 購買確認 Modal ----- */
+const DEMO_ERRORS = [
+  { id: 'none',    label: '正常（成功）' },
+  { id: 'cancel',  label: '用戶取消付款' },
+  { id: 'timeout', label: '付款逾時' },
+  { id: 'verify',  label: '驗證失敗' },
+  { id: 'network', label: '網路錯誤' },
+];
+const ERROR_MESSAGES = {
+  cancel:  '付款已取消',
+  timeout: '付款逾時，請重試',
+  verify:  '付款驗證失敗，請聯繫客服',
+  network: '網路不穩定，請檢查連線後重試',
+};
 const ShopPurchaseModal = ({ item, state, onClose, onConfirm }) => {
   const isCash = item.currency === 'cash';
+  const isNewebpay = item.cashChannel === 'newebpay';
+  const isIAP = item.cashChannel === 'platform-iap';
   const insufficient = !isCash && state.points < item.price;
-  const [payMethod, setPayMethod] = useState('apple');
+  const [demoError, setDemoError] = useState('none');
   const [toast, setToast] = useState(null);
-  const [payFailDemo, setPayFailDemo] = useState(false);
 
   const handleConfirm = () => {
-    if (payFailDemo) {
-      setToast(DIALOGUES.sys.p4.payFail);
-      setPayFailDemo(false);
+    if (demoError !== 'none') {
+      setToast(ERROR_MESSAGES[demoError]);
       return;
     }
     onConfirm(isCash ? 'cash' : 'points');
@@ -1118,6 +1271,7 @@ const ShopPurchaseModal = ({ item, state, onClose, onConfirm }) => {
         <h3>{item.name}</h3>
         <p>{item.desc}</p>
 
+        {/* 付款方式 */}
         {!isCash && insufficient ? (
           <div style={{ background: '#FFF3F0', borderRadius: 12, padding: '14px 16px', marginBottom: 14 }}>
             <div style={{ fontWeight: 800, color: '#D9382A', fontSize: 15, marginBottom: 4 }}>ECOCO 點數不足，無法完成購買</div>
@@ -1132,37 +1286,35 @@ const ShopPurchaseModal = ({ item, state, onClose, onConfirm }) => {
             </span>
             <span className="rhs">- {item.price} pt</span>
           </div>
-        ) : (
-          <div style={{ marginBottom: 14 }}>
-            <div
-              className={`pay-row ${payMethod === 'apple' ? 'active' : ''}`}
-              onClick={() => setPayMethod('apple')}
-            >
-              <span className="lhs">
-                🍎 Apple Pay
-                {payMethod === 'apple' && <span style={{ color: 'var(--ecoco-orange)', marginLeft: 4 }}>✓</span>}
-              </span>
-              <span className="rhs">NT$ {item.price}</span>
-            </div>
-            <div
-              className={`pay-row ${payMethod === 'google' ? 'active' : ''}`}
-              onClick={() => setPayMethod('google')}
-              style={{ marginTop: 8 }}
-            >
-              <span className="lhs">
-                🌐 Google Pay
-                {payMethod === 'google' && <span style={{ color: 'var(--ecoco-orange)', marginLeft: 4 }}>✓</span>}
-              </span>
-              <span className="rhs">NT$ {item.price}</span>
-            </div>
+        ) : isNewebpay ? (
+          <div className="pay-row active" style={{ marginBottom: 14 }}>
+            <span className="lhs">💳 藍新 NewebPay <span style={{ color: 'var(--ecoco-orange)', marginLeft: 4 }}>✓</span></span>
+            <span className="rhs">NT$ {item.price}</span>
+          </div>
+        ) : isIAP ? (
+          <div className="pay-row active" style={{ marginBottom: 14 }}>
+            <span className="lhs">🍎 App Store / Google Play <span style={{ color: 'var(--ecoco-orange)', marginLeft: 4 }}>✓</span></span>
+            <span className="rhs">NT$ {item.price}</span>
+          </div>
+        ) : null}
+
+        {/* 退款聲明 */}
+        {isCash && (
+          <div style={{ fontSize: 11, color: '#AAA', marginBottom: 12, lineHeight: 1.5 }}>
+            購買即視為同意
+            <span style={{ color: '#060E9F', textDecoration: 'underline', cursor: 'pointer' }}>退款政策</span>
+            。數位商品一經購買恕不退款，{isIAP ? '裝扮類商品退款請洽 App Store / Google Play 客服' : '如有問題請聯繫 ECOCO 客服'}。
           </div>
         )}
 
-        {/* DEMO toggle — 模擬付款失敗（採系統 alert） */}
-        <label className="p4-demo-row">
-          <input type="checkbox" checked={payFailDemo} onChange={(e) => setPayFailDemo(e.target.checked)} />
-          <span>DEMO · 模擬付款失敗</span>
-        </label>
+        {/* DEMO error selector */}
+        <div style={{ marginBottom: 12 }}>
+          <div style={{ fontSize: 10, color: '#BBB', marginBottom: 4, letterSpacing: '.06em' }}>DEMO · 模擬錯誤情境</div>
+          <select value={demoError} onChange={e => setDemoError(e.target.value)}
+            style={{ fontSize: 12, border: '1px solid #ddd', borderRadius: 8, padding: '4px 8px', width: '100%', color: '#666' }}>
+            {DEMO_ERRORS.map(o => <option key={o.id} value={o.id}>{o.label}</option>)}
+          </select>
+        </div>
 
         <div className="modal-actions">
           <button onClick={onClose} style={{ background: 'var(--gray-light)', color: '#666' }}>取消</button>
@@ -1178,7 +1330,10 @@ const ShopPurchaseModal = ({ item, state, onClose, onConfirm }) => {
 };
 
 /* ----- P4 helper: 購買成功 Modal ----- */
-const ShopSuccessModal = ({ item, state, onClose, onGoToBag }) => {
+const ShopSuccessModal = ({ item, state, onClose, onGoToBag, onGoToWardrobe, setScreen }) => {
+  const isCash = item.paidWith === 'cash';
+  const isCosmetic = item.cashChannel === 'platform-iap';
+  const orderId = isCash ? `ORD-${String(Date.now()).slice(-8)}` : null;
   return (
     <div className="modal-backdrop" onClick={onClose}>
       <div className="modal" onClick={(e) => e.stopPropagation()} style={{ textAlign: 'center' }}>
@@ -1198,18 +1353,24 @@ const ShopSuccessModal = ({ item, state, onClose, onGoToBag }) => {
           <div style={{ display: 'flex', justifyContent: 'space-between', color: '#555' }}>
             <span>付款方式</span>
             <span style={{ fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-              {item.paidWith === 'points'
+              {!isCash
                 ? <><img src="assets/icon-ecoco-point.svg" alt="" width="14" height="14" />ECOCO 點數</>
-                : '💳 Apple / Google Pay'}
+                : isCosmetic ? '🍎 App Store / Google Play' : '💳 藍新 NewebPay'}
             </span>
           </div>
-          {item.paidWith === 'points' && (
+          {!isCash && (
             <div style={{ display: 'flex', justifyContent: 'space-between', color: '#555' }}>
               <span>剩餘 ECOCO 點數</span>
               <span style={{ fontWeight: 800, color: 'var(--ecoco-orange)', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
                 <img src="assets/icon-ecoco-point.svg" alt="" width="14" height="14" />
                 {(state.points - item.price).toLocaleString()} pt
               </span>
+            </div>
+          )}
+          {orderId && (
+            <div style={{ display: 'flex', justifyContent: 'space-between', color: '#555' }}>
+              <span>訂單編號</span>
+              <span style={{ fontWeight: 700, fontFamily: 'var(--font-en)', fontSize: 12 }}>{orderId}</span>
             </div>
           )}
         </div>
@@ -1220,6 +1381,19 @@ const ShopSuccessModal = ({ item, state, onClose, onGoToBag }) => {
               border: 'none', borderRadius: 999, padding: '13px 0',
               fontWeight: 800, fontSize: 14, cursor: 'pointer',
             }}>好的，繼續</button>
+          ) : isCosmetic ? (
+            <>
+              <button onClick={onGoToWardrobe} style={{
+                flex: 1, background: 'var(--ecoco-orange)', color: '#fff',
+                border: 'none', borderRadius: 999, padding: '13px 0',
+                fontWeight: 800, fontSize: 14, cursor: 'pointer',
+              }}>去「我的」查看與換裝</button>
+              <button onClick={onClose} style={{
+                flex: 1, background: 'var(--gray-light)', color: '#555',
+                border: 'none', borderRadius: 999, padding: '13px 0',
+                fontWeight: 700, fontSize: 14, cursor: 'pointer',
+              }}>繼續逛</button>
+            </>
           ) : (
             <>
               <button onClick={onGoToBag} style={{
@@ -1234,7 +1408,12 @@ const ShopSuccessModal = ({ item, state, onClose, onGoToBag }) => {
               }}>繼續逛</button>
             </>
           )}
-        </div>
+        {isCash && (
+          <button
+            onClick={() => { onClose(); setScreen('p4-orders'); }}
+            style={{ marginTop: 10, background: 'none', border: 'none', color: '#888', fontSize: 13, cursor: 'pointer', textDecoration: 'underline' }}
+          >查看訂單 ›</button>
+        )}
       </div>
     </div>
   );
@@ -1284,7 +1463,7 @@ const P5Missions = ({ setScreen, state, dispatch, tweaks }) => {
   const [tab, setTab] = useState('daily');
   const [toast, setToast] = useState(null);
   const [pulsing, setPulsing] = useState(false);
-  const isPhase2 = (tweaks?.phase ?? 1) >= 2;
+  const isPhase2 = (tweaks?.shopPhase ?? 1) >= 2;
   const tabs = [
     { id: 'daily',   label: '今日' },
     ...(isPhase2 ? [
@@ -1475,7 +1654,7 @@ const P6Ads = ({ setScreen, state, dispatch }) => {
 
 /* ═══════════════ P7 · Dex ═══════════════ */
 const P7Dex = ({ setScreen, state, dispatch, onOpenPicker, tweaks }) => {
-  const isPhase2 = (tweaks?.phase ?? 1) >= 2;
+  const isPhase2 = (tweaks?.shopPhase ?? 1) >= 2;
   const lockedCode = state.lockedMonthCode;
 
   // Phase 2 角色清單（Phase 1 只有小海龜）
@@ -1692,6 +1871,7 @@ const P8Profile = ({ setScreen, state }) => {
     { icon: '🎒', label: '玩具箱', sub: `${state.tools.length} 個玩具`, go: 'p9' },
     { icon: '✅', label: '今日陪伴', sub: '還有 3 件事可以做', go: 'p5' },
     { icon: '🛒', label: '商店', sub: `點數 ${state.points.toLocaleString()}`, go: 'p4' },
+    { icon: '🧾', label: '購買紀錄', sub: state.orderHistory && state.orderHistory.length > 0 ? state.orderHistory[0].name : '尚無購買紀錄', go: 'p4-orders' },
     { icon: 'pt', label: '點數明細', sub: '本月 +382 · 帶食物回家 12 次', action: () => setShowPointSrc(true) }]
 
   },
@@ -2106,7 +2286,7 @@ const FAQ_DATA = [
     items: [
       { q: '怎麼取得 ECOCO 點數？', a: '帶食物回家給 Buddy、在補充站消費、完成今日陪伴，都能獲得 ECOCO 點數。' },
       { q: 'ECOCO 點數會過期嗎？', a: '詳細內容請至 ECOCO 官網常見問題查看。' },
-      { q: '商店可以買什麼？', a: '商店分為食物、道具、裝飾、禮包四個分類。食物與道具用 ECOCO 點數購買；裝飾與禮包（月底衝刺禮包、月度通行證等）用現金購買。點數與現金不互換、不互買，每張卡片都會標示「點數」或「NT$」。' },
+      { q: '商店可以買什麼？', a: '商店分為食物、玩具、裝扮、禮包四個分類。食物與玩具用 ECOCO 點數購買；裝扮與禮包（月底衝刺禮包、月度通行證等）用現金購買。點數與現金不互換、不互買，每張卡片都會標示「點數」或「NT$」。' },
       { q: '月底衝刺禮包是什麼？', a: '每月 22–28 日上架，幫 Buddy 在月底前衝一波狀態與日誌收藏的限時禮包，商店頁會置頂顯示倒數天數。' },
     ],
   },
@@ -2194,10 +2374,70 @@ const PNormalHome = ({ setScreen }) => (
 );
 
 
+/* ═══════════════ P4-Orders · 購買紀錄 ═══════════════ */
+const STATUS_CONFIG = {
+  success: { label: '已完成', cls: 'order-status-success' },
+  pending: { label: '處理中', cls: 'order-status-pending' },
+  failed:  { label: '失敗',   cls: 'order-status-failed' },
+};
+
+const P4Orders = ({ setScreen, state }) => {
+  const orders = state.orderHistory ?? [];
+  return (
+    <div className="screen" style={{ background: 'var(--bg-cream, #FAE0B8)' }}>
+      <StatusBar />
+      <NavBack onClick={() => setScreen('p8')} />
+      <div className="screen-scroll" style={{ paddingTop: 56 }}>
+        <h2 style={{ fontSize: 18, fontWeight: 900, color: '#222', padding: '0 20px 16px' }}>購買紀錄</h2>
+
+        {orders.length === 0 ? (
+          <div className="order-empty">
+            <div style={{ fontSize: 56 }}>🧾</div>
+            <div>還沒有購買紀錄</div>
+          </div>
+        ) : (
+          <div style={{ padding: '0 16px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {orders.map((order) => {
+              const sc = STATUS_CONFIG[order.status] || STATUS_CONFIG.success;
+              return (
+                <div key={order.id} className="order-card">
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
+                    <div style={{ fontWeight: 800, fontSize: 14, color: '#222' }}>{order.name}</div>
+                    <span className={sc.cls}>{sc.label}</span>
+                  </div>
+                  <div style={{ fontSize: 12, color: '#888', display: 'flex', flexDirection: 'column', gap: 3 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <span>訂單編號</span>
+                      <span style={{ fontFamily: 'var(--font-en)', fontWeight: 600 }}>{order.id}</span>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <span>金額</span>
+                      <span style={{ fontWeight: 700, color: '#060E9F' }}>NT$ {order.price}</span>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <span>購買日期</span>
+                      <span>{order.date}</span>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        <div style={{ padding: '24px 20px 40px', textAlign: 'center', fontSize: 11, color: '#aaa', lineHeight: 1.6 }}>
+          裝扮類商品由 App Store / Google Play 管理，請至手機系統查詢訂單
+        </div>
+      </div>
+    </div>
+  );
+};
+
 /* ───── Export ───── */
 Object.assign(window, {
   P1Home, P2Scan, P2bResult,
   P4Shop, P5Missions, P6Ads, P7Dex,
+  P4Orders,
   P8Profile, P8Faq,
   P9Bag,
   P10Picker, P11Pack, P11PurchaseModal, P11SuccessModal,

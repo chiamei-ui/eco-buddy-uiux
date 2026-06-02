@@ -21,6 +21,11 @@ const DEFAULT_STATE = {
     { id:'feather', name:'逗貓棒', emoji:'🪶', count:2, hoursLeft:18 },
     { id:'brush',   name:'梳子',   emoji:'🪮', count:1, hoursLeft:4  },
   ],
+  orderHistory: [
+    { id: 'ORD-20260501', name: '月度通行證', price: 149, date: '2026-05-01', status: 'success' },
+    { id: 'ORD-20260515', name: '五月衝刺禮包', price: 199, date: '2026-05-15', status: 'pending' },
+    { id: 'ORD-20260520', name: '五月衝刺禮包', price: 199, date: '2026-05-20', status: 'failed' },
+  ],
   dexStates: [
     { code:'01', name:'瀕死邊緣', unlocked:true,  tint:'grayscale(0.5) brightness(0.7)' },
     { code:'07', name:'潔癖徹底', unlocked:true,  tint:'brightness(1.05) saturate(0.7)' },
@@ -124,6 +129,11 @@ function stateReducer(state, action){
         },
       };
     }
+    case 'PURCHASE_CASH':
+      return {
+        ...state,
+        orderHistory: [{ id: action.id, name: action.name, price: action.price, date: action.date, status: 'success' }, ...state.orderHistory],
+      };
     case 'CLAIM_MISSION':
       // #21 日常任務獎勵：食物 ×1 + 心情 +3（食物加在第一個未鎖食物格）
       return {
@@ -261,7 +271,7 @@ const PushDemo = ({ setScreen }) => {
 
 /* ───────── Top-level App ───────── */
 const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
-  "phase": 1,
+  "shopPhase": 1,
   "p2DemoType": "recycle",
   "p2ErrKind": null,
   "p2bQuotaFull": false,
@@ -274,7 +284,7 @@ const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
   "sprintDaysLeft": null
 }/*EDITMODE-END*/;
 
-const P8_SUBS = new Set(['p8-faq']);
+const P8_SUBS = new Set(['p8-faq', 'p4-orders']);
 const TAB_ORDER = ['p1','p4','p5','p7'];
 
 const App = () => {
@@ -334,6 +344,7 @@ const App = () => {
       case 'p10': return <P7Dex setScreen={setScreen} state={state} dispatch={dispatch} onOpenPicker={() => setDexPickerOpen(true)} tweaks={tweaks} />;
       case 'p11': return <P11Pack setScreen={setScreen} />;
       case 'p12': return <P12RefillResult setScreen={setScreen} state={state} dispatch={dispatch} payload={screenPayload} tweaks={tweaks} />;
+      case 'p4-orders': return <P4Orders setScreen={setScreen} state={state} />;
       case 'p8-faq':    return <P8Faq setScreen={setScreen} />;
       default: return null;
     }
@@ -449,14 +460,14 @@ const InlineTweaks = ({ tweaks, setTweak, setScreen, state, dispatch, screen }) 
       {/* 開發範圍：僅在影響 Phase 的畫面顯示 */}
       {(isP4 || isP5) && (
         <>
-          <div style={tweakLabel}>開發範圍</div>
+          <div style={tweakLabel}>商店上線階段 (shopPhase)</div>
           <Segmented
-            value={tweaks.phase === 2 ? '2' : '1'}
-            onChange={v => setTweak('phase', Number(v))}
-            options={[{v:'1',l:'Phase 1'},{v:'2',l:'Phase 2'}]}
+            value={tweaks.shopPhase === 2 ? '2' : '1'}
+            onChange={v => setTweak('shopPhase', Number(v))}
+            options={[{v:'1',l:'Phase 1 封測'},{v:'2',l:'Phase 2 正式'}]}
           />
           <div style={{fontSize:10,color:'rgba(255,255,255,0.3)',marginTop:4,lineHeight:1.4}}>
-            切換後 P4 禮包、P5 週/月任務 Tab 跟著顯示/隱藏
+            Phase 1：禮包/裝扮 Coming Soon，僅點數可購。Phase 2：開放金流。
           </div>
         </>
       )}
