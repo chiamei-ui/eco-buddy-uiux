@@ -265,6 +265,9 @@ const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
   "p2DemoType": "recycle",
   "p2ErrKind": null,
   "p2bQuotaFull": false,
+  "p2bEvolve": false,
+  "p1Evolve": false,
+  "p12Evolve": false,
   "shopSprint": false,
   "sprintPrice": null,
   "passPrice": null,
@@ -319,7 +322,7 @@ const App = () => {
       case 'push': return <PushDemo setScreen={setScreen} />;
       case 'p0a': return <P1Home state={state} dispatch={dispatch} setScreen={setScreen} dragManager={dragManager} payload={null} showTutorial={true} onTutorialDone={() => setScreen('p1')} />;
       case 'p0':  return <PNormalHome setScreen={setScreen} />;
-      case 'p1':  return <P1Home state={state} dispatch={dispatch} setScreen={setScreen} dragManager={dragManager} payload={screenPayload} />;
+      case 'p1':  return <P1Home state={state} dispatch={dispatch} setScreen={setScreen} dragManager={dragManager} payload={screenPayload} tweaks={tweaks} />;
       case 'p2':  return <P2Scan setScreen={setScreen} dispatch={dispatch} tweaks={tweaks} setTweak={setTweak} />;
       case 'p2b': return <P2bResult setScreen={setScreen} dispatch={dispatch} state={state} tweaks={tweaks} setTweak={setTweak} />;
       case 'p4':  return <P4Shop setScreen={setScreen} state={state} dispatch={dispatch} tweaks={tweaks} />;
@@ -330,7 +333,7 @@ const App = () => {
       case 'p9':  return <P9Bag setScreen={setScreen} state={state} dispatch={dispatch} />;
       case 'p10': return <P7Dex setScreen={setScreen} state={state} dispatch={dispatch} onOpenPicker={() => setDexPickerOpen(true)} tweaks={tweaks} />;
       case 'p11': return <P11Pack setScreen={setScreen} />;
-      case 'p12': return <P12RefillResult setScreen={setScreen} state={state} dispatch={dispatch} payload={screenPayload} />;
+      case 'p12': return <P12RefillResult setScreen={setScreen} state={state} dispatch={dispatch} payload={screenPayload} tweaks={tweaks} />;
       case 'p8-faq':    return <P8Faq setScreen={setScreen} />;
       default: return null;
     }
@@ -478,6 +481,24 @@ const InlineTweaks = ({ tweaks, setTweak, setScreen, state, dispatch }) => {
           value={tweaks.p2bQuotaFull ? 'full' : 'normal'}
           onChange={v => setTweak('p2bQuotaFull', v === 'full')}
           options={[{v:'normal',l:'配額未滿'},{v:'full',l:'本週已領完'}]}
+        />
+        <div style={{...tweakLabel, marginTop:8}}>P2b · 變身觸發</div>
+        <Segmented
+          value={tweaks.p2bEvolve ? 'yes' : 'no'}
+          onChange={v => setTweak('p2bEvolve', v === 'yes')}
+          options={[{v:'no',l:'不觸發'},{v:'yes',l:'觸發變身'}]}
+        />
+        <div style={{...tweakLabel, marginTop:8}}>P1 · 變身觸發（餵食後）</div>
+        <Segmented
+          value={tweaks.p1Evolve ? 'yes' : 'no'}
+          onChange={v => setTweak('p1Evolve', v === 'yes')}
+          options={[{v:'no',l:'不觸發'},{v:'yes',l:'觸發變身'}]}
+        />
+        <div style={{...tweakLabel, marginTop:8}}>P12 · 變身觸發（計數後）</div>
+        <Segmented
+          value={tweaks.p12Evolve ? 'yes' : 'no'}
+          onChange={v => setTweak('p12Evolve', v === 'yes')}
+          options={[{v:'no',l:'不觸發'},{v:'yes',l:'觸發變身'}]}
         />
       </div>
 

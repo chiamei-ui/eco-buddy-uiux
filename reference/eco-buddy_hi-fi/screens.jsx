@@ -146,11 +146,12 @@ const OnboardingSpotlight = ({ step, refs, onNext, onSkip }) => {
 };
 
 /* ═══════════════ P1 · Buddy Home ═══════════════ */
-const P1Home = ({ state, dispatch, setScreen, dragManager, payload, showTutorial, onTutorialDone }) => {
+const P1Home = ({ state, dispatch, setScreen, dragManager, payload, showTutorial, onTutorialDone, tweaks = {} }) => {
   const [dockTab, setDockTab] = useState('food'); // food | tools
   const [touched, setTouched] = useState(false);
   const [eating, setEating] = useState(false);
   const [bubble, setBubble] = useState(null); // {text, error}
+  const [showEvolve, setShowEvolve] = useState(false);
   const [p6SheetOpen, setP6SheetOpen] = useState(false);
   const [ambientVisible, setAmbientVisible] = useState(true);
   const [ambientDismissing, setAmbientDismissing] = useState(false);
@@ -255,7 +256,10 @@ const P1Home = ({ state, dispatch, setScreen, dragManager, payload, showTutorial
       dispatch({ type: 'FEED', food: payload.id, hpGain: 5 });
       addRise('+5 體力', pos);
       showBubble({ text: '好好吃！謝謝你～', error: false });
-      setTimeout(() => setEating(false), 1500);
+      setTimeout(() => {
+        setEating(false);
+        if (tweaks.p1Evolve) setShowEvolve(true);
+      }, 1500);
     } else if (payload.kind === 'tool') {
       const tool = payload.id;
       // tool max-stat guards
@@ -294,6 +298,7 @@ const P1Home = ({ state, dispatch, setScreen, dragManager, payload, showTutorial
 
   return (
     <div className="screen p1">
+      {showEvolve && <EvolveOverlay onDone={() => setShowEvolve(false)} />}
       <StatusBar />
       <div className="p1-header">
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -602,10 +607,44 @@ const P2Scan = ({ setScreen, dispatch, tweaks = {}, setTweak = () => {} }) => {
 
 };
 
+/* ═══════════════ EvolveOverlay · 變身過場（演示用，實際動畫由動畫師執行）═══════════════ */
+const EvolveOverlay = ({ onDone, newFormName = '夏日龜 ☀️' }) => {
+  const [phase, setPhase] = useState('flash'); // flash | reveal | hold
+
+  useEffect(() => {
+    const t1 = setTimeout(() => setPhase('reveal'), 450);
+    const t2 = setTimeout(() => setPhase('hold'), 950);
+    const t3 = setTimeout(onDone, 3200);
+    return () => [t1, t2, t3].forEach(clearTimeout);
+  }, []);
+
+  return (
+    <div className="evolve-overlay">
+      {phase === 'flash' && <div className="p3-flash" />}
+      <div className="evolve-buddy-wrap">
+        <TurtleImg
+          className={phase !== 'flash' ? 'evolving' : ''}
+          style={{ width: 190, opacity: phase === 'flash' ? 0 : 1, transition: 'opacity 0.1s' }}
+        />
+        {phase === 'hold' && (
+          <SpeechBubble text="我有新的樣子了！✨" style={{ top: -68, right: -54 }} />
+        )}
+      </div>
+      <div className="evolve-text" style={{ opacity: phase === 'flash' ? 0 : 1 }}>
+        <div className="evolve-headline">Buddy 變身了！</div>
+        <div className="evolve-form">{newFormName}</div>
+      </div>
+    </div>
+  );
+};
+
 /* ═══════════════ P2b · 回收結果頁（滿版·對齊 P12）═══════════════ */
 const P2bResult = ({ setScreen, dispatch, tweaks = {}, setTweak = () => {} }) => {
   const quotaFull = tweaks.p2bQuotaFull || false;
+  const willEvolve = tweaks.p2bEvolve || false;
   const [showInfo, setShowInfo] = useState(false);
+  const [showEvolve, setShowEvolve] = useState(false);
+  const evolveNavRef = React.useRef(null);
 
   // mock 本批投瓶組成 — PET 12 個 / 電池 3 顆 / 退瓶 0
   // 體力：PET 12*2 + 電池 3*5 = 39；潔淨：投入 12*2 - 退瓶 0*1 = 24（電池機不給潔淨）
@@ -613,18 +652,30 @@ const P2bResult = ({ setScreen, dispatch, tweaks = {}, setTweak = () => {} }) =>
   const CLEAN_GAIN = 24;
   const POINTS_GAIN = 18;
 
+  const navigate = (navFn) => {
+    if (willEvolve) {
+      evolveNavRef.current = navFn;
+      setShowEvolve(true);
+    } else {
+      navFn();
+    }
+  };
+
   const handleStore = () => {
     dispatch({ type: 'COLLECT_BATCH', quotaFull: false, hpGain: HP_GAIN, cleanGain: CLEAN_GAIN, pointsGain: POINTS_GAIN });
-    setScreen('p1', { foodStored: true });
+    navigate(() => setScreen('p1', { foodStored: true }));
   };
 
   const handleComplete = () => {
     dispatch({ type: 'COLLECT_BATCH', quotaFull: true, hpGain: HP_GAIN, cleanGain: CLEAN_GAIN, pointsGain: POINTS_GAIN });
-    setScreen('p1');
+    navigate(() => setScreen('p1'));
   };
 
   return (
     <div className="screen p2b">
+      {showEvolve && (
+        <EvolveOverlay onDone={() => { setShowEvolve(false); evolveNavRef.current?.(); }} />
+      )}
       <StatusBar />
       {showInfo && (
         <div

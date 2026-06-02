@@ -13,12 +13,13 @@ const REFILL_SESSION = {
 };
 
 /* ═══════════════ P12 · 洗劑消費結果頁（結構對齊 P2b · 滿版） ═══════════════ */
-const P12RefillResult = ({ setScreen, state, dispatch, payload }) => {
+const P12RefillResult = ({ setScreen, state, dispatch, payload, tweaks = {} }) => {
   const session = payload?.session || REFILL_SESSION;
   const [phase, setPhase] = useState('counting'); // counting | done
   const [happy, setHappy] = useState(false);
   const [valueRises, setValueRises] = useState([]);
   const [showInfo, setShowInfo] = useState(false);
+  const [showEvolve, setShowEvolve] = useState(false);
 
   const addRise = (txt, pos, color) => {
     const id = Math.random();
@@ -27,25 +28,26 @@ const P12RefillResult = ({ setScreen, state, dispatch, payload }) => {
   };
 
   useEffect(() => {
-    // 沒有金流：僅把現實購買回饋的 體力/潔淨寫入 state
     dispatch({ type: 'REFILL_RESULT', hpGain: session.hp, cleanGain: session.clean });
     const t = setTimeout(() => setPhase('done'), 1600);
     return () => clearTimeout(t);
   }, []);
 
-  // 計數結束 → 角色開心反應 + 數值浮起動畫
+  // 計數結束 → 開心反應 + 浮字；若觸發變身則接著播 overlay
   useEffect(() => {
     if (phase === 'done') {
       setHappy(true);
       addRise(`+${session.hp} 體力`, { x: 40, y: 50 }, '#FF4D63');
       setTimeout(() => addRise(`+${session.clean} 潔淨`, { x: 140, y: 70 }, '#1F3DBF'), 250);
-      const t = setTimeout(() => setHappy(false), 2500);
-      return () => clearTimeout(t);
+      const happyOff = setTimeout(() => setHappy(false), 2500);
+      const evolveDelay = tweaks.p12Evolve ? setTimeout(() => setShowEvolve(true), 800) : null;
+      return () => { clearTimeout(happyOff); if (evolveDelay) clearTimeout(evolveDelay); };
     }
   }, [phase]);
 
   return (
     <div className="screen p12">
+      {showEvolve && <EvolveOverlay onDone={() => setShowEvolve(false)} />}
       <StatusBar />
       {showInfo && (
         <div
