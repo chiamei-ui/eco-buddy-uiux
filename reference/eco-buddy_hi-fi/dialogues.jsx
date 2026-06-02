@@ -31,7 +31,7 @@ const DIALOGUES = {
     adsLoad:     '廣告跑丟了… 等等再試試？',
     adsSkip:     '欸你沒看完耶！看完才有獎勵喔 👀',
     bagEmpty:    '背包空空的… 去廣告抽一個？🎁',
-    toolExpire:  '我的玩具快消失了！快點用 ⏳',
+    toolExpire:  'Buddy 等不及想玩了',
     toolExpired: '嗚… 道具不見了 😔 下次要記得用',
     foodStored:  '幫我存好了！等你準備好再給我～ 🍖',
   },

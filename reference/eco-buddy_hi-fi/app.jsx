@@ -226,12 +226,12 @@ const ScreenNav = ({ screen, setScreen }) => (
 /* ───────── Push notification entry mock ───────── */
 const PushDemo = ({ setScreen }) => {
   const samples = [
-    { trigger:'體力低', msg:'Buddy 想念你了… 快帶食物回家給我 😫' },
-    { trigger:'潔淨低', msg:'Buddy 想洗個澡 🛁 帶我去補充站沖一沖！' },
-    { trigger:'心情低', msg:'Buddy 有點寂寞 😞 快來陪我玩一玩！' },
-    { trigger:'月底倒數', msg:'5 天後結算 · 還沒選 6 月夥伴喔' },
-    { trigger:'道具即將過期', msg:'⏰ 你的逗貓棒還剩 6 小時！' },
-    { trigger:'三值全滿', msg:'✨ 傳說型態解鎖！快來看看' },
+    { trigger:'體力低', msg:'Buddy 在等你～肚子咕嚕咕嚕' },
+    { trigger:'潔淨低', msg:'Buddy 偷偷說：我有點臭臭的' },
+    { trigger:'心情低', msg:'Buddy 在發呆，需要你' },
+    { trigger:'月底倒數', msg:'6 月快結束了，要把這個 Buddy 收進日誌嗎？' },
+    { trigger:'道具即將過期', msg:'逗貓棒還能讓 Buddy 玩 6 小時' },
+    { trigger:'三值全滿', msg:'你的 Buddy 變得不一樣了…' },
   ];
   return (
     <div className="screen" style={{background:'#0B0E27',color:'#fff'}}>
@@ -384,7 +384,7 @@ const App = () => {
         </div>
 
         <div className="stage-title" style={{padding:'0 4px'}}>Tweaks · 即時調整</div>
-        <InlineTweaks tweaks={tweaks} setTweak={setTweak} setScreen={setScreen} state={state} dispatch={dispatch} />
+        <InlineTweaks tweaks={tweaks} setTweak={setTweak} setScreen={setScreen} state={state} dispatch={dispatch} screen={screen} />
       </div>
 
       <DragGhost drag={dragManager.drag} hover={dragManager.hover} />
@@ -401,149 +401,211 @@ const P2_ERR_OPTIONS = [
   { id:'netFail',   label:'網路失敗' },
 ];
 
-const InlineTweaks = ({ tweaks, setTweak, setScreen, state, dispatch }) => {
+const TweakDivider = () => (
+  <div style={{marginTop:10,paddingTop:10,borderTop:'1px solid rgba(255,255,255,0.08)'}} />
+);
+
+const StatSliders = ({ state, dispatch }) => (
+  <>
+    <div style={tweakLabel}>三維數值</div>
+    {[
+      { kind:'hp',    label:'體力', color:'#D4251C' },
+      { kind:'clean', label:'潔淨', color:'#060E9F' },
+      { kind:'mood',  label:'心情', color:'#FFCE00' },
+    ].map(({ kind, label, color }) => (
+      <div key={kind} style={{marginBottom:8}}>
+        <div style={{display:'flex',justifyContent:'space-between',fontSize:11,color:'rgba(255,255,255,0.7)',marginBottom:3}}>
+          <span style={{fontWeight:600}}>{label}</span>
+          <span style={{fontVariantNumeric:'tabular-nums'}}>{state.stats[kind]}%</span>
+        </div>
+        <input type="range" min={0} max={100} step={1}
+          value={state.stats[kind]}
+          onChange={e => dispatch({ type:'SET_STAT', kind, value:Number(e.target.value) })}
+          style={{width:'100%',accentColor:color,cursor:'pointer'}}
+        />
+      </div>
+    ))}
+  </>
+);
+
+const InlineTweaks = ({ tweaks, setTweak, setScreen, state, dispatch, screen }) => {
+  const isP1  = screen === 'p1' || screen === 'p0a';
+  const isP2  = screen === 'p2';
+  const isP2b = screen === 'p2b';
+  const isP4  = screen === 'p4';
+  const isP5  = screen === 'p5';
+  const isP12 = screen === 'p12';
+  const isP7  = screen === 'p7' || screen === 'p10';
+  const showStats = isP1 || isP2b || isP12 || isP7;
+  const hasContent = isP1 || isP2 || isP2b || isP4 || isP5 || isP12 || isP7;
+
   return (
     <div style={{
       background:'rgba(255,255,255,0.04)',
       border:'1px solid rgba(255,255,255,0.08)',
       borderRadius:20,padding:16,color:'#fff',
     }}>
-      <div style={tweakLabel}>開發範圍</div>
-      <Segmented
-        value={tweaks.phase === 2 ? '2' : '1'}
-        onChange={v => setTweak('phase', Number(v))}
-        options={[{v:'1',l:'Phase 1'},{v:'2',l:'Phase 2'}]}
-      />
-      <div style={{fontSize:10,color:'rgba(255,255,255,0.3)',marginTop:4,lineHeight:1.4}}>
-        切換後 P4 禮包、P5 週/月任務 Tab 跟著顯示/隱藏
-      </div>
 
-      <div style={{marginTop:10,paddingTop:10,borderTop:'1px solid rgba(255,255,255,0.08)'}}>
-      <div style={tweakLabel}>三維數值</div>
-      {[
-        { kind:'hp',    label:'體力', color:'#D4251C' },
-        { kind:'clean', label:'潔淨', color:'#060E9F' },
-        { kind:'mood',  label:'心情', color:'#FFCE00' },
-      ].map(({ kind, label, color }) => (
-        <div key={kind} style={{marginBottom:8}}>
-          <div style={{display:'flex',justifyContent:'space-between',fontSize:11,color:'rgba(255,255,255,0.7)',marginBottom:3}}>
-            <span style={{fontWeight:600}}>{label}</span>
-            <span style={{fontVariantNumeric:'tabular-nums'}}>{state.stats[kind]}%</span>
+      {/* 開發範圍：僅在影響 Phase 的畫面顯示 */}
+      {(isP4 || isP5) && (
+        <>
+          <div style={tweakLabel}>開發範圍</div>
+          <Segmented
+            value={tweaks.phase === 2 ? '2' : '1'}
+            onChange={v => setTweak('phase', Number(v))}
+            options={[{v:'1',l:'Phase 1'},{v:'2',l:'Phase 2'}]}
+          />
+          <div style={{fontSize:10,color:'rgba(255,255,255,0.3)',marginTop:4,lineHeight:1.4}}>
+            切換後 P4 禮包、P5 週/月任務 Tab 跟著顯示/隱藏
           </div>
-          <input type="range" min={0} max={100} step={1}
-            value={state.stats[kind]}
-            onChange={e => dispatch({ type:'SET_STAT', kind, value:Number(e.target.value) })}
-            style={{width:'100%',accentColor:color,cursor:'pointer'}}
+        </>
+      )}
+
+      {/* 三維數值 slider */}
+      {showStats && (
+        <>
+          {(isP4 || isP5) && <TweakDivider />}
+          <StatSliders state={state} dispatch={dispatch} />
+        </>
+      )}
+
+      {/* P1 專屬 */}
+      {isP1 && (
+        <>
+          <div style={{marginTop:10,paddingTop:10,borderTop:'1px solid rgba(255,255,255,0.08)'}}>
+            <div style={tweakLabel}>衰減模擬 · 每日 -5%</div>
+            <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:6}}>
+              <button onClick={()=>dispatch({ type:'DECAY', days:1 })} style={tweakBtn}>-1 天</button>
+              <button onClick={()=>dispatch({ type:'DECAY', days:3 })} style={tweakBtn}>-3 天</button>
+              <button onClick={()=>dispatch({ type:'DECAY', days:7 })} style={tweakBtn}>-7 天</button>
+            </div>
+            <div style={{fontSize:10,color:'rgba(255,255,255,0.3)',marginTop:4,lineHeight:1.4}}>
+              7 天 ≈ 35% 下降，三維低於 30% 會觸發召回推播
+            </div>
+          </div>
+          <div style={{marginTop:10,paddingTop:10,borderTop:'1px solid rgba(255,255,255,0.08)'}}>
+            <div style={tweakLabel}>變身觸發（餵食後）</div>
+            <Segmented
+              value={tweaks.p1Evolve ? 'yes' : 'no'}
+              onChange={v => setTweak('p1Evolve', v === 'yes')}
+              options={[{v:'no',l:'不觸發'},{v:'yes',l:'觸發變身'}]}
+            />
+          </div>
+        </>
+      )}
+
+      {/* P2 專屬 */}
+      {isP2 && (
+        <>
+          <div style={tweakLabel}>模擬掃碼來源</div>
+          <Segmented
+            value={tweaks.p2DemoType || 'recycle'}
+            onChange={v => setTweak({ p2DemoType: v, p2ErrKind: null })}
+            options={[{v:'recycle',l:'♻️ 收瓶機'},{v:'refill',l:'💧 補充站'}]}
+          />
+          <div style={{fontSize:10,color:'rgba(255,255,255,0.3)',marginTop:4,lineHeight:1.4}}>
+            同一入口：收瓶機 / 補充站 QR 自動識別後路由
+          </div>
+          <div style={{marginTop:10,paddingTop:10,borderTop:'1px solid rgba(255,255,255,0.08)'}}>
+            <div style={tweakLabel}>錯誤情境（系統 toast）</div>
+            <div style={{display:'flex',flexWrap:'wrap',gap:4}}>
+              {P2_ERR_OPTIONS.map(o => (
+                <button key={o.id}
+                  onClick={() => setTweak('p2ErrKind', tweaks.p2ErrKind === o.id ? null : o.id)}
+                  style={{
+                    background: tweaks.p2ErrKind === o.id ? 'var(--ecoco-orange)' : 'rgba(255,255,255,0.08)',
+                    color:'#fff', padding:'6px 10px', borderRadius:6, fontSize:11, fontWeight:600, cursor:'pointer',
+                  }}>
+                  {o.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* P2b 專屬 */}
+      {isP2b && (
+        <div style={{marginTop:10,paddingTop:10,borderTop:'1px solid rgba(255,255,255,0.08)'}}>
+          <div style={tweakLabel}>週配額情境</div>
+          <Segmented
+            value={tweaks.p2bQuotaFull ? 'full' : 'normal'}
+            onChange={v => setTweak('p2bQuotaFull', v === 'full')}
+            options={[{v:'normal',l:'配額未滿'},{v:'full',l:'本週已領完'}]}
+          />
+          <div style={{...tweakLabel, marginTop:8}}>變身觸發</div>
+          <Segmented
+            value={tweaks.p2bEvolve ? 'yes' : 'no'}
+            onChange={v => setTweak('p2bEvolve', v === 'yes')}
+            options={[{v:'no',l:'不觸發'},{v:'yes',l:'觸發變身'}]}
           />
         </div>
-      ))}
+      )}
 
-      <div style={{marginTop:4,paddingTop:10,borderTop:'1px solid rgba(255,255,255,0.08)'}}>
-      <div style={tweakLabel}>P2 · 模擬掃碼來源</div>
-      <Segmented
-        value={tweaks.p2DemoType || 'recycle'}
-        onChange={v => setTweak({ p2DemoType: v, p2ErrKind: null })}
-        options={[{v:'recycle',l:'♻️ 收瓶機'},{v:'refill',l:'💧 補充站'}]}
-      />
-      <div style={{fontSize:10,color:'rgba(255,255,255,0.3)',marginTop:4,lineHeight:1.4}}>
-        同一入口：收瓶機 / 補充站 QR 自動識別後路由
-      </div>
-
-      <div style={tweakLabel}>P2 · 錯誤情境（系統 toast）</div>
-      <div style={{display:'flex',flexWrap:'wrap',gap:4}}>
-        {P2_ERR_OPTIONS.map(o => (
-          <button key={o.id}
-            onClick={() => setTweak('p2ErrKind', tweaks.p2ErrKind === o.id ? null : o.id)}
-            style={{
-              background: tweaks.p2ErrKind === o.id ? 'var(--ecoco-orange)' : 'rgba(255,255,255,0.08)',
-              color:'#fff', padding:'6px 10px', borderRadius:6, fontSize:11, fontWeight:600, cursor:'pointer',
-            }}>
-            {o.label}
-          </button>
-        ))}
-      </div>
-
-      <div style={{marginTop:10,paddingTop:10,borderTop:'1px solid rgba(255,255,255,0.08)'}}>
-        <div style={tweakLabel}>#4 衰減模擬 · 每日 -5%</div>
-        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:6}}>
-          <button onClick={()=>dispatch({ type:'DECAY', days:1 })} style={tweakBtn}>-1 天</button>
-          <button onClick={()=>dispatch({ type:'DECAY', days:3 })} style={tweakBtn}>-3 天</button>
-          <button onClick={()=>dispatch({ type:'DECAY', days:7 })} style={tweakBtn}>-7 天</button>
+      {/* P12 專屬 */}
+      {isP12 && (
+        <div style={{marginTop:10,paddingTop:10,borderTop:'1px solid rgba(255,255,255,0.08)'}}>
+          <div style={tweakLabel}>變身觸發（計數後）</div>
+          <Segmented
+            value={tweaks.p12Evolve ? 'yes' : 'no'}
+            onChange={v => setTweak('p12Evolve', v === 'yes')}
+            options={[{v:'no',l:'不觸發'},{v:'yes',l:'觸發變身'}]}
+          />
         </div>
-        <div style={{fontSize:10,color:'rgba(255,255,255,0.3)',marginTop:4,lineHeight:1.4}}>
-          7 天 ≈ 35% 下降，三維低於 30% 會觸發召回推播
-        </div>
-      </div>
+      )}
 
-      <div style={{marginTop:10,paddingTop:10,borderTop:'1px solid rgba(255,255,255,0.08)'}}>
-        <div style={tweakLabel}>P2b · 週配額情境</div>
-        <Segmented
-          value={tweaks.p2bQuotaFull ? 'full' : 'normal'}
-          onChange={v => setTweak('p2bQuotaFull', v === 'full')}
-          options={[{v:'normal',l:'配額未滿'},{v:'full',l:'本週已領完'}]}
-        />
-        <div style={{...tweakLabel, marginTop:8}}>P2b · 變身觸發</div>
-        <Segmented
-          value={tweaks.p2bEvolve ? 'yes' : 'no'}
-          onChange={v => setTweak('p2bEvolve', v === 'yes')}
-          options={[{v:'no',l:'不觸發'},{v:'yes',l:'觸發變身'}]}
-        />
-        <div style={{...tweakLabel, marginTop:8}}>P1 · 變身觸發（餵食後）</div>
-        <Segmented
-          value={tweaks.p1Evolve ? 'yes' : 'no'}
-          onChange={v => setTweak('p1Evolve', v === 'yes')}
-          options={[{v:'no',l:'不觸發'},{v:'yes',l:'觸發變身'}]}
-        />
-        <div style={{...tweakLabel, marginTop:8}}>P12 · 變身觸發（計數後）</div>
-        <Segmented
-          value={tweaks.p12Evolve ? 'yes' : 'no'}
-          onChange={v => setTweak('p12Evolve', v === 'yes')}
-          options={[{v:'no',l:'不觸發'},{v:'yes',l:'觸發變身'}]}
-        />
-      </div>
-
-      <div style={{marginTop:10,paddingTop:10,borderTop:'1px solid rgba(255,255,255,0.08)'}}>
-        <div style={tweakLabel}>P4 · 月底模式（22–28 日）</div>
-        <Segmented
-          value={tweaks.shopSprint ? 'sprint' : 'normal'}
-          onChange={v => setTweak('shopSprint', v === 'sprint')}
-          options={[{v:'normal',l:'一般'},{v:'sprint',l:'月底 22–28 日'}]}
-        />
-      </div>
-
-      <div style={{marginTop:10,paddingTop:10,borderTop:'1px solid rgba(255,255,255,0.08)'}}>
-        <div style={tweakLabel}>P4 · IAP 後台設定（模擬 CMS）</div>
-        <div style={{fontSize:10,color:'rgba(255,255,255,0.35)',marginBottom:8,lineHeight:1.5}}>
-          以下值模擬後台可動態設定，前端不寫死
-        </div>
-        {[
-          { label:'衝刺禮包 NT$', key:'sprintPrice', def:199 },
-          { label:'通行證 NT$',   key:'passPrice',   def:149 },
-          { label:'衝刺倒數天數', key:'sprintDaysLeft', def:6, min:1, max:7 },
-        ].map(({ label, key, def, min=1, max=9999 }) => (
-          <div key={key} style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:6}}>
-            <span style={{fontSize:11,color:'rgba(255,255,255,0.7)'}}>{label}</span>
-            <input type="number" min={min} max={max}
-              value={tweaks[key] ?? def}
-              onChange={e => setTweak(key, Number(e.target.value))}
-              style={{width:64,background:'rgba(255,255,255,0.08)',border:'1px solid rgba(255,255,255,0.15)',
-                borderRadius:6,color:'#fff',fontSize:12,padding:'4px 6px',textAlign:'right'}} />
+      {/* P4 專屬 */}
+      {isP4 && (
+        <>
+          <div style={{marginTop:10,paddingTop:10,borderTop:'1px solid rgba(255,255,255,0.08)'}}>
+            <div style={tweakLabel}>月底模式（22–28 日）</div>
+            <Segmented
+              value={tweaks.shopSprint ? 'sprint' : 'normal'}
+              onChange={v => setTweak('shopSprint', v === 'sprint')}
+              options={[{v:'normal',l:'一般'},{v:'sprint',l:'月底 22–28 日'}]}
+            />
           </div>
-        ))}
-      </div>
+          <div style={{marginTop:10,paddingTop:10,borderTop:'1px solid rgba(255,255,255,0.08)'}}>
+            <div style={tweakLabel}>IAP 後台設定（模擬 CMS）</div>
+            <div style={{fontSize:10,color:'rgba(255,255,255,0.35)',marginBottom:8,lineHeight:1.5}}>
+              以下值模擬後台可動態設定，前端不寫死
+            </div>
+            {[
+              { label:'衝刺禮包 NT$', key:'sprintPrice', def:199 },
+              { label:'通行證 NT$',   key:'passPrice',   def:149 },
+              { label:'衝刺倒數天數', key:'sprintDaysLeft', def:6, min:1, max:7 },
+            ].map(({ label, key, def, min=1, max=9999 }) => (
+              <div key={key} style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:6}}>
+                <span style={{fontSize:11,color:'rgba(255,255,255,0.7)'}}>{label}</span>
+                <input type="number" min={min} max={max}
+                  value={tweaks[key] ?? def}
+                  onChange={e => setTweak(key, Number(e.target.value))}
+                  style={{width:64,background:'rgba(255,255,255,0.08)',border:'1px solid rgba(255,255,255,0.15)',
+                    borderRadius:6,color:'#fff',fontSize:12,padding:'4px 6px',textAlign:'right'}} />
+              </div>
+            ))}
+          </div>
+        </>
+      )}
 
+      {/* 無相關 tweaks 的畫面 */}
+      {!hasContent && (
+        <div style={{fontSize:11,color:'rgba(255,255,255,0.3)',lineHeight:1.6}}>
+          此畫面沒有可調整的參數。
+        </div>
+      )}
+
+      {/* 快速跳轉：永遠顯示 */}
       <div style={{marginTop:10,paddingTop:10,borderTop:'1px solid rgba(255,255,255,0.08)'}}>
         <div style={tweakLabel}>快速跳轉</div>
         <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:6}}>
-          <button onClick={()=>setScreen('p2')} style={tweakBtn}>▶ 掃描條碼（統一入口）</button>
-          <button onClick={()=>setScreen('p12')} style={tweakBtn}>▶ 補充站消費結果</button>
+          <button onClick={()=>setScreen('p2')} style={tweakBtn}>▶ 掃描條碼</button>
+          <button onClick={()=>setScreen('p12')} style={tweakBtn}>▶ 補充站結果</button>
           <button onClick={()=>setScreen('p6')} style={tweakBtn}>▶ 廣告開箱</button>
           <button onClick={()=>setScreen('p10')} style={tweakBtn}>▶ 月末選擇</button>
           <button onClick={()=>setScreen('push')} style={tweakBtn}>▶ 推播範例</button>
-          <button onClick={()=>setScreen('p4')} style={tweakBtn}>▶ P4 商店（唯一金流）</button>
+          <button onClick={()=>setScreen('p4')} style={tweakBtn}>▶ P4 商店</button>
         </div>
-      </div>
-      </div>
       </div>
     </div>
   );
