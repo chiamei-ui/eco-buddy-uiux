@@ -1288,6 +1288,7 @@ const PointsSourceSheet = ({ state, onClose }) => {
 const P5Missions = ({ setScreen, state, dispatch, tweaks }) => {
   const [tab, setTab] = useState('daily');
   const [toast, setToast] = useState(null);
+  const [pulsing, setPulsing] = useState(false);
   const isPhase2 = (tweaks?.phase ?? 1) >= 2;
   const tabs = [
     { id: 'daily',   label: '每日' },
@@ -1310,12 +1311,6 @@ const P5Missions = ({ setScreen, state, dispatch, tweaks }) => {
     missionData.filter(m => m.claimed).map(m => m.id)
   );
 
-  const handleClaim = (m) => {
-    setClaimedIds(prev => [...prev, m.id]);
-    dispatch({ type: 'CLAIM_MISSION' });
-    setToast('一起做到！食物 ×1 ・ 心情 +3 ✨');
-  };
-
   const sortedMissions = [...missionData].sort((a, b) => {
     const rank = (m) => {
       if (claimedIds.includes(m.id)) return 2;   // 已領 → 最下
@@ -1324,6 +1319,22 @@ const P5Missions = ({ setScreen, state, dispatch, tweaks }) => {
     };
     return rank(a) - rank(b);
   });
+
+  const hasClaimable = sortedMissions.some(m => !claimedIds.includes(m.id) && m.progress >= m.total);
+
+  React.useEffect(() => {
+    if (tab !== 'daily' || !hasClaimable) return;
+    setPulsing(true);
+    const t = setTimeout(() => setPulsing(false), 2100);
+    return () => clearTimeout(t);
+  }, [tab]);
+
+  const handleClaim = (m) => {
+    setPulsing(false);
+    setClaimedIds(prev => [...prev, m.id]);
+    dispatch({ type: 'CLAIM_MISSION' });
+    setToast('一起做到！食物 ×1 ・ 心情 +3 ✨');
+  };
 
   return (
     <div className="screen p5">
@@ -1377,10 +1388,10 @@ const P5Missions = ({ setScreen, state, dispatch, tweaks }) => {
                   <div className="progress-text">{m.progress}/{m.total}</div>
                 </div>
                 <button
-                  className={`claim ${isClaimed ? 'done' : isLocked ? 'locked' : ''}`}
+                  className={`claim ${isClaimed ? 'done' : isLocked ? 'locked' : pulsing ? 'pulse' : ''}`}
                   onClick={!isClaimed && !isLocked ? () => handleClaim(m) : undefined}
                 >
-                  {isClaimed ? '已完成' : isLocked ? '進行中' : '領取'}
+                  {isClaimed ? '已完成' : isLocked ? '進行中' : '可領取'}
                 </button>
               </div>
             );
