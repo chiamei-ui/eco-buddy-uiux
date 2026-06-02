@@ -834,6 +834,7 @@ const P4Shop = ({ setScreen, state, dispatch, tweaks }) => {
   const [showPointSrc, setShowPointSrc] = useState(false);
   const [detailItem, setDetailItem] = useState(null);
   const isSprintPeriod = tweaks?.shopSprint ?? false;
+  const isPhase2 = (tweaks?.phase ?? 1) >= 2;
 
   const cats = [
   { id: 'food', label: '食物' },
@@ -852,7 +853,7 @@ const P4Shop = ({ setScreen, state, dispatch, tweaks }) => {
 
     package: [
     { ...SHOP_IAP_CONFIG.monthlyPass, price: tweaks?.passPrice ?? SHOP_IAP_CONFIG.monthlyPass.price },
-    ...(isSprintPeriod ? [{ ...SHOP_IAP_CONFIG.sprintPack, price: tweaks?.sprintPrice ?? SHOP_IAP_CONFIG.sprintPack.price, daysLeft: tweaks?.sprintDaysLeft ?? 6 }] : []),
+    ...((!isPhase2 || isSprintPeriod) ? [{ ...SHOP_IAP_CONFIG.sprintPack, price: tweaks?.sprintPrice ?? SHOP_IAP_CONFIG.sprintPack.price, daysLeft: tweaks?.sprintDaysLeft ?? 6 }] : []),
     ],
 
     tool: [
@@ -885,7 +886,7 @@ const P4Shop = ({ setScreen, state, dispatch, tweaks }) => {
           {visibleCats.map((c) =>
           <button key={c.id} className={`tab-chip ${tab === c.id ? 'active' : ''}`} onClick={() => setTab(c.id)}>
               {c.label}
-              {c.id === 'package' && isSprintPeriod && (
+              {c.id === 'package' && isSprintPeriod && isPhase2 && (
                 <span className="tab-chip-badge">{tweaks?.sprintDaysLeft ?? 6}天</span>
               )}
             </button>
@@ -900,16 +901,22 @@ const P4Shop = ({ setScreen, state, dispatch, tweaks }) => {
         if (!pkgItems.length) return null;
         return (
           <div>
+            {!isPhase2 && (
+              <div style={{ margin: '10px 14px 0', padding: '10px 14px', background: '#FFFFFF', borderRadius: 12, fontSize: 12, color: '#555555', fontWeight: 600, lineHeight: 1.5 }}>
+                💳 禮包即將推出，敬請期待
+              </div>
+            )}
             <div style={{ fontSize: 13, fontWeight: 800, color: '#888', letterSpacing: '.04em', padding: '10px 18px 4px' }}>現金商品</div>
             <div className="shop-grid">
               {pkgItems.map(it => {
                 const hasDetail = !!(it.contents || it.benefits);
                 const isBought = (it.id === 'sprint-pack' && state.sprintPurchased) ||
                                   (it.id === 'monthly-pass' && state.hasPass);
+                const canBuy = isPhase2 && !isBought;
                 return (
                   <div key={it.id} className={`shop-card${isBought ? ' purchased' : ''}`}
-                    onClick={isBought ? undefined : () => hasDetail ? setDetailItem(it) : setPurchasing(it)}
-                    style={isBought ? { cursor: 'default' } : {}}>
+                    onClick={canBuy ? () => hasDetail ? setDetailItem(it) : setPurchasing(it) : undefined}
+                    style={{ cursor: canBuy ? 'pointer' : 'default' }}>
                     <div className="thumb">{it.emoji}</div>
                     <h4>{it.name}</h4>
                     <div className="desc">{it.desc}</div>
@@ -921,8 +928,10 @@ const P4Shop = ({ setScreen, state, dispatch, tweaks }) => {
                       ) : (
                         <>
                           <b style={{ fontFamily: 'var(--font-en)', fontWeight: 900, color: '#060E9F', fontSize: 15 }}>NT$ {it.price}</b>
-                          <button className="buy-btn" onClick={(e) => { e.stopPropagation(); hasDetail ? setDetailItem(it) : setPurchasing(it); }}>
-                            {hasDetail ? '查看' : '購買'}
+                          <button className="buy-btn" disabled={!isPhase2}
+                            onClick={(e) => { e.stopPropagation(); if (isPhase2) { hasDetail ? setDetailItem(it) : setPurchasing(it); } }}
+                            style={!isPhase2 ? { opacity: 0.45, cursor: 'default' } : {}}>
+                            {!isPhase2 ? '即將開放' : hasDetail ? '查看' : '購買'}
                           </button>
                         </>
                       )}
@@ -1225,14 +1234,17 @@ const PointsSourceSheet = ({ state, onClose }) => {
 };
 
 /* ═══════════════ P5 · Missions ═══════════════ */
-const P5Missions = ({ setScreen, state, dispatch }) => {
+const P5Missions = ({ setScreen, state, dispatch, tweaks }) => {
   const [tab, setTab] = useState('daily');
   const [toast, setToast] = useState(null);
+  const isPhase2 = (tweaks?.phase ?? 1) >= 2;
   const tabs = [
     { id: 'daily',   label: '每日' },
-    { id: 'week',    label: '本週' },
-    { id: 'month',   label: '月度' },
-    { id: 'achieve', label: '成就' },
+    ...(isPhase2 ? [
+      { id: 'week',    label: '本週' },
+      { id: 'month',   label: '月度' },
+      { id: 'achieve', label: '成就' },
+    ] : []),
   ];
 
   const missionData = [
@@ -1405,13 +1417,27 @@ const P6Ads = ({ setScreen, state, dispatch }) => {
 };
 
 /* ═══════════════ P7 · Dex ═══════════════ */
-const P7Dex = ({ setScreen, state, dispatch, onOpenPicker }) => {
+const P7Dex = ({ setScreen, state, dispatch, onOpenPicker, tweaks }) => {
+  const isPhase2 = (tweaks?.phase ?? 1) >= 2;
   const lockedCode = state.lockedMonthCode;
+
+  // Phase 2 角色清單（Phase 1 只有小海龜）
+  const characters = isPhase2 ? [
+    { id: 'turtle', name: '小海龜', icon: '🐢', primary: true },
+    { id: 'polar',  name: '北極熊', icon: '🐻‍❄️' },
+    { id: 'seal',   name: '小海豹', icon: '🦭' },
+    { id: 'gem',    name: '亮寶',   icon: '✨' },
+  ] : [
+    { id: 'turtle', name: '小海龜', icon: '🐢', primary: true },
+  ];
+  const [charId, setCharId] = useState('turtle');
+  const currentChar = characters.find(c => c.id === charId) || characters[0];
+
   const months = [
   { m: 1, filled: true, icon: '🐢', code: '07' },
   { m: 2, filled: true, icon: '🐢', code: '13' },
-  { m: 3, filled: true, icon: '🐢', code: '17' },
-  { m: 4, filled: true, icon: '🐢', code: '26' },
+  { m: 3, filled: true, icon: isPhase2 ? '🐻‍❄️' : '🐢', code: '17' },
+  { m: 4, filled: true, icon: isPhase2 ? '🦭' : '🐢', code: '26' },
   { m: 5, filled: true, icon: '🐢', code: '08' },
   lockedCode
     ? { m: 6, filled: true, icon: '🐢', code: lockedCode, current: true }
@@ -1424,7 +1450,30 @@ const P7Dex = ({ setScreen, state, dispatch, onOpenPicker }) => {
   { m: 12, locked: true }];
 
 
-  const states = state.dexStates;
+  // Phase 2：每角色 36 種狀態（小海龜用既有 9 種解鎖資料 + 27 種預留鎖定；其他角色全鎖定）
+  const dexTotal = isPhase2 ? 36 : 9;
+  const baseStates = state.dexStates;
+  const states = (() => {
+    if (!isPhase2) return baseStates;
+    if (charId !== 'turtle') {
+      // 其他角色：全部鎖定預留
+      return Array.from({ length: 36 }, (_, i) => ({
+        code: String(i + 1).padStart(2, '0'),
+        name: '???',
+        unlocked: false,
+        character: charId,
+      }));
+    }
+    // 小海龜 Phase 2：原 9 格 + 27 格鎖定預留
+    const knownCodes = new Set(baseStates.map(s => s.code));
+    const padded = [];
+    for (let i = 1; i <= 36; i++) {
+      const code = String(i).padStart(2, '0');
+      if (knownCodes.has(code)) padded.push(baseStates.find(s => s.code === code));
+      else padded.push({ code, name: '???', unlocked: false });
+    }
+    return padded;
+  })();
   const stripRef = useRef(null);
   const currentCellRef = useRef(null);
   const [detailMo, setDetailMo] = useState(null);
@@ -1493,28 +1542,53 @@ const P7Dex = ({ setScreen, state, dispatch, onOpenPicker }) => {
         );
       })()}
 
+      {isPhase2 && (
+        <div style={{ padding: '0 18px 8px', display: 'flex', gap: 6, overflowX: 'auto' }}>
+          {characters.map(c => {
+            const on = c.id === charId;
+            return (
+              <button key={c.id} onClick={() => setCharId(c.id)} style={{
+                display: 'flex', alignItems: 'center', gap: 4,
+                padding: '6px 12px', borderRadius: 999, flexShrink: 0,
+                background: on ? 'var(--ecoco-orange)' : '#fff',
+                color: on ? '#fff' : '#666',
+                border: on ? 'none' : '1.5px solid var(--border)',
+                fontSize: 12, fontWeight: 700, cursor: 'pointer',
+              }}>
+                <span style={{ fontSize: 14 }}>{c.icon}</span>
+                <span>{c.name}</span>
+              </button>
+            );
+          })}
+        </div>
+      )}
+
       <div className="section-h">
         <div className="section-h-row">
-          <span>本月解鎖 · 6 月小海龜</span>
-          <span className="meta">{states.filter((s) => s.unlocked).length} / 9</span>
+          <span>本月解鎖 · 6 月{currentChar.name}</span>
+          <span className="meta">{states.filter((s) => s.unlocked).length} / {dexTotal}</span>
         </div>
       </div>
       <div className="section-progress">
-        <div className="fill" style={{ width: `${(states.filter(s => s.unlocked).length / 9) * 100}%` }} />
+        <div className="fill" style={{ width: `${(states.filter(s => s.unlocked).length / dexTotal) * 100}%` }} />
       </div>
       <div className="month-grid" style={{ paddingBottom: 100 }}>
         {states.map((s) =>
-        <div key={s.code} className={`state-card ${s.unlocked ? 'unlocked' : 'locked'} ${s.legendary ? 'legendary' : ''}`} onClick={() => setDetailState(s)} style={{ cursor: 'pointer' }}>
+        <div key={s.code} className={`state-card ${s.unlocked ? 'unlocked' : 'locked'} ${s.legendary ? 'legendary' : ''}`} onClick={() => setDetailState({ ...s, character: currentChar })} style={{ cursor: 'pointer' }}>
             <span className="code">#{s.code}</span>
             {s.unlocked ? <>
               <img className="turtle" src="assets/sea-turtle.svg" alt="" style={{ filter: s.tint || 'none' }} />
               <span className="name">{s.name}</span>
               {s.legendary && <span className="rarity">✦ 傳說</span>}
-            </> : <>
+            </> : (charId === 'turtle' ? <>
               <img className="turtle" src="assets/sea-turtle.svg" alt="" />
               <span className="name">??? ???</span>
               <span className="lock" style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)' }}>🔒</span>
-            </>}
+            </> : <>
+              <div style={{ width: 60, height: 60, marginBottom: 4, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 36, opacity: 0.18 }}>{currentChar.icon}</div>
+              <span className="name">??? ???</span>
+              <span className="lock" style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)' }}>🔒</span>
+            </>)}
           </div>
         )}
       </div>
@@ -1527,14 +1601,18 @@ const P7Dex = ({ setScreen, state, dispatch, onOpenPicker }) => {
               ? <div className="year-detail-collected">已解鎖 ✓</div>
               : <div className="year-detail-collected" style={{ background: 'rgba(0,0,0,0.06)', color: '#999' }}>🔒 尚未解鎖</div>
             }
-            <img
-              src="assets/sea-turtle.svg" alt=""
-              className="state-detail-turtle"
-              style={{ filter: detailState.unlocked ? (detailState.tint || 'none') : 'grayscale(1) opacity(0.3)' }}
-            />
+            {detailState.character && detailState.character.id !== 'turtle' ? (
+              <div style={{ width: 120, height: 120, margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 72, opacity: detailState.unlocked ? 1 : 0.25 }}>{detailState.character.icon}</div>
+            ) : (
+              <img
+                src="assets/sea-turtle.svg" alt=""
+                className="state-detail-turtle"
+                style={{ filter: detailState.unlocked ? (detailState.tint || 'none') : 'grayscale(1) opacity(0.3)' }}
+              />
+            )}
             <div className="year-detail-code">#{detailState.code}</div>
             <div className="year-detail-name">{detailState.unlocked ? detailState.name : '??? ???'}</div>
-            <div className="year-detail-month">本月 6 月 · 小海龜</div>
+            <div className="year-detail-month">本月 6 月 · {detailState.character?.name || '小海龜'}</div>
             {detailState.legendary && detailState.unlocked && <div className="year-detail-rarity">✦ 傳說</div>}
           </div>
         </div>

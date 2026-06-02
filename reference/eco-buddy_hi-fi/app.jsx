@@ -261,6 +261,7 @@ const PushDemo = ({ setScreen }) => {
 
 /* ───────── Top-level App ───────── */
 const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+  "phase": 1,
   "p2DemoType": "recycle",
   "p2ErrKind": null,
   "p2bQuotaFull": false,
@@ -322,12 +323,12 @@ const App = () => {
       case 'p2':  return <P2Scan setScreen={setScreen} dispatch={dispatch} tweaks={tweaks} setTweak={setTweak} />;
       case 'p2b': return <P2bResult setScreen={setScreen} dispatch={dispatch} state={state} tweaks={tweaks} setTweak={setTweak} />;
       case 'p4':  return <P4Shop setScreen={setScreen} state={state} dispatch={dispatch} tweaks={tweaks} />;
-      case 'p5':  return <P5Missions setScreen={setScreen} state={state} dispatch={dispatch} />;
+      case 'p5':  return <P5Missions setScreen={setScreen} state={state} dispatch={dispatch} tweaks={tweaks} />;
       case 'p6':  return <P6Ads setScreen={setScreen} state={state} dispatch={dispatch} payload={screenPayload} />;
-      case 'p7':  return <P7Dex setScreen={setScreen} state={state} dispatch={dispatch} onOpenPicker={() => setDexPickerOpen(true)} />;
+      case 'p7':  return <P7Dex setScreen={setScreen} state={state} dispatch={dispatch} onOpenPicker={() => setDexPickerOpen(true)} tweaks={tweaks} />;
       case 'p8':  return <P8Profile setScreen={setScreen} state={state} />;
       case 'p9':  return <P9Bag setScreen={setScreen} state={state} dispatch={dispatch} />;
-      case 'p10': return <P7Dex setScreen={setScreen} state={state} dispatch={dispatch} onOpenPicker={() => setDexPickerOpen(true)} />;
+      case 'p10': return <P7Dex setScreen={setScreen} state={state} dispatch={dispatch} onOpenPicker={() => setDexPickerOpen(true)} tweaks={tweaks} />;
       case 'p11': return <P11Pack setScreen={setScreen} />;
       case 'p12': return <P12RefillResult setScreen={setScreen} state={state} dispatch={dispatch} payload={screenPayload} />;
       case 'p8-faq':    return <P8Faq setScreen={setScreen} />;
@@ -404,6 +405,17 @@ const InlineTweaks = ({ tweaks, setTweak, setScreen, state, dispatch }) => {
       border:'1px solid rgba(255,255,255,0.08)',
       borderRadius:20,padding:16,color:'#fff',
     }}>
+      <div style={tweakLabel}>開發範圍</div>
+      <Segmented
+        value={tweaks.phase === 2 ? '2' : '1'}
+        onChange={v => setTweak('phase', Number(v))}
+        options={[{v:'1',l:'Phase 1'},{v:'2',l:'Phase 2'}]}
+      />
+      <div style={{fontSize:10,color:'rgba(255,255,255,0.3)',marginTop:4,lineHeight:1.4}}>
+        切換後 P4 禮包、P5 週/月任務 Tab 跟著顯示/隱藏
+      </div>
+
+      <div style={{marginTop:10,paddingTop:10,borderTop:'1px solid rgba(255,255,255,0.08)'}}>
       <div style={tweakLabel}>三維數值</div>
       {[
         { kind:'hp',    label:'體力', color:'#D4251C' },
@@ -509,6 +521,7 @@ const InlineTweaks = ({ tweaks, setTweak, setScreen, state, dispatch }) => {
           <button onClick={()=>setScreen('push')} style={tweakBtn}>▶ 推播範例</button>
           <button onClick={()=>setScreen('p4')} style={tweakBtn}>▶ P4 商店（唯一金流）</button>
         </div>
+      </div>
       </div>
       </div>
     </div>
