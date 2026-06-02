@@ -1408,6 +1408,7 @@ const ShopSuccessModal = ({ item, state, onClose, onGoToBag, onGoToWardrobe, set
               }}>繼續逛</button>
             </>
           )}
+        </div>
         {isCash && (
           <button
             onClick={() => { onClose(); setScreen('p4-orders'); }}
