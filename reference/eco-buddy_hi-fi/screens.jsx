@@ -858,10 +858,14 @@ const P2bResult = ({ setScreen, dispatch, tweaks = {}, setTweak = () => {} }) =>
           </div>
         </div>
         <div className="next-week-preview">
-          <div className="nwp-badge">下週預告</div>
+          <div className="nwp-thumb-wrap">
+            <div className="nwp-thumb">🥦</div>
+            <div className="nwp-thumb-mask"></div>
+          </div>
           <div className="nwp-body">
-            <div className="nwp-title">🥦 花椰菜</div>
-            <div className="nwp-hp">每份讓 Buddy +8 體力</div>
+            <div className="nwp-badge">下週預告</div>
+            <div className="nwp-hp">+8 體力</div>
+            <div className="nwp-hp-label">每份讓 Buddy 更有力</div>
           </div>
           <div className="nwp-time">
             <div className="nwp-time-label">開搶時間</div>
