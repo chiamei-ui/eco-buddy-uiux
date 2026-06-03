@@ -75,3 +75,13 @@ AI 會自動跨檔案閱讀，不用你手動切換。
 
 直接在 LINE 群組丟訊息 + 貼 GitHub 連結，標 `@chiamei-ui`（UI 設計師）或 `@andrewtainan`（PM）。
 不要自己猜。
+
+---
+
+## 待辦清單
+
+來源：`openspec/changes/p4-shop-phase-rollout`（P4 商店分階段上線）
+
+- [ ] **7.3** 禮包 Tab CTA 點擊跳轉藍新網頁付款（hi-fi 僅模擬）
+- [ ] **7.4** 裝扮 Tab CTA 點擊觸發平台 IAP（StoreKit / Play Billing）；設備判斷副標（App Store / Google Play）
+- [ ] **12.3** review `openspec/changes/p4-shop-phase-rollout/specs/` 四份規格的可實作性，回報給 `@chiamei-ui`

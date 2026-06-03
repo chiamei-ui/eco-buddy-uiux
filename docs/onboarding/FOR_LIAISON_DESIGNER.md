@@ -49,3 +49,11 @@
 
 外包**不會自己看 repo**——他沒有帳號也沒有義務。
 PM 改了影響動畫的決策時，**主動傳訊息給外包**，不要假設他會知道。
+
+---
+
+## 待辦清單
+
+來源：`openspec/changes/p4-shop-phase-rollout`（P4 商店分階段上線）
+
+- [ ] **11.1** 在 `docs/animation/NAMING.md` S1–S6 插槽標注 Phase 1 hero 裝扮款（彩虹光暈、循環王冠等）

@@ -35,3 +35,12 @@
 - 代表「我看過了，沒問題」
 
 這一步讓其他人知道：**你確認過這個決策，不會中途反悔**。
+
+---
+
+## 待辦清單
+
+來源：`openspec/changes/p4-shop-phase-rollout`（P4 商店分階段上線）
+
+- [ ] **12.2** review `openspec/changes/p4-shop-phase-rollout/proposal.md` 與 `design.md`
+- [ ] **12.4** 於 `docs/decisions/CURRENT.md` 寫入 #26 / #27 / #28 / #29

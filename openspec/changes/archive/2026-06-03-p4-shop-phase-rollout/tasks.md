@@ -41,13 +41,13 @@
 
 ## 7. Phase 2 金流串接
 
-- [ ] 7.1 ⚠️ **BLOCKED（後端）** 後端串接藍新 NewebPay（callback、對帳）— 工時尚未估，需後端 @shangchian 與 PM 對齊後接手
-- [ ] 7.2 ⚠️ **BLOCKED（後端）** 後端串接 Apple StoreKit / Google Play Billing（裝扮 IAP entitlement 驗證）
-- [ ] 7.3 ⚠️ **BLOCKED（前端工程）** 前端禮包 Tab：CTA 點擊跳轉藍新網頁付款（hi-fi 僅模擬）
-- [ ] 7.4 ⚠️ **BLOCKED（前端工程）** 前端裝扮 Tab：CTA 點擊觸發平台 IAP（StoreKit / Play Billing）；設備判斷副標（5.2 hi-fi 同時顯示兩平台）
-- [ ] 7.5 ⚠️ **BLOCKED（人工）** 資安 review（依 ECOCO 資安規範，金流/認證/個資處理皆需資深工程師 review）
-- [ ] 7.6 ⚠️ **BLOCKED（後端）** 訂單資料模型必須同時儲存 `cashChannel`、`payMethod`、`gatewayOrderId`（藍新）、`platformTransactionId`（IAP）；成功頁與訂單紀錄共用同一筆資料，不得各自產生
-- [ ] 7.7 ⚠️ **BLOCKED（後端 + QA）** Phase 2 上線前「客訴視角 UAT」：取消付款、付款逾時、付款成功未入庫、重複購買防呆、退款查詢流程（藍新找 ECOCO 客服；平台 IAP 找 App Store / Google Play）
+- [ ] 7.1 → 委派至 `docs/onboarding/FOR_BACKEND.md`（後端串接藍新 NewebPay）
+- [ ] 7.2 → 委派至 `docs/onboarding/FOR_BACKEND.md`（後端串接 StoreKit / Play Billing）
+- [ ] 7.3 → 委派至 `docs/onboarding/FOR_FRONTEND.md`（前端禮包 Tab CTA 跳轉藍新）
+- [ ] 7.4 → 委派至 `docs/onboarding/FOR_FRONTEND.md`（前端裝扮 Tab CTA 觸發 IAP）
+- [ ] 7.5 → 待人工觸發：資安 review（金流/認證/個資需資深工程師 review）
+- [ ] 7.6 → 委派至 `docs/onboarding/FOR_BACKEND.md`（訂單資料模型）
+- [ ] 7.7 → 委派至 `docs/onboarding/FOR_BACKEND.md`（Phase 2 上線前客訴視角 UAT）
 
 ## 8. 裝扮 Tab 試穿／預覽
 
@@ -63,18 +63,18 @@
 
 ## 10. Phase 切換與回滾
 
-- [ ] 10.1 ⚠️ **BLOCKED（後端）** 後端 feature flag 介接 `shopPhase`，前端 fetch 一次後快取至 session
-- [ ] 10.2 ⚠️ **BLOCKED（後端 + 測試）** 緊急回滾測試：Phase 2 → Phase 1，禮包與裝扮 Tab 回 Coming Soon，進行中的交易不受影響
+- [ ] 10.1 → 委派至 `docs/onboarding/FOR_BACKEND.md`（feature flag 介接 `shopPhase`）
+- [ ] 10.2 → 委派至 `docs/onboarding/FOR_BACKEND.md`（緊急回滾測試）
 - [x] 10.3 hi-fi 原型開發者面板可在 Phase 1 / 2 間切換以驗收兩態 UI（1.4 已完成）
 
 ## 11. 動畫資產對接（與 #29 連動但範圍外）
 
-- [ ] 11.1 ⚠️ **BLOCKED（@idahsueh-cmd）** 通知 @idahsueh-cmd 在 `docs/animation/NAMING.md` S1–S6 插槽標注 Phase 1 hero 款（彩虹光暈、循環王冠等）
-- [ ] 11.2 ⚠️ **BLOCKED（@chiamei-ui）** 確認 Phase 1 hero 款最終品項清單（2–3 款）；hi-fi 暫載：星辰帽、水晶蝴蝶結、彩虹光暈
+- [ ] 11.1 → 委派至 `docs/onboarding/FOR_LIAISON_DESIGNER.md`（NAMING.md S1–S6 插槽標注 Phase 1 hero 款）
+- ~~11.2 Phase 1 不實作裝扮，略~~
 
 ## 12. Spec archive 前驗收
 
 - [x] 12.1 `openspec validate p4-shop-phase-rollout` 通過
-- [ ] 12.2 ⚠️ **BLOCKED（@andrewtainan）** PM review proposal.md / design.md
-- [ ] 12.3 ⚠️ **BLOCKED（@shangchian）** 前端 review specs/ 四份規格的可實作性
-- [ ] 12.4 ⚠️ **BLOCKED（@andrewtainan）** 提醒 PM 於 `docs/decisions/CURRENT.md` 寫入 #26 / #27 / #28 / #29
+- [ ] 12.2 → 委派至 `docs/onboarding/FOR_PM.md`（PM review proposal.md / design.md）
+- [ ] 12.3 → 委派至 `docs/onboarding/FOR_FRONTEND.md`（前端 review specs/ 可實作性）
+- [ ] 12.4 → 委派至 `docs/onboarding/FOR_PM.md`（PM 於 CURRENT.md 寫入 #26–#29）
