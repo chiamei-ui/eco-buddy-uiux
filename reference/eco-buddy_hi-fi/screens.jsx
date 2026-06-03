@@ -153,6 +153,7 @@ const P1Home = ({ state, dispatch, setScreen, dragManager, payload, showTutorial
   const [bubble, setBubble] = useState(null); // {text, error}
   const [showEvolve, setShowEvolve] = useState(false);
   const [p6SheetOpen, setP6SheetOpen] = useState(false);
+  const [dockInfoOpen, setDockInfoOpen] = useState(false);
   const [ambientVisible, setAmbientVisible] = useState(true);
   const [ambientDismissing, setAmbientDismissing] = useState(false);
   const [pulsingIds, setPulsingIds] = useState(new Set());
@@ -299,6 +300,10 @@ const P1Home = ({ state, dispatch, setScreen, dragManager, payload, showTutorial
     setTimeout(() => setValueRises((prev) => prev.filter((v) => v.id !== id)), 1400);
   };
 
+  const wardrobeIsPhase2 = (tweaks?.shopPhase ?? 1) >= 2;
+  const wardrobeOwnedItems = COSMETIC_CATALOG.filter(c => (state.ownedCosmetics || []).includes(c.id));
+  const wardrobeHasItems = wardrobeIsPhase2 && wardrobeOwnedItems.length > 0;
+
   return (
     <div className="screen p1">
       {showEvolve && <EvolveOverlay onDone={() => setShowEvolve(false)} />}
@@ -313,7 +318,6 @@ const P1Home = ({ state, dispatch, setScreen, dragManager, payload, showTutorial
         <AvatarButton onClick={() => setScreen('p8')} />
       </div>
 
-      <div className="welcome" style={{ color: "rgb(128, 128, 128)" }}>可可粉，Buddy 等你好久了</div>
       <div className="charinfo">
         <span className="name" style={{ fontWeight: "700" }}>海龜</span>
         <div className="charinfo-divider"></div>
@@ -389,21 +393,30 @@ const P1Home = ({ state, dispatch, setScreen, dragManager, payload, showTutorial
           <button className={`dock-tab ${dockTab === 'tools' ? 'active' : ''}`} onClick={() => setDockTab('tools')}>玩具箱</button>
           <button className={`dock-tab ${dockTab === 'wardrobe' ? 'active' : ''}`} onClick={() => setDockTab('wardrobe')}>換衣間</button>
         </div>
-        <div className="dock" style={dockTab === 'wardrobe' ? { overflowY: 'auto' } : {}}>
+        <div className="dock" style={dockTab === 'wardrobe' && wardrobeHasItems ? { overflowY: 'auto' } : {}}>
+          <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:10 }}>
+            {dockTab !== 'wardrobe' && (
+              <button onClick={() => setDockInfoOpen(true)} style={{ display:'flex', alignItems:'center', gap:4, background:'none', border:'none', padding:0, cursor:'pointer' }}>
+                <img src="assets/btn/icon-_info.svg" alt="" width="17" height="17" draggable="false" style={{ display:'block' }} />
+                <span style={{ fontSize:11, fontWeight:700, color:'var(--ecoco-blue)', lineHeight:1 }}>效果說明</span>
+              </button>
+            )}
+            {dockTab === 'tools' && (
+              <button onClick={() => setScreen('p9')} style={{ fontSize:11, fontWeight:700, color:'var(--ecoco-blue)', background:'none', border:'none', cursor:'pointer', padding:0 }}>管理 ›</button>
+            )}
+            {dockTab === 'wardrobe' && (tweaks?.shopPhase ?? 1) >= 2 && (
+              <button onClick={() => setScreen('wardrobe-manage')} style={{ fontSize:11, fontWeight:700, color:'var(--ecoco-blue)', background:'none', border:'none', cursor:'pointer', padding:0 }}>管理 ›</button>
+            )}
+          </div>
         {dockTab === 'food' ? <>
-          <div className="dock-hint">每週限量食物！拖曳餵食 Buddy 吧</div>
           <div className="dock-grid">
             {state.food.map((f, i) => <FoodCell key={f.id} food={f} dragManager={dragManager} onDrop={onDrop} index={i} showBubble={showBubble} pulsing={pulsingIds.has(f.id)} />
             )}
           </div>
         </> : dockTab === 'tools' ? <>
-          <div className="dock-hint" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <span>拖到角色身上即可使用 · 24 小時內有效</span>
-            <button onClick={() => setScreen('p9')} style={{ fontSize: 12, fontWeight: 700, color: 'var(--ecoco-blue)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, flexShrink: 0 }}>管理 ›</button>
-          </div>
           <div className="dock-grid">
             {state.tools.length ? state.tools.map((t, i) =>
-            <ToolCell key={t.id} tool={t} dragManager={dragManager} onDrop={onDrop} />
+            <ToolCell key={t.id} tool={t} dragManager={dragManager} onDrop={onDrop} showBubble={showBubble} />
             ) :
             <div style={{ gridColumn: '1/-1', padding: '18px', textAlign: 'center', color: '#888', fontSize: 13 }}>
                 還沒有道具～<br />
@@ -412,50 +425,64 @@ const P1Home = ({ state, dispatch, setScreen, dragManager, payload, showTutorial
             }
           </div>
         </> : (() => {
-          const isPhase2 = (tweaks?.shopPhase ?? 1) >= 2;
-          const owned = state.ownedCosmetics || [];
           const equipped = state.equippedCosmetic;
-          const ownedItems = COSMETIC_CATALOG.filter(c => owned.includes(c.id));
+          const isPhase2 = wardrobeIsPhase2;
+          const ownedItems = wardrobeOwnedItems;
           if (!isPhase2) return (
-            <div style={{ padding: '32px 18px', textAlign: 'center' }}>
-              <div style={{ fontSize: 40, marginBottom: 12 }}>🎀</div>
+            <div style={{ padding: '32px 18px', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
               <div style={{ fontSize: 14, fontWeight: 700, color: '#222', marginBottom: 8 }}>即將推出，敬請期待</div>
               <div style={{ fontSize: 12, color: '#888', lineHeight: 1.6 }}>正式版上線後，在商店購買的裝扮<br />會出現在這裡</div>
             </div>
           );
           if (ownedItems.length === 0) return (
-            <div style={{ padding: '32px 18px', textAlign: 'center' }}>
-              <div style={{ fontSize: 40, marginBottom: 12 }}>🎀</div>
+            <div style={{ padding: '6px 18px', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
               <div style={{ fontSize: 14, fontWeight: 700, color: '#222', marginBottom: 8 }}>還沒有裝扮</div>
               <div style={{ fontSize: 12, color: '#888', marginBottom: 16 }}>去商店逛逛，幫 Buddy 找件喜歡的衣服</div>
               <button onClick={() => setScreen('p4')} style={{ background: 'var(--ecoco-orange)', color: '#fff', border: 'none', borderRadius: 999, padding: '10px 24px', fontWeight: 800, fontSize: 13, cursor: 'pointer' }}>去商店</button>
             </div>
           );
           return (
-            <div style={{ padding: '10px 12px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-              {ownedItems.map(item => {
-                const isEquipped = equipped === item.id;
-                return (
-                  <div key={item.id} style={{ background: '#F8F8F8', borderRadius: 14, padding: '12px 10px', textAlign: 'center', border: isEquipped ? '2px solid var(--ecoco-orange)' : '2px solid transparent', position: 'relative' }}>
-                    {isEquipped && (
-                      <div style={{ position: 'absolute', top: 6, right: 6, background: 'var(--ecoco-orange)', color: '#fff', fontSize: 9, fontWeight: 800, borderRadius: 999, padding: '2px 7px' }}>穿著中</div>
-                    )}
-                    <div style={{ fontSize: 36, marginBottom: 6 }}>{item.emoji}</div>
-                    <div style={{ fontSize: 13, fontWeight: 800, color: '#222' }}>{item.name}</div>
-                    <div style={{ fontSize: 10, color: '#888', marginTop: 2, marginBottom: 10 }}>{item.desc}</div>
-                    <button
-                      onClick={() => dispatch({ type: 'EQUIP_COSMETIC', id: isEquipped ? null : item.id })}
-                      style={{ width: '100%', background: isEquipped ? '#f0f0f0' : 'var(--ecoco-blue)', color: isEquipped ? '#888' : '#fff', border: 'none', borderRadius: 999, padding: '8px 0', fontWeight: 800, fontSize: 12, cursor: 'pointer' }}>
-                      {isEquipped ? '脫下' : '穿上'}
-                    </button>
-                  </div>
-                );
-              })}
+            <div className="dock-grid">
+              {ownedItems.map(item => (
+                <WardrobeCell key={item.id} item={item} equipped={equipped} dispatch={dispatch} />
+              ))}
             </div>
           );
         })()}
         </div>
       </div>
+      {dockInfoOpen && (
+        <ItemInfoSheet onClose={() => setDockInfoOpen(false)}>
+          {dockTab === 'food' ? (
+            <div>
+              <div style={{ fontSize:17, fontWeight:900, marginBottom:10 }}>食物欄說明</div>
+              <div style={{ fontSize:13, color:'#444', lineHeight:1.7, marginBottom:12 }}>
+                <div>• 拖曳食物到 Buddy 身上即可餵食</div>
+                <div>• 每份食物讓 Buddy 體力 +5</div>
+                <div>• 每週配額 5 個，每格顯示剩餘庫存</div>
+                <div>• 數量 ≤ 2 時卡片變淡，提醒快用完</div>
+              </div>
+              <div style={{ background:'#FFF3E0', borderRadius:12, padding:'10px 14px', fontSize:12, color:'#7A4800' }}>
+                💡 帶食物回家（投瓶機）每週可補充配額
+              </div>
+            </div>
+          ) : (
+            <div>
+              <div style={{ fontSize:17, fontWeight:900, marginBottom:10 }}>玩具箱說明</div>
+              <div style={{ fontSize:13, color:'#444', lineHeight:1.7, marginBottom:12 }}>
+                <div>• 拖曳道具到 Buddy 身上即可使用</div>
+                <div>• 免費道具（看廣告領取）有效期 24h</div>
+                <div>• 購買道具有效期 7 日</div>
+                <div>• ⏰ 代表剩餘 ≤ 24h，記得今天用掉</div>
+                <div>• 過期道具無法使用，24h 後自動移除</div>
+              </div>
+              <div style={{ background:'#FFF3E0', borderRadius:12, padding:'10px 14px', fontSize:12, color:'#7A4800' }}>
+                💡 點擊「管理 ›」可進入完整道具背包
+              </div>
+            </div>
+          )}
+        </ItemInfoSheet>
+      )}
       {p6SheetOpen && (
         <div className="sheet-backdrop" onClick={() => setP6SheetOpen(false)}>
           <div className="sheet-panel" onClick={e => e.stopPropagation()}>
@@ -498,11 +525,22 @@ const P1Home = ({ state, dispatch, setScreen, dragManager, payload, showTutorial
 };
 
 const toolEffectMap = {
-  feather: { label: '心情+15' },
-  brush:   { label: '潔+15・心+10' },
-  ball:    { label: '心情+15' },
-  snack:   { label: '體+15・心+15' },
+  feather: { label: '心情 +15' },
+  brush:   { label: '潔淨 +15・心情 +10' },
+  ball:    { label: '心情 +15' },
+  snack:   { label: '體力 +15・心情 +15' },
 };
+
+/* ── 食物/道具 ℹ️ Bottom Sheet ── */
+const ItemInfoSheet = ({ onClose, children }) => (
+  <div className="sheet-backdrop" onClick={onClose} style={{ zIndex: 200 }}>
+    <div className="sheet-panel" onClick={e => e.stopPropagation()}>
+      <div className="sheet-grip" />
+      <div style={{ padding: '8px 20px 16px' }}>{children}</div>
+      <button className="btn-ghost" style={{ width: 'calc(100% - 40px)', margin: '0 20px 12px' }} onClick={onClose}>關閉</button>
+    </div>
+  </div>
+);
 
 /* food cell with drag */
 const FoodCell = ({ food, dragManager, onDrop, showBubble, pulsing }) => {
@@ -547,42 +585,62 @@ const FoodCell = ({ food, dragManager, onDrop, showBubble, pulsing }) => {
       {food.state !== 'locked' && (
         <div className="food-label">
           <span className="name">{food.name}</span>
-          <span className="effect-tag">體力+5</span>
         </div>
       )}
     </div>);
-
 };
-const ToolCell = ({ tool, dragManager, onDrop }) => {
+
+const ToolCell = ({ tool, dragManager, onDrop, showBubble }) => {
+  const expired = tool.hoursLeft != null && tool.hoursLeft <= 0;
+  const warn    = !expired && tool.hoursLeft != null && tool.hoursLeft <= 24;
+
   const handlePointerDown = (e) => {
-    dragManager.startDrag(e, { kind: 'tool', id: tool.id, emoji: tool.emoji }, onDrop);
+    if (expired) {
+      showBubble?.({ text: '嗚… 這個不見了 😔' });
+      return;
+    }
+    const startX = e.clientX, startY = e.clientY;
+    const onMove = (me) => {
+      if (Math.abs(me.clientX - startX) > 6 || Math.abs(me.clientY - startY) > 6) {
+        window.removeEventListener('pointermove', onMove);
+        window.removeEventListener('pointerup', onUp);
+        dragManager.startDrag(e, { kind: 'tool', id: tool.id, emoji: tool.emoji }, onDrop);
+      }
+    };
+    const onUp = () => {
+      window.removeEventListener('pointermove', onMove);
+      window.removeEventListener('pointerup', onUp);
+      showBubble?.({ text: warn ? '這個快消失了！今天要用掉喔 ⏰' : '拖到我身上，記得今天就用掉喔！' });
+    };
+    window.addEventListener('pointermove', onMove);
+    window.addEventListener('pointerup', onUp);
   };
-  const warn = tool.hoursLeft != null && tool.hoursLeft <= 6;
+
   return (
     <div className="food-slot">
-      <div className="food-cell has-stock" onPointerDown={handlePointerDown}>
+      <div
+        className="food-cell has-stock"
+        onPointerDown={handlePointerDown}
+        style={{ position:'relative', opacity: expired ? 0.4 : 1, cursor: expired ? 'default' : 'grab' }}
+      >
         <span className="emoji">{tool.emoji}</span>
         {tool.count > 1 && <span className="badge">{tool.count}</span>}
-        {tool.hoursLeft != null && (
+        {expired && (
+          <span style={{ position:'absolute', top:3, right:4, fontSize:13, lineHeight:1, color:'#666', pointerEvents:'none', fontWeight:700 }}>✕</span>
+        )}
+        {!expired && tool.hoursLeft != null && (
           <span style={{
-            position: 'absolute', bottom: 4, right: 4,
+            position:'absolute', bottom:4, right:4,
             background: warn ? '#FF5000' : 'rgba(0,0,0,0.32)',
-            color: '#fff',
-            fontSize: 9, fontWeight: 800, lineHeight: 1,
-            padding: '2px 5px', borderRadius: 6,
-            letterSpacing: '0.02em',
-            pointerEvents: 'none',
-          }}>
-            {tool.hoursLeft}h
-          </span>
+            color:'#fff', fontSize:9, fontWeight:800, lineHeight:1,
+            padding:'2px 5px', borderRadius:6, letterSpacing:'0.02em', pointerEvents:'none',
+          }}>{tool.hoursLeft}h</span>
         )}
       </div>
       <div className="food-label">
-        <span className="name">{tool.name}</span>
-        <span className="effect-tag">{toolEffectMap[tool.id].label}</span>
+        <span className="name" style={expired ? { textDecoration:'line-through', color:'#aaa' } : {}}>{tool.name}</span>
       </div>
     </div>);
-
 };
 
 
@@ -1002,6 +1060,27 @@ const COSMETIC_CATALOG = [
   { id: 'rainbow-halo', emoji: '🌈', name: '彩虹光暈',   desc: 'Phase 1 預覽款 · 閃耀登場', price: 199 },
 ];
 
+const WardrobeCell = ({ item, equipped, dispatch }) => {
+  const isEquipped = equipped === item.id;
+  return (
+    <div className="food-slot">
+      <div
+        className="food-cell has-stock"
+        onClick={() => dispatch({ type: 'EQUIP_COSMETIC', id: isEquipped ? null : item.id })}
+        style={{ position:'relative', cursor:'pointer', outline: isEquipped ? '2px solid var(--ecoco-orange)' : 'none', outlineOffset:'-2px' }}
+      >
+        <span className="emoji">{item.emoji}</span>
+        {isEquipped && (
+          <span style={{ position:'absolute', top:3, right:4, background:'var(--ecoco-orange)', color:'#fff', fontSize:9, fontWeight:800, borderRadius:999, padding:'2px 5px', lineHeight:1, pointerEvents:'none' }}>穿著中</span>
+        )}
+      </div>
+      <div className="food-label">
+        <span className="name">{item.name}</span>
+      </div>
+    </div>
+  );
+};
+
 /* ═══════════════ P4 · Shop ═══════════════ */
 const P4Shop = ({ setScreen, state, dispatch, tweaks }) => {
   const [tab, setTab] = useState('food');
@@ -1289,6 +1368,7 @@ const P4Shop = ({ setScreen, state, dispatch, tweaks }) => {
           onClose={() => setSuccessItem(null)}
           onGoToBag={() => { setSuccessItem(null); setScreen('p9'); }}
           onGoToWardrobe={() => { setSuccessItem(null); setScreen('p1', { openWardrobe: true }); }}
+          onGoToManage={() => { setSuccessItem(null); setScreen('wardrobe-manage'); }}
           setScreen={setScreen}
         />
       }
@@ -1394,13 +1474,14 @@ const ShopPurchaseModal = ({ item, state, onClose, onConfirm }) => {
 };
 
 /* ----- P4 helper: 購買成功 Modal ----- */
-const ShopSuccessModal = ({ item, state, onClose, onGoToBag, onGoToWardrobe, setScreen }) => {
+const ShopSuccessModal = ({ item, state, onClose, onGoToBag, onGoToWardrobe, onGoToManage, setScreen }) => {
   const isCash = item.paidWith === 'cash';
   const isCosmetic = item.cashChannel === 'platform-iap';
   const orderId = item.orderId ?? null;
   return (
     <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal" onClick={(e) => e.stopPropagation()} style={{ textAlign: 'center' }}>
+      <div className="modal" onClick={(e) => e.stopPropagation()} style={{ textAlign: 'center', position: 'relative' }}>
+        <button onClick={onClose} style={{ position:'absolute', top:12, left:12, background:'none', border:'none', padding:'4px 8px', cursor:'pointer', fontSize:13, fontWeight:700, color:'#555', lineHeight:1, display:'flex', alignItems:'center', gap:2 }}>‹ 返回</button>
         <div style={{ fontSize: 56, marginBottom: 4, lineHeight: 1 }}>{item.emoji}</div>
         <div style={{
           display: 'inline-flex', alignItems: 'center', gap: 4,
@@ -1447,16 +1528,16 @@ const ShopSuccessModal = ({ item, state, onClose, onGoToBag, onGoToWardrobe, set
             }}>好的，繼續</button>
           ) : isCosmetic ? (
             <>
+              <button onClick={onGoToManage} style={{
+                flex: 1, background: 'var(--gray-light)', color: '#555',
+                border: 'none', borderRadius: 999, padding: '13px 0',
+                fontWeight: 700, fontSize: 14, cursor: 'pointer',
+              }}>管理裝扮</button>
               <button onClick={onGoToWardrobe} style={{
                 flex: 1, background: 'var(--ecoco-orange)', color: '#fff',
                 border: 'none', borderRadius: 999, padding: '13px 0',
                 fontWeight: 800, fontSize: 14, cursor: 'pointer',
-              }}>去「我的」查看與換裝</button>
-              <button onClick={onClose} style={{
-                flex: 1, background: 'var(--gray-light)', color: '#555',
-                border: 'none', borderRadius: 999, padding: '13px 0',
-                fontWeight: 700, fontSize: 14, cursor: 'pointer',
-              }}>繼續逛</button>
+              }}>前往換裝</button>
             </>
           ) : (
             <>
@@ -1943,7 +2024,7 @@ const P8Profile = ({ setScreen, state, tweaks }) => {
       title: '我的收藏', en: 'COLLECTION',
       items: [
         isPhase2
-          ? { icon: '🎀', label: '我的裝扮', sub: ownedCount > 0 ? `${ownedCount} 件 · 現在穿著：${equippedName}` : '還沒有裝扮', action: () => setScreen('p1', { openWardrobe: true }) }
+          ? { icon: '🎀', label: '我的裝扮', sub: ownedCount > 0 ? `${ownedCount} 件 · 現在穿著：${equippedName}` : '還沒有裝扮', action: () => setScreen('wardrobe-manage') }
           : { icon: '🎀', label: '我的裝扮', sub: '即將推出，敬請期待', locked: true },
         { icon: '🎒', label: '玩具箱',   sub: `${state.tools.length} 個玩具`, go: 'p9' },
       ],
@@ -2072,7 +2153,7 @@ const P9Bag = ({ setScreen, state, dispatch }) => {
       <StatusBar />
       <NavBack onClick={() => setScreen('p1')} />
       <div className="header">
-        <h2>道具背包</h2>
+        <h2>玩具箱</h2>
       </div>
       <div className="tabs">
         <button className={`tab ${tab === 'free' ? 'active' : ''}`} onClick={() => setTab('free')}>Buddy 的禮物 ({tools.filter((t) => !t.permanent).length})</button>
@@ -2147,6 +2228,51 @@ const P9Bag = ({ setScreen, state, dispatch }) => {
 
 };
 
+
+/* ═══════════════ 裝扮衣櫥 · Wardrobe Management ═══════════════ */
+const WardrobeManage = ({ setScreen, state }) => {
+  const [snackText, setSnackText] = useState(null);
+  const owned = state.ownedCosmetics || [];
+  const equipped = state.equippedCosmetic;
+  const ownedItems = COSMETIC_CATALOG.filter(c => owned.includes(c.id));
+
+  return (
+    <div className="screen p9">
+      <StatusBar />
+      <NavBack onClick={() => setScreen('p1', { openWardrobe: true })} />
+      <div className="header">
+        <h2>我的裝扮</h2>
+      </div>
+      {ownedItems.length === 0 ? (
+        <div className="empty-bag">
+          <div className="icon">🎀</div>
+          <h3>還沒有裝扮</h3>
+          <p>去商店幫 Buddy 找件喜歡的衣服</p>
+          <div className="empty-actions">
+            <button className="btn-primary" style={{ padding: '10px 20px', fontSize: 13 }} onClick={() => setScreen('p4')}>去商店</button>
+          </div>
+        </div>
+      ) : (
+        <div className="bag-grid">
+          {ownedItems.map(item => {
+            const isEquipped = equipped === item.id;
+            return (
+              <div key={item.id} className="bag-cell" style={{ cursor: 'pointer' }}
+                onClick={() => setSnackText('回夥伴首頁，在換衣間幫 Buddy 穿上')}>
+                {isEquipped && <div className="perm" style={{ background: 'var(--ecoco-orange)' }}>穿著中</div>}
+                <div className="emoji">{item.emoji}</div>
+                <div className="name">{item.name}</div>
+                <div style={{ fontSize: 11, color: '#888', marginTop: 2 }}>{item.desc}</div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+      <div style={{ paddingBottom: 100 }}></div>
+      <SystemToast bottom icon={false} text={snackText} onClose={() => setSnackText(null)} duration={2500} />
+    </div>
+  );
+};
 
 /* ═══════════════ P10 · Month picker (overlay on P7) ═══════════════ */
 const P10Picker = ({ setScreen, state, dispatch, onClose }) => {
