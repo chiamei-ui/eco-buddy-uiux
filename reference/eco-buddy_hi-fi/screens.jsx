@@ -175,11 +175,15 @@ const P1Home = ({ state, dispatch, setScreen, dragManager, payload, showTutorial
     } else {
       setTutorialStep(-1);
       if (onTutorialDone) onTutorialDone();
+      // 新手引導結束 → Buddy 主動開口，引導第一次餵食
+      setTimeout(() => showBubble({ text: DIALOGUES.onboarding.firstFeed, error: false }), 400);
     }
   };
   const handleTutorialSkip = () => {
     setTutorialStep(-1);
     if (onTutorialDone) onTutorialDone();
+    // 跳過引導時同樣觸發餵食提示
+    setTimeout(() => showBubble({ text: DIALOGUES.onboarding.firstFeed, error: false }), 400);
   };
 
   useEffect(() => {

@@ -66,6 +66,11 @@ const DIALOGUES = {
     lockWarn:  '改了要花更換次數喔，確定嗎？🤔',
   },
 
+  // 新手引導
+  onboarding: {
+    firstFeed: '我等你好久了！快把食物拖過來嘛～',
+  },
+
   // 觸摸（撫摸）反應 — 角色性格反應
   touch: [
     '呵呵～癢癢的！',
