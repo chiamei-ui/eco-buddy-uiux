@@ -305,7 +305,7 @@ img,svg{display:block;}
   width:fit-content;
 }
 .dock-tab{
-  padding:5px 16px;border-radius:999px;font-size:14px;font-weight:700;
+  padding:5px 12px;border-radius:999px;font-size:13px;font-weight:700;
   color:var(--gray-text);background:transparent;cursor:pointer;
   transition:background .15s,color .15s;
 }

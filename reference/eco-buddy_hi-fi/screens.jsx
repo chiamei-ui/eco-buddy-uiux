@@ -13,7 +13,7 @@ const OB_STEPS = [
   { refKey: 'adsBtnRef',     pad: 8,  radius: 24, textRight: true,
     title: '免費道具 🎁',           text: '看廣告領道具，每天最多 5 次' },
   { refKey: 'dockTabsRef',   pad: 6,  radius: 16,
-    title: '食物欄 & 玩具箱',       text: '切換查看食物和道具，拖到夥伴身上使用' },
+    title: '食物欄、玩具箱、換衣間', text: '切換查看食物、道具和裝扮，拖到夥伴身上使用' },
   { refKey: 'tabbarRef',     pad: 4,  radius: 12,
     title: '四大功能',              text: '快來探索遊戲中的每個小驚喜吧！' },
 ];
@@ -147,7 +147,7 @@ const OnboardingSpotlight = ({ step, refs, onNext, onSkip }) => {
 
 /* ═══════════════ P1 · Buddy Home ═══════════════ */
 const P1Home = ({ state, dispatch, setScreen, dragManager, payload, showTutorial, onTutorialDone, tweaks = {} }) => {
-  const [dockTab, setDockTab] = useState('food'); // food | tools
+  const [dockTab, setDockTab] = useState('food'); // food | tools | wardrobe
   const [touched, setTouched] = useState(false);
   const [eating, setEating] = useState(false);
   const [bubble, setBubble] = useState(null); // {text, error}
@@ -186,6 +186,9 @@ const P1Home = ({ state, dispatch, setScreen, dragManager, payload, showTutorial
       setEating(true);
       showBubble({ text: '好好吃！謝謝你～', error: false });
       setTimeout(() => setEating(false), 1500);
+    }
+    if (payload?.openWardrobe) {
+      setDockTab('wardrobe');
     }
     if (payload?.foodStored) {
       setDockTab('food');
@@ -384,15 +387,16 @@ const P1Home = ({ state, dispatch, setScreen, dragManager, payload, showTutorial
         <div className="dock-tabs" ref={dockTabsRef}>
           <button className={`dock-tab ${dockTab === 'food' ? 'active' : ''}`} onClick={() => setDockTab('food')}>食物欄</button>
           <button className={`dock-tab ${dockTab === 'tools' ? 'active' : ''}`} onClick={() => setDockTab('tools')}>玩具箱</button>
+          <button className={`dock-tab ${dockTab === 'wardrobe' ? 'active' : ''}`} onClick={() => setDockTab('wardrobe')}>換衣間</button>
         </div>
-        <div className="dock">
+        <div className="dock" style={dockTab === 'wardrobe' ? { overflowY: 'auto' } : {}}>
         {dockTab === 'food' ? <>
           <div className="dock-hint">每週限量食物！拖曳餵食 Buddy 吧</div>
           <div className="dock-grid">
             {state.food.map((f, i) => <FoodCell key={f.id} food={f} dragManager={dragManager} onDrop={onDrop} index={i} showBubble={showBubble} pulsing={pulsingIds.has(f.id)} />
             )}
           </div>
-        </> : <>
+        </> : dockTab === 'tools' ? <>
           <div className="dock-hint" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <span>拖到角色身上即可使用 · 24 小時內有效</span>
             <button onClick={() => setScreen('p9')} style={{ fontSize: 12, fontWeight: 700, color: 'var(--ecoco-blue)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, flexShrink: 0 }}>管理 ›</button>
@@ -407,7 +411,49 @@ const P1Home = ({ state, dispatch, setScreen, dragManager, payload, showTutorial
               </div>
             }
           </div>
-        </>}
+        </> : (() => {
+          const isPhase2 = (tweaks?.shopPhase ?? 1) >= 2;
+          const owned = state.ownedCosmetics || [];
+          const equipped = state.equippedCosmetic;
+          const ownedItems = COSMETIC_CATALOG.filter(c => owned.includes(c.id));
+          if (!isPhase2) return (
+            <div style={{ padding: '32px 18px', textAlign: 'center' }}>
+              <div style={{ fontSize: 40, marginBottom: 12 }}>🎀</div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: '#222', marginBottom: 8 }}>即將推出，敬請期待</div>
+              <div style={{ fontSize: 12, color: '#888', lineHeight: 1.6 }}>正式版上線後，在商店購買的裝扮<br />會出現在這裡</div>
+            </div>
+          );
+          if (ownedItems.length === 0) return (
+            <div style={{ padding: '32px 18px', textAlign: 'center' }}>
+              <div style={{ fontSize: 40, marginBottom: 12 }}>🎀</div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: '#222', marginBottom: 8 }}>還沒有裝扮</div>
+              <div style={{ fontSize: 12, color: '#888', marginBottom: 16 }}>去商店逛逛，幫 Buddy 找件喜歡的衣服</div>
+              <button onClick={() => setScreen('p4')} style={{ background: 'var(--ecoco-orange)', color: '#fff', border: 'none', borderRadius: 999, padding: '10px 24px', fontWeight: 800, fontSize: 13, cursor: 'pointer' }}>去商店</button>
+            </div>
+          );
+          return (
+            <div style={{ padding: '10px 12px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+              {ownedItems.map(item => {
+                const isEquipped = equipped === item.id;
+                return (
+                  <div key={item.id} style={{ background: '#F8F8F8', borderRadius: 14, padding: '12px 10px', textAlign: 'center', border: isEquipped ? '2px solid var(--ecoco-orange)' : '2px solid transparent', position: 'relative' }}>
+                    {isEquipped && (
+                      <div style={{ position: 'absolute', top: 6, right: 6, background: 'var(--ecoco-orange)', color: '#fff', fontSize: 9, fontWeight: 800, borderRadius: 999, padding: '2px 7px' }}>穿著中</div>
+                    )}
+                    <div style={{ fontSize: 36, marginBottom: 6 }}>{item.emoji}</div>
+                    <div style={{ fontSize: 13, fontWeight: 800, color: '#222' }}>{item.name}</div>
+                    <div style={{ fontSize: 10, color: '#888', marginTop: 2, marginBottom: 10 }}>{item.desc}</div>
+                    <button
+                      onClick={() => dispatch({ type: 'EQUIP_COSMETIC', id: isEquipped ? null : item.id })}
+                      style={{ width: '100%', background: isEquipped ? '#f0f0f0' : 'var(--ecoco-blue)', color: isEquipped ? '#888' : '#fff', border: 'none', borderRadius: 999, padding: '8px 0', fontWeight: 800, fontSize: 12, cursor: 'pointer' }}>
+                      {isEquipped ? '脫下' : '穿上'}
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          );
+        })()}
         </div>
       </div>
       {p6SheetOpen && (
@@ -949,6 +995,13 @@ const ProductDetailSheet = ({ item, onClose, onBuy }) => {
   );
 };
 
+/* ───── Cosmetic catalogue (shared by P4Shop + P1Home wardrobe tab) ───── */
+const COSMETIC_CATALOG = [
+  { id: 'star-hat',     emoji: '⭐', name: '星辰帽',     desc: '限定裝扮 · 閃閃發光',       price: 299 },
+  { id: 'crystal-bow',  emoji: '🎀', name: '水晶蝴蝶結', desc: '限定裝扮 · 精緻優雅',       price: 249 },
+  { id: 'rainbow-halo', emoji: '🌈', name: '彩虹光暈',   desc: 'Phase 1 預覽款 · 閃耀登場', price: 199 },
+];
+
 /* ═══════════════ P4 · Shop ═══════════════ */
 const P4Shop = ({ setScreen, state, dispatch, tweaks }) => {
   const [tab, setTab] = useState('food');
@@ -986,10 +1039,7 @@ const P4Shop = ({ setScreen, state, dispatch, tweaks }) => {
     { id: 'ball', emoji: '⚾', name: '小球', desc: '心情 +15', price: 25, currency: 'heart' },
     { id: 'snack', emoji: '🍪', name: '零食', desc: '體力 +15、心情 +15', price: 20, currency: 'heart' }],
 
-    cosmetic: [
-    { id: 'star-hat', emoji: '⭐', name: '星辰帽', desc: '限定裝扮 · 閃閃發光', price: 299, currency: 'cash', cashChannel: 'platform-iap' },
-    { id: 'crystal-bow', emoji: '🎀', name: '水晶蝴蝶結', desc: '限定裝扮 · 精緻優雅', price: 249, currency: 'cash', cashChannel: 'platform-iap' },
-    { id: 'rainbow-halo', emoji: '🌈', name: '彩虹光暈', desc: 'Phase 1 預覽款 · 閃耀登場', price: 199, currency: 'cash', cashChannel: 'platform-iap' }],
+    cosmetic: COSMETIC_CATALOG.map(c => ({ ...c, currency: 'cash', cashChannel: 'platform-iap' })),
 
     music: []
 
@@ -1238,7 +1288,7 @@ const P4Shop = ({ setScreen, state, dispatch, tweaks }) => {
           state={state}
           onClose={() => setSuccessItem(null)}
           onGoToBag={() => { setSuccessItem(null); setScreen('p9'); }}
-          onGoToWardrobe={() => { setSuccessItem(null); setScreen('p8'); }}
+          onGoToWardrobe={() => { setSuccessItem(null); setScreen('p1', { openWardrobe: true }); }}
           setScreen={setScreen}
         />
       }
@@ -1874,30 +1924,49 @@ const P7Dex = ({ setScreen, state, dispatch, onOpenPicker, tweaks }) => {
 };
 
 /* ═══════════════ P8 · Profile (Me · 我的) ═══════════════ */
-const P8Profile = ({ setScreen, state }) => {
+const P8Profile = ({ setScreen, state, tweaks }) => {
   const [showPointSrc, setShowPointSrc] = useState(false);
+  const isPhase2 = (tweaks?.shopPhase ?? 1) >= 2;
+  const ownedCount = (state.ownedCosmetics || []).length;
+  const equippedName = state.equippedCosmetic
+    ? (COSMETIC_CATALOG.find(c => c.id === state.equippedCosmetic)?.name ?? '已穿戴')
+    : '尚未穿戴';
   const featureGroups = [
-  {
-    title: '',
-    en: 'GAME',
-    items: [
-    { icon: '🐢', label: '夥伴狀態', sub: `體力 ${state.stats.hp} · 潔淨 ${state.stats.clean} · 心情 ${state.stats.mood}`, go: 'p1' },
-    { icon: '📖', label: '夥伴日誌', sub: `認識了 ${state.dexStates.filter((s) => s.unlocked).length} / 9 個樣子`, go: 'p7' },
-    { icon: '🎒', label: '玩具箱', sub: `${state.tools.length} 個玩具`, go: 'p9' },
-    { icon: '✅', label: '今日陪伴', sub: '還有 3 件事可以做', go: 'p5' },
-    { icon: '🛒', label: '商店', sub: `點數 ${state.points.toLocaleString()}`, go: 'p4' },
-    { icon: '🧾', label: '購買紀錄', sub: state.orderHistory && state.orderHistory.length > 0 ? state.orderHistory[0].name : '尚無購買紀錄', go: 'p4-orders' },
-    { icon: 'pt', label: '點數明細', sub: '本月 +382 · 帶食物回家 12 次', action: () => setShowPointSrc(true) }]
-
-  },
-  {
-    title: '使用教學',
-    en: 'GUIDE',
-    items: [
-    { icon: '🌱', label: '新手引導', sub: '認識體力／潔淨／心情、陪 Buddy 吃飯、變身', go: 'p0a' },
-    { icon: '💬', label: '常見問題', sub: '更換次數、過期道具、課金', go: 'p8-faq' }]
-
-  }];
+    {
+      title: '', en: 'BUDDY',
+      items: [
+        { icon: '🐢', label: '夥伴狀態', sub: `體力 ${state.stats.hp} · 潔淨 ${state.stats.clean} · 心情 ${state.stats.mood}`, go: 'p1' },
+        { icon: '📖', label: '夥伴日誌', sub: `認識了 ${state.dexStates.filter(s => s.unlocked).length} / 9 個樣子`, go: 'p7' },
+      ],
+    },
+    {
+      title: '我的收藏', en: 'COLLECTION',
+      items: [
+        isPhase2
+          ? { icon: '🎀', label: '我的裝扮', sub: ownedCount > 0 ? `${ownedCount} 件 · 現在穿著：${equippedName}` : '還沒有裝扮', action: () => setScreen('p1', { openWardrobe: true }) }
+          : { icon: '🎀', label: '我的裝扮', sub: '即將推出，敬請期待', locked: true },
+        { icon: '🎒', label: '玩具箱',   sub: `${state.tools.length} 個玩具`, go: 'p9' },
+      ],
+    },
+    {
+      title: '活動', en: 'ACTIVITY',
+      items: [
+        { icon: '✅', label: '今日陪伴', sub: '還有 3 件事可以做', go: 'p5' },
+        { icon: '🛒', label: '商店',     sub: `點數 ${state.points.toLocaleString()}`, go: 'p4' },
+        isPhase2
+          ? { icon: '🧾', label: '購買紀錄', sub: state.orderHistory && state.orderHistory.length > 0 ? state.orderHistory[0].name : '尚無購買紀錄', go: 'p4-orders' }
+          : { icon: '🧾', label: '購買紀錄', sub: '即將推出，敬請期待', locked: true },
+        { icon: 'pt', label: '點數明細', sub: '本月 +382 · 帶食物回家 12 次', action: () => setShowPointSrc(true) },
+      ],
+    },
+    {
+      title: '使用教學', en: 'GUIDE',
+      items: [
+        { icon: '🌱', label: '新手引導',   sub: '認識體力／潔淨／心情、陪 Buddy 吃飯、變身', go: 'p0a' },
+        { icon: '💬', label: '常見問題',   sub: '更換次數、過期道具、課金', go: 'p8-faq' },
+      ],
+    },
+  ];
 
 
   return (
@@ -1942,8 +2011,10 @@ const P8Profile = ({ setScreen, state }) => {
             </div>}
             <div className="menu">
               {group.items.map((it, i) =>
-            <div key={i} className={`menu-item ${it.go || it.comingSoon || it.action ? 'tap-area' : ''}`}
-            onClick={() => { if (it.action) it.action(); else if (it.go) setScreen(it.go); }}>
+            <div key={i}
+              className={`menu-item ${!it.locked && (it.go || it.comingSoon || it.action) ? 'tap-area' : ''}`}
+              style={it.locked ? { opacity: 0.45, cursor: 'default' } : {}}
+              onClick={() => { if (it.locked) return; if (it.action) it.action(); else if (it.go) setScreen(it.go); }}>
                   <span className="icon">
                     {it.icon === 'pt' ?
                 <img src="assets/icon-ecoco-point.svg" alt="" width="20" height="20" /> :
@@ -1953,7 +2024,7 @@ const P8Profile = ({ setScreen, state }) => {
                     <div style={{ fontWeight: 700, color: '#222', fontSize: 14 }}>{it.label}</div>
                     {it.sub && <div style={{ fontSize: 11, color: '#888', marginTop: 2 }}>{it.sub}</div>}
                   </div>
-                  <span className="arrow" style={it.comingSoon ? { color: '#ccc' } : {}}>›</span>
+                  <span className="arrow" style={{ color: (it.comingSoon || it.locked) ? '#ccc' : '' }}>›</span>
                 </div>
             )}
             </div>
@@ -2366,6 +2437,7 @@ const P8Faq = ({ setScreen }) => {
 };
 
 
+
 /* ═══════════════ P0 · 一般模式-首頁 ═══════════════ */
 const PNormalHome = ({ setScreen }) => (
   <div className="screen p0">
@@ -2482,7 +2554,7 @@ const P4Orders = ({ setScreen, state }) => {
                   {/* 失敗後續行動 */}
                   {isFailed && (
                     <div className="order-failed-actions">
-                      <a href="https://ecocogroup.zendesk.com/hc/zh-tw/requests/new?ticket_form_id=41244248648473" target="_blank" rel="noreferrer" className="order-action-ghost">聯繫客服</a>
+                      <button className="order-action-ghost" onClick={() => window.open('https://ecocogroup.zendesk.com/hc/zh-tw/requests/new?ticket_form_id=41244248648473', '_blank', 'noreferrer')}>聯繫客服</button>
                       <button className="order-action-primary" onClick={() => setScreen('p4')}>重新購買</button>
                     </div>
                   )}

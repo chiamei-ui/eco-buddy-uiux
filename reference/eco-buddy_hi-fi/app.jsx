@@ -12,6 +12,7 @@ const DEFAULT_STATE = {
   hasPass: false,
   sprintPurchased: false,
   ownedCosmetics: [],
+  equippedCosmetic: null,
   food: [
     { id:'hotdog-w1', name:'熱狗堡', emoji:'🌭', stock:2, state:'has' },
     { id:'hotdog-w2', name:'熱狗堡', emoji:'🌭', stock:12, state:'has' },
@@ -111,6 +112,8 @@ function stateReducer(state, action){
         lockedMonthCode: action.code,
         swapLeft: state.lockedMonthCode ? Math.max(0, state.swapLeft - 1) : state.swapLeft,
       };
+    case 'EQUIP_COSMETIC':
+      return { ...state, equippedCosmetic: action.id };
     case 'RESET_STATS': return {...state, stats:action.stats};
     case 'SET_STAT': return {...state, stats:{...state.stats, [action.kind]: Math.min(100, Math.max(0, action.value))}};
     case 'SET_STOCK': return {...state, food: state.food.map((f,i)=>({...f, stock:action.stocks[i] ?? f.stock, state:action.stocks[i]===0?(f.state==='locked'?'locked':'low'):f.state}))};
@@ -341,13 +344,13 @@ const App = () => {
       case 'p5':  return <P5Missions setScreen={setScreen} state={state} dispatch={dispatch} tweaks={tweaks} />;
       case 'p6':  return <P6Ads setScreen={setScreen} state={state} dispatch={dispatch} payload={screenPayload} />;
       case 'p7':  return <P7Dex setScreen={setScreen} state={state} dispatch={dispatch} onOpenPicker={() => setDexPickerOpen(true)} tweaks={tweaks} />;
-      case 'p8':  return <P8Profile setScreen={setScreen} state={state} />;
+      case 'p8':         return <P8Profile setScreen={setScreen} state={state} tweaks={tweaks} />;
       case 'p9':  return <P9Bag setScreen={setScreen} state={state} dispatch={dispatch} />;
       case 'p10': return <P7Dex setScreen={setScreen} state={state} dispatch={dispatch} onOpenPicker={() => setDexPickerOpen(true)} tweaks={tweaks} />;
       case 'p11': return <P11Pack setScreen={setScreen} />;
       case 'p12': return <P12RefillResult setScreen={setScreen} state={state} dispatch={dispatch} payload={screenPayload} tweaks={tweaks} />;
       case 'p4-orders': return <P4Orders setScreen={setScreen} state={state} />;
-      case 'p8-faq':    return <P8Faq setScreen={setScreen} />;
+      case 'p8-faq':     return <P8Faq setScreen={setScreen} />;
       default: return null;
     }
   };
@@ -449,8 +452,9 @@ const InlineTweaks = ({ tweaks, setTweak, setScreen, state, dispatch, screen }) 
   const isP5  = screen === 'p5';
   const isP12 = screen === 'p12';
   const isP7  = screen === 'p7' || screen === 'p10';
+  const isP8  = screen === 'p8';
   const showStats = isP1 || isP2b || isP12 || isP7;
-  const hasContent = isP1 || isP2 || isP2b || isP4 || isP5 || isP12 || isP7;
+  const hasContent = isP1 || isP2 || isP2b || isP4 || isP5 || isP12 || isP7 || isP8;
 
   return (
     <div style={{
@@ -597,6 +601,38 @@ const InlineTweaks = ({ tweaks, setTweak, setScreen, state, dispatch, screen }) 
                     borderRadius:6,color:'#fff',fontSize:12,padding:'4px 6px',textAlign:'right'}} />
               </div>
             ))}
+          </div>
+        </>
+      )}
+
+      {/* P8 / P8-Wardrobe 專屬 */}
+      {isP8 && (
+        <>
+          <div style={tweakLabel}>商店上線階段 (shopPhase)</div>
+          <Segmented
+            value={tweaks.shopPhase === 2 ? '2' : '1'}
+            onChange={v => setTweak('shopPhase', Number(v))}
+            options={[{v:'1',l:'Phase 1 封測'},{v:'2',l:'Phase 2 正式'}]}
+          />
+          <div style={{fontSize:10,color:'rgba(255,255,255,0.3)',marginTop:4,lineHeight:1.4}}>
+            Phase 1：裝扮功能尚未開放，入口停用。Phase 2：我的裝扮全功能。
+          </div>
+          <div style={{marginTop:10,paddingTop:10,borderTop:'1px solid rgba(255,255,255,0.08)'}}>
+            <div style={tweakLabel}>模擬裝扮持有</div>
+            <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:6}}>
+              <button
+                onClick={() => dispatch({ type: 'BUY', item: { id:'star-hat', cashChannel:'platform-iap' } })}
+                style={tweakBtn}>＋⭐ 星辰帽</button>
+              <button
+                onClick={() => dispatch({ type: 'BUY', item: { id:'crystal-bow', cashChannel:'platform-iap' } })}
+                style={tweakBtn}>＋🎀 蝴蝶結</button>
+              <button
+                onClick={() => dispatch({ type: 'BUY', item: { id:'rainbow-halo', cashChannel:'platform-iap' } })}
+                style={tweakBtn}>＋🌈 彩虹光暈</button>
+              <button
+                onClick={() => dispatch({ type: 'EQUIP_COSMETIC', id: null })}
+                style={{...tweakBtn, background:'rgba(255,255,255,0.06)'}}>脫下裝扮</button>
+            </div>
           </div>
         </>
       )}
