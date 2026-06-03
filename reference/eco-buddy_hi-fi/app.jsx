@@ -22,9 +22,9 @@ const DEFAULT_STATE = {
     { id:'brush',   name:'梳子',   emoji:'🪮', count:1, hoursLeft:4  },
   ],
   orderHistory: [
-    { id: 'ORD-20260501', name: '月度通行證', price: 149, date: '2026-05-01', status: 'success' },
-    { id: 'ORD-20260515', name: '五月衝刺禮包', price: 199, date: '2026-05-15', status: 'pending' },
-    { id: 'ORD-20260520', name: '五月衝刺禮包', price: 199, date: '2026-05-20', status: 'failed' },
+    { id: 'ORD-20260501', name: '月度通行證',   thumb: '🎫', price: 149, payMethod: 'Apple Pay',        date: '2026-05-01', status: 'success' },
+    { id: 'ORD-20260515', name: '五月衝刺禮包', thumb: '🎁', price: 199, payMethod: '藍新 NewebPay',    date: '2026-05-15', status: 'pending' },
+    { id: 'ORD-20260520', name: '五月衝刺禮包', thumb: '🎁', price: 199, payMethod: '信用卡',           date: '2026-05-20', status: 'failed', failReason: '信用卡授權失敗，請確認卡片額度是否充足' },
   ],
   dexStates: [
     { code:'01', name:'瀕死邊緣', unlocked:true,  tint:'grayscale(0.5) brightness(0.7)' },
@@ -132,7 +132,7 @@ function stateReducer(state, action){
     case 'PURCHASE_CASH':
       return {
         ...state,
-        orderHistory: [{ id: action.id, name: action.name, price: action.price, date: action.date, status: 'success' }, ...state.orderHistory],
+        orderHistory: [{ id: action.id, name: action.name, thumb: action.thumb, price: action.price, payMethod: action.payMethod, date: action.date, status: 'success' }, ...state.orderHistory],
       };
     case 'CLAIM_MISSION':
       // #21 日常任務獎勵：食物 ×1 + 心情 +3（食物加在第一個未鎖食物格）

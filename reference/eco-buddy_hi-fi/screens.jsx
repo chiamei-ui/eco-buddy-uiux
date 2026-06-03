@@ -791,7 +791,7 @@ const SHOP_IAP_CONFIG = {
     ],
   },
   monthlyPass: {
-    id: 'monthly-pass', emoji: '🎫', name: '月度通行證', price: 149, currency: 'cash', cashChannel: 'newebpay',
+    id: 'monthly-pass', emoji: '🎫', name: '月度通行證', price: 149, currency: 'cash', cashChannel: 'platform-iap',
     desc: '整個月都是你和 Buddy 的專屬時光，每天都有小驚喜',
     validDays: 30,
     benefits: [
@@ -1209,11 +1209,16 @@ const P4Shop = ({ setScreen, state, dispatch, tweaks }) => {
           onConfirm={(method) => {
             const item = purchasing;
             dispatch({ type: 'BUY', item });
+            let orderId = null;
             if (method === 'cash') {
-              dispatch({ type: 'PURCHASE_CASH', id: `ORD-${String(Date.now()).slice(-8)}`, name: item.name, price: item.price, date: new Date().toISOString().slice(0, 10) });
+              orderId = `ORD-${String(Date.now()).slice(-8)}`;
+              const thumbMap = { '通行證': '🎫', '禮包': '🎁', '衝刺': '🎁' };
+              const thumb = Object.entries(thumbMap).find(([k]) => item.name.includes(k))?.[1] ?? '🛍️';
+              const payMethod = item.cashChannel === 'platform-iap' ? 'Apple / Google Pay' : '藍新 NewebPay';
+              dispatch({ type: 'PURCHASE_CASH', id: orderId, name: item.name, thumb, price: item.price, payMethod, date: new Date().toISOString().slice(0, 10) });
             }
             setPurchasing(null);
-            setSuccessItem({ ...item, paidWith: method });
+            setSuccessItem({ ...item, paidWith: method, orderId });
           }}
         />
       }
@@ -1333,7 +1338,7 @@ const ShopPurchaseModal = ({ item, state, onClose, onConfirm }) => {
 const ShopSuccessModal = ({ item, state, onClose, onGoToBag, onGoToWardrobe, setScreen }) => {
   const isCash = item.paidWith === 'cash';
   const isCosmetic = item.cashChannel === 'platform-iap';
-  const orderId = isCash ? `ORD-${String(Date.now()).slice(-8)}` : null;
+  const orderId = item.orderId ?? null;
   return (
     <div className="modal-backdrop" onClick={onClose}>
       <div className="modal" onClick={(e) => e.stopPropagation()} style={{ textAlign: 'center' }}>
@@ -2382,44 +2387,96 @@ const STATUS_CONFIG = {
   failed:  { label: '失敗',   cls: 'order-status-failed' },
 };
 
+const ORDER_FILTER_OPTIONS = [
+  { id: 'all',     label: '全部' },
+  { id: 'success', label: '已完成' },
+  { id: 'pending', label: '處理中' },
+  { id: 'failed',  label: '失敗' },
+];
+const ORDER_FILTER_EMPTY = {
+  success: '還沒有完成的購買',
+  pending: '目前沒有處理中的訂單',
+  failed:  '太好了，沒有失敗的訂單！',
+};
+
 const P4Orders = ({ setScreen, state }) => {
-  const orders = state.orderHistory ?? [];
+  const [activeFilter, setActiveFilter] = useState('all');
+  const allOrders = state.orderHistory ?? [];
+  const orders = activeFilter === 'all' ? allOrders : allOrders.filter(o => o.status === activeFilter);
+
   return (
     <div className="screen" style={{ background: 'var(--bg-cream, #FAE0B8)' }}>
       <StatusBar />
       <NavBack onClick={() => setScreen('p8')} />
-      <div className="screen-scroll" style={{ paddingTop: 56 }}>
-        <h2 style={{ fontSize: 18, fontWeight: 900, color: '#222', padding: '0 20px 16px' }}>購買紀錄</h2>
+      <div style={{ padding: '90px 18px 8px' }}>
+        <h2 style={{ fontSize: 22, fontWeight: 900, color: '#222', marginTop: 8 }}>購買紀錄</h2>
+      </div>
 
+      {/* 篩選 Chip 列 */}
+      <div style={{ display: 'flex', gap: 8, padding: '8px 18px 12px', overflowX: 'auto', scrollbarWidth: 'none' }}>
+        {ORDER_FILTER_OPTIONS.map(f => (
+          <button key={f.id} onClick={() => setActiveFilter(f.id)} className={`order-filter-chip${activeFilter === f.id ? ' active' : ''}`}>
+            {f.label}
+          </button>
+        ))}
+      </div>
+
+      <div className="screen-scroll" style={{ paddingTop: 0 }}>
         {orders.length === 0 ? (
           <div className="order-empty">
             <div style={{ fontSize: 56 }}>🧾</div>
-            <div>還沒有購買紀錄</div>
+            <div>{activeFilter === 'all' ? '還沒有購買紀錄' : ORDER_FILTER_EMPTY[activeFilter]}</div>
           </div>
         ) : (
           <div style={{ padding: '0 16px', display: 'flex', flexDirection: 'column', gap: 10 }}>
             {orders.map((order) => {
               const sc = STATUS_CONFIG[order.status] || STATUS_CONFIG.success;
+              const isFailed = order.status === 'failed';
               return (
-                <div key={order.id} className="order-card">
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
-                    <div style={{ fontWeight: 800, fontSize: 14, color: '#222' }}>{order.name}</div>
-                    <span className={sc.cls}>{sc.label}</span>
+                <div key={order.id} className={`order-card${isFailed ? ' order-card-failed' : ''}`}>
+                  {/* 頂部：縮圖 + 商品名 + 狀態 */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
+                    <div className="order-thumb">{order.thumb ?? '🛍️'}</div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontWeight: 800, fontSize: 15, color: '#222', marginBottom: 2 }}>{order.name}</div>
+                      <span className={sc.cls}>{sc.label}</span>
+                    </div>
                   </div>
-                  <div style={{ fontSize: 12, color: '#888', display: 'flex', flexDirection: 'column', gap: 3 }}>
+
+                  {/* 明細列 */}
+                  <div style={{ fontSize: 12, color: '#888', display: 'flex', flexDirection: 'column', gap: 4, borderTop: '1px solid #F0EDE8', paddingTop: 10 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                       <span>訂單編號</span>
-                      <span style={{ fontFamily: 'var(--font-en)', fontWeight: 600 }}>{order.id}</span>
+                      <span style={{ fontFamily: 'var(--font-en)', fontWeight: 600, color: '#555' }}>{order.id}</span>
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                       <span>金額</span>
                       <span style={{ fontWeight: 700, color: '#060E9F' }}>NT$ {order.price}</span>
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <span>付款方式</span>
+                      <span style={{ fontWeight: 600, color: '#555' }}>💳 {order.payMethod ?? '—'}</span>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                       <span>購買日期</span>
-                      <span>{order.date}</span>
+                      <span style={{ color: '#555' }}>{order.date}</span>
                     </div>
                   </div>
+
+                  {/* 失敗說明區塊 */}
+                  {isFailed && (
+                    <div className="order-fail-reason">
+                      {order.failReason || '付款未成功，請確認卡片資訊或聯繫您的銀行'}
+                    </div>
+                  )}
+
+                  {/* 失敗後續行動 */}
+                  {isFailed && (
+                    <div className="order-failed-actions">
+                      <a href={`mailto:support@ecoco.xyz?subject=訂單問題%20${order.id}`} className="order-action-ghost">聯繫客服</a>
+                      <button className="order-action-primary" onClick={() => setScreen('p4')}>重新購買</button>
+                    </div>
+                  )}
                 </div>
               );
             })}
