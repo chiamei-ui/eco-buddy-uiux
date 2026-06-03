@@ -841,7 +841,7 @@ const MonthlyPassCard = ({ hasPass, validUntil = '6/30', onClick }) => (
 );
 
 /* ----- P4 helper: CosmeticDetailModal (裝扮商品詳情 + 試穿 — 彈窗) ----- */
-const CosmeticDetailSheet = ({ item, isPhase2, onClose, onBuy }) => {
+const CosmeticDetailSheet = ({ item, isPhase2, isOwned, onClose, onBuy }) => {
   const [tryingOn, setTryingOn] = useState(false);
   return (
     <div className="modal-backdrop" onClick={onClose}>
@@ -898,7 +898,9 @@ const CosmeticDetailSheet = ({ item, isPhase2, onClose, onBuy }) => {
           </div>
           <div className="product-detail-footer">
             <div className="price-tag">NT$ {item.price}</div>
-            {isPhase2 ? (
+            {isOwned ? (
+              <button className="buy-cta" disabled style={{ background: '#E8F9EE', color: '#22A55C', cursor: 'default' }}>✓ 已擁有</button>
+            ) : isPhase2 ? (
               <button className="buy-cta" onClick={() => onBuy(item)}>確認購買</button>
             ) : (
               <button className="buy-cta" disabled style={{ background: '#E0E0E0', color: '#999', cursor: 'default' }}>即將開放</button>
@@ -1092,21 +1094,27 @@ const P4Shop = ({ setScreen, state, dispatch, tweaks }) => {
             </div>
             <div className="shop-grid">
               {cosItems.map(it => {
-                const canBuy = isPhase2;
+                const isBought = state.ownedCosmetics?.includes(it.id);
                 return (
-                  <div key={it.id} className="shop-card"
+                  <div key={it.id} className={`shop-card${isBought ? ' purchased' : ''}`}
                     onClick={() => setCosmeticDetail(it)}
                     style={{ cursor: 'pointer' }}>
                     <div className="thumb">{it.emoji}</div>
                     <h4>{it.name}</h4>
                     <div className="desc">{it.desc}</div>
                     <div className="price">
-                      <b style={{ fontFamily: 'var(--font-en)', fontWeight: 900, color: '#060E9F', fontSize: 15 }}>NT$ {it.price}</b>
-                      <button className="buy-btn" disabled={!isPhase2}
-                        onClick={(e) => { e.stopPropagation(); setCosmeticDetail(it); }}
-                        style={!isPhase2 ? { background: '#E0E0E0', color: '#999', cursor: 'default' } : {}}>
-                        {!isPhase2 ? '即將開放' : '查看'}
-                      </button>
+                      {isBought ? (
+                        <span style={{ fontWeight: 800, color: '#22A55C', fontSize: 12 }}>✓ 已擁有</span>
+                      ) : (
+                        <>
+                          <b style={{ fontFamily: 'var(--font-en)', fontWeight: 900, color: '#060E9F', fontSize: 15 }}>NT$ {it.price}</b>
+                          <button className="buy-btn" disabled={!isPhase2}
+                            onClick={(e) => { e.stopPropagation(); setCosmeticDetail(it); }}
+                            style={!isPhase2 ? { background: '#E0E0E0', color: '#999', cursor: 'default' } : {}}>
+                            {!isPhase2 ? '即將開放' : '查看'}
+                          </button>
+                        </>
+                      )}
                     </div>
                   </div>
                 );
@@ -1196,6 +1204,7 @@ const P4Shop = ({ setScreen, state, dispatch, tweaks }) => {
         <CosmeticDetailSheet
           item={cosmeticDetail}
           isPhase2={isPhase2}
+          isOwned={state.ownedCosmetics?.includes(cosmeticDetail.id)}
           onClose={() => setCosmeticDetail(null)}
           onBuy={(item) => { setCosmeticDetail(null); setPurchasing(item); }}
         />
@@ -2473,7 +2482,7 @@ const P4Orders = ({ setScreen, state }) => {
                   {/* 失敗後續行動 */}
                   {isFailed && (
                     <div className="order-failed-actions">
-                      <a href={`mailto:support@ecoco.xyz?subject=訂單問題%20${order.id}`} className="order-action-ghost">聯繫客服</a>
+                      <a href="https://ecocogroup.zendesk.com/hc/zh-tw/requests/new?ticket_form_id=41244248648473" target="_blank" rel="noreferrer" className="order-action-ghost">聯繫客服</a>
                       <button className="order-action-primary" onClick={() => setScreen('p4')}>重新購買</button>
                     </div>
                   )}

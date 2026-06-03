@@ -11,6 +11,7 @@ const DEFAULT_STATE = {
   pity: 1,
   hasPass: false,
   sprintPurchased: false,
+  ownedCosmetics: [],
   food: [
     { id:'hotdog-w1', name:'熱狗堡', emoji:'🌭', stock:2, state:'has' },
     { id:'hotdog-w2', name:'熱狗堡', emoji:'🌭', stock:12, state:'has' },
@@ -85,6 +86,7 @@ function stateReducer(state, action){
     case 'BUY':
       if (action.item.id === 'monthly-pass') return { ...state, hasPass: true };
       if (action.item.id === 'sprint-pack') return { ...state, sprintPurchased: true };
+      if (action.item.cashChannel === 'platform-iap') return { ...state, ownedCosmetics: [...(state.ownedCosmetics || []), action.item.id] };
       return {
         ...state,
         points: Math.max(0, state.points - action.item.price),
