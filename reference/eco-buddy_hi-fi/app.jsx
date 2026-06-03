@@ -20,8 +20,9 @@ const DEFAULT_STATE = {
     { id:'hotdog-w4', name:'???',    emoji:'🌭', stock:0, state:'locked' },
   ],
   tools: [
+    { id:'ball',    name:'小球',   emoji:'⚾', count:1, hoursLeft:72 },
     { id:'feather', name:'逗貓棒', emoji:'🪶', count:2, hoursLeft:18 },
-    { id:'brush',   name:'梳子',   emoji:'🪮', count:1, hoursLeft:4  },
+    { id:'brush',   name:'梳子',   emoji:'🪮', count:1, hoursLeft:0  },
   ],
   orderHistory: [
     { id: 'ORD-20260501', name: '月度通行證',   thumb: '🎫', price: 149, payMethod: 'Apple Pay',        date: '2026-05-01', status: 'success' },
@@ -318,7 +319,7 @@ const App = () => {
 
   // map screen → tabbar active id (only show on tab pages)
   const tabbarActive = {
-    p1:'buddy', p4:'shop', p5:'mission', p7:'dex', p9:'buddy', p0a:'buddy'
+    p1:'buddy', p4:'shop', p5:'mission', p7:'dex', p9:'buddy', p0a:'buddy', 'wardrobe-manage':'buddy'
   }[screen];
 
   const navFromTabbar = (id) => {
@@ -346,6 +347,7 @@ const App = () => {
       case 'p7':  return <P7Dex setScreen={setScreen} state={state} dispatch={dispatch} onOpenPicker={() => setDexPickerOpen(true)} tweaks={tweaks} />;
       case 'p8':         return <P8Profile setScreen={setScreen} state={state} tweaks={tweaks} />;
       case 'p9':  return <P9Bag setScreen={setScreen} state={state} dispatch={dispatch} />;
+      case 'wardrobe-manage': return <WardrobeManage setScreen={setScreen} state={state} dispatch={dispatch} />;
       case 'p10': return <P7Dex setScreen={setScreen} state={state} dispatch={dispatch} onOpenPicker={() => setDexPickerOpen(true)} tweaks={tweaks} />;
       case 'p11': return <P11Pack setScreen={setScreen} />;
       case 'p12': return <P12RefillResult setScreen={setScreen} state={state} dispatch={dispatch} payload={screenPayload} tweaks={tweaks} />;
@@ -489,6 +491,24 @@ const InlineTweaks = ({ tweaks, setTweak, setScreen, state, dispatch, screen }) 
       {/* P1 專屬 */}
       {isP1 && (
         <>
+          <div style={tweakLabel}>商店上線階段 (shopPhase)</div>
+          <Segmented
+            value={tweaks.shopPhase === 2 ? '2' : '1'}
+            onChange={v => setTweak('shopPhase', Number(v))}
+            options={[{v:'1',l:'Phase 1 封測'},{v:'2',l:'Phase 2 正式'}]}
+          />
+          <div style={{fontSize:10,color:'rgba(255,255,255,0.3)',marginTop:4,lineHeight:1.4}}>
+            Phase 1：換衣間顯示「即將推出」。Phase 2：顯示已購裝扮列表。
+          </div>
+          <div style={{marginTop:10,paddingTop:10,borderTop:'1px solid rgba(255,255,255,0.08)'}}>
+            <div style={tweakLabel}>模擬裝扮持有</div>
+            <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:6}}>
+              <button onClick={()=>dispatch({ type:'BUY', item:{ id:'star-hat', cashChannel:'platform-iap' } })} style={tweakBtn}>＋⭐ 星辰帽</button>
+              <button onClick={()=>dispatch({ type:'BUY', item:{ id:'crystal-bow', cashChannel:'platform-iap' } })} style={tweakBtn}>＋🎀 蝴蝶結</button>
+              <button onClick={()=>dispatch({ type:'BUY', item:{ id:'rainbow-halo', cashChannel:'platform-iap' } })} style={tweakBtn}>＋🌈 彩虹光暈</button>
+              <button onClick={()=>dispatch({ type:'EQUIP_COSMETIC', id:null })} style={{...tweakBtn, background:'rgba(255,255,255,0.06)'}}>脫下裝扮</button>
+            </div>
+          </div>
           <div style={{marginTop:10,paddingTop:10,borderTop:'1px solid rgba(255,255,255,0.08)'}}>
             <div style={tweakLabel}>衰減模擬 · 每日 -5%</div>
             <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:6}}>

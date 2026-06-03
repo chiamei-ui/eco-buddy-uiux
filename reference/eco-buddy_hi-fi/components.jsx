@@ -169,15 +169,20 @@ const ModeToggle = ({ onClick }) => (
 
 /* ───────── Avatar button — top-right entry to P8 ───────── */
 const AvatarButton = ({ onClick }) => (
-  <button onClick={onClick} title="我的"
-    style={{
-      width:40,height:40,padding:0,
-      background:'transparent',border:0,cursor:'pointer',
-      borderRadius:'50%',
-      boxShadow:'0 4px 12px rgba(6,14,159,0.3)',
-    }}>
-    <img src="assets/btn/avatar.svg" alt="我的" width="40" height="40" draggable="false" />
-  </button>
+  <div style={{ position:'relative', display:'inline-block' }}>
+    <button onClick={onClick} title="我的"
+      style={{
+        width:52, height:52, padding:0,
+        background:'transparent', border:0, cursor:'pointer',
+        borderRadius:'50%',
+        boxShadow:'0 4px 12px rgba(6,14,159,0.3)',
+      }}>
+      <img src="assets/btn/avatar.svg" alt="我的" width="52" height="52" draggable="false" style={{ borderRadius:'50%' }} />
+    </button>
+    <div style={{ position:'absolute', bottom:-2, right:-2, width:17, height:17, pointerEvents:'none' }}>
+      <img src="assets/btn/icon-_setting.svg" alt="" width="17" height="17" />
+    </div>
+  </div>
 );
 
 /* ───────── Floating value-rise indicator (HP+5 etc) ───────── */
