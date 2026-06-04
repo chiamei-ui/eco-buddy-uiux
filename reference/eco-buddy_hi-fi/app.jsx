@@ -341,7 +341,7 @@ const App = () => {
       case 'p1':  return <P1Home state={state} dispatch={dispatch} setScreen={setScreen} dragManager={dragManager} payload={screenPayload} tweaks={tweaks} />;
       case 'p2':  return <P2Scan setScreen={setScreen} dispatch={dispatch} tweaks={tweaks} setTweak={setTweak} />;
       case 'p2b': return <P2bResult setScreen={setScreen} dispatch={dispatch} state={state} tweaks={tweaks} setTweak={setTweak} />;
-      case 'p4':  return <P4Shop setScreen={setScreen} state={state} dispatch={dispatch} tweaks={tweaks} />;
+      case 'p4':  return <P4Shop setScreen={setScreen} state={state} dispatch={dispatch} tweaks={tweaks} payload={screenPayload} />;
       case 'p5':  return <P5Missions setScreen={setScreen} state={state} dispatch={dispatch} tweaks={tweaks} />;
       case 'p6':  return <P6Ads setScreen={setScreen} state={state} dispatch={dispatch} payload={screenPayload} />;
       case 'p7':  return <P7Dex setScreen={setScreen} state={state} dispatch={dispatch} onOpenPicker={() => setDexPickerOpen(true)} tweaks={tweaks} />;

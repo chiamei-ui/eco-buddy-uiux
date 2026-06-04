@@ -442,7 +442,7 @@ const P1Home = ({ state, dispatch, setScreen, dragManager, payload, showTutorial
             <div style={{ padding: '6px 18px', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
               <div style={{ fontSize: 14, fontWeight: 700, color: '#222', marginBottom: 8 }}>還沒有裝扮</div>
               <div style={{ fontSize: 12, color: '#888', marginBottom: 16 }}>去商店逛逛，幫 Buddy 找件喜歡的衣服</div>
-              <button onClick={() => setScreen('p4')} style={{ background: 'var(--ecoco-orange)', color: '#fff', border: 'none', borderRadius: 999, padding: '10px 24px', fontWeight: 800, fontSize: 13, cursor: 'pointer' }}>去商店</button>
+              <button onClick={() => setScreen('p4', { tab: 'cosmetic' })} style={{ background: 'var(--ecoco-orange)', color: '#fff', border: 'none', borderRadius: 999, padding: '10px 24px', fontWeight: 800, fontSize: 13, cursor: 'pointer' }}>去商店</button>
             </div>
           );
           return (
@@ -1090,8 +1090,8 @@ const WardrobeCell = ({ item, equipped, dispatch }) => {
 };
 
 /* ═══════════════ P4 · Shop ═══════════════ */
-const P4Shop = ({ setScreen, state, dispatch, tweaks }) => {
-  const [tab, setTab] = useState('food');
+const P4Shop = ({ setScreen, state, dispatch, tweaks, payload }) => {
+  const [tab, setTab] = useState(payload?.tab ?? 'food');
   const [purchasing, setPurchasing] = useState(null);
   const [successItem, setSuccessItem] = useState(null);
   const [showPointSrc, setShowPointSrc] = useState(false);
@@ -1124,7 +1124,11 @@ const P4Shop = ({ setScreen, state, dispatch, tweaks }) => {
     { id: 'feather', emoji: '🪶', name: '逗貓棒', desc: '心情 +15', price: 30, currency: 'heart' },
     { id: 'brush', emoji: '🪮', name: '梳子', desc: '潔淨 +15、心情 +10', price: 35, currency: 'heart' },
     { id: 'ball', emoji: '⚾', name: '小球', desc: '心情 +15', price: 25, currency: 'heart' },
-    { id: 'snack', emoji: '🍪', name: '零食', desc: '體力 +15、心情 +15', price: 20, currency: 'heart' }],
+    { id: 'snack', emoji: '🍪', name: '零食', desc: '體力 +15、心情 +15', price: 20, currency: 'heart' },
+    ...(isPhase2 ? [
+      { id: 'feather-deluxe', emoji: '🪶', name: '限定逗貓棒禮盒', desc: '心情 +30 · 限定', price: 99, currency: 'cash', cashChannel: 'platform-iap' },
+      { id: 'brush-deluxe', emoji: '🪮', name: '豪華梳子組', desc: '潔淨 +30、心情 +20 · 限定', price: 149, currency: 'cash', cashChannel: 'platform-iap' },
+    ] : [])],
 
     cosmetic: COSMETIC_CATALOG.map(c => ({ ...c, currency: 'cash', cashChannel: 'platform-iap' })),
 
@@ -1226,8 +1230,13 @@ const P4Shop = ({ setScreen, state, dispatch, tweaks }) => {
         const cosItems = items['cosmetic'] || [];
         return (
           <div>
-            <div style={{ fontSize: 13, fontWeight: 800, color: '#888', letterSpacing: '.04em', padding: '10px 18px 4px' }}>
-              {isPhase2 ? '限定裝扮' : '即將上架'}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 18px 4px' }}>
+              <span style={{ fontSize: 13, fontWeight: 800, color: '#888', letterSpacing: '.04em' }}>
+                {isPhase2 ? '限定裝扮' : '即將上架'}
+              </span>
+              {isPhase2 && (
+                <button onClick={() => setScreen('wardrobe-manage')} style={{ fontSize: 11, fontWeight: 700, color: 'var(--ecoco-blue)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>查看我的裝扮 ›</button>
+              )}
             </div>
             <div className="shop-grid">
               {cosItems.map(it => {
@@ -1261,42 +1270,46 @@ const P4Shop = ({ setScreen, state, dispatch, tweaks }) => {
         );
       })()}
 
-{/* 現金商品 — 橫向滑動卡片 strip（禮包 / 裝扮 tab 有專屬 section，不使用） */}
-      {(() => {
-        const cashItems = (items[tab] || []).filter(it => it.currency === 'cash');
-        if (!cashItems.length || tab === 'package' || tab === 'cosmetic') return null;
+{/* 玩具 tab — 現金商品 section（Phase 2 才顯示） */}
+      {tab === 'tool' && isPhase2 && (() => {
+        const cashItems = (items['tool'] || []).filter(it => it.currency === 'cash');
         return (
           <div>
-            <div style={{ fontSize: 13, fontWeight: 800, color: '#888', letterSpacing: '.04em', padding: '10px 18px 4px' }}>現金商品</div>
-            <div className="cash-strip">
-              {cashItems.map(it => {
-                const hasDetail = !!(it.contents || it.benefits);
-                const isBought = (it.id === 'sprint-pack' && state.sprintPurchased) ||
-                                  (it.id === 'monthly-pass' && state.hasPass);
-                return (
-                  <div key={it.id}
-                    className={`cash-card${isBought ? ' purchased' : ''}`}
-                    onClick={isBought ? undefined : () => hasDetail ? setDetailItem(it) : setPurchasing(it)}
-                    style={isBought ? { cursor: 'default' } : {}}>
-                    <div className="cash-thumb">{it.emoji}</div>
-                    <div className="cash-info">
-                      <h4>{it.name}</h4>
-                      <div className="desc">{it.desc}</div>
-                      {isBought ? (
-                        <div style={{ fontWeight: 800, color: '#22A55C', fontSize: 12, marginTop: 6 }}>
-                          {it.id === 'monthly-pass' ? '✓ 啟用中' : '✓ 本月已領'}
-                        </div>
-                      ) : (
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 6 }}>
-                          <span style={{ fontWeight: 800, color: '#060E9F', fontSize: 13, fontFamily: 'var(--font-en)' }}>NT$ {it.price}</span>
-                          {hasDetail && <span style={{ fontSize: 10, color: '#888' }}>查看 ›</span>}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 18px 4px' }}>
+              <span style={{ fontSize: 13, fontWeight: 800, color: '#888', letterSpacing: '.04em' }}>{cashItems.length > 0 ? '現金商品' : ''}</span>
+              {isPhase2 && <button onClick={() => setScreen('p9')} style={{ fontSize: 11, fontWeight: 700, color: 'var(--ecoco-blue)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>查看我的玩具箱 ›</button>}
             </div>
+            {cashItems.length > 0 && (
+              <div className="cash-strip">
+                {cashItems.map(it => {
+                  const hasDetail = !!(it.contents || it.benefits);
+                  const isBought = (it.id === 'sprint-pack' && state.sprintPurchased) ||
+                                    (it.id === 'monthly-pass' && state.hasPass);
+                  return (
+                    <div key={it.id}
+                      className={`cash-card${isBought ? ' purchased' : ''}`}
+                      onClick={isBought ? undefined : () => hasDetail ? setDetailItem(it) : setPurchasing(it)}
+                      style={isBought ? { cursor: 'default' } : {}}>
+                      <div className="cash-thumb">{it.emoji}</div>
+                      <div className="cash-info">
+                        <h4>{it.name}</h4>
+                        <div className="desc">{it.desc}</div>
+                        {isBought ? (
+                          <div style={{ fontWeight: 800, color: '#22A55C', fontSize: 12, marginTop: 6 }}>
+                            {it.id === 'monthly-pass' ? '✓ 啟用中' : '✓ 本月已領'}
+                          </div>
+                        ) : (
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 6 }}>
+                            <span style={{ fontWeight: 800, color: '#060E9F', fontSize: 13, fontFamily: 'var(--font-en)' }}>NT$ {it.price}</span>
+                            {hasDetail && <span style={{ fontSize: 10, color: '#888' }}>查看 ›</span>}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         );
       })()}
@@ -1307,7 +1320,10 @@ const P4Shop = ({ setScreen, state, dispatch, tweaks }) => {
         if (!heartItems.length) return null;
         return (
           <div>
-            <div style={{ fontSize: 13, fontWeight: 800, color: '#888', letterSpacing: '.04em', padding: '10px 18px 4px' }}>點數商品</div>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 18px 4px' }}>
+              <span style={{ fontSize: 13, fontWeight: 800, color: '#888', letterSpacing: '.04em' }}>點數商品</span>
+              {tab === 'tool' && !isPhase2 && <button onClick={() => setScreen('p9')} style={{ fontSize: 11, fontWeight: 700, color: 'var(--ecoco-blue)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>查看我的玩具箱 ›</button>}
+            </div>
             <div className="shop-grid">
               {heartItems.map(it => (
                 <div key={it.id} className={`shop-card ${it.soldOut ? 'sold-out' : ''}`}>
@@ -2180,7 +2196,7 @@ const P9Bag = ({ setScreen, state, dispatch }) => {
           <p>看廣告抽道具，或到商店逛逛</p>
           <div className="empty-actions">
             <button className="btn-primary" style={{ padding: '10px 20px', fontSize: 13 }} onClick={() => setP6SheetOpen(true)}>看廣告</button>
-            <button className="btn-ghost" style={{ padding: '10px 20px', fontSize: 13 }} onClick={() => setScreen('p4')}>去商店</button>
+            <button className="btn-ghost" style={{ padding: '10px 20px', fontSize: 13 }} onClick={() => setScreen('p4', { tab: 'tool' })}>去商店</button>
           </div>
         </div> :
 
@@ -2257,7 +2273,7 @@ const WardrobeManage = ({ setScreen, state }) => {
           <h3>還沒有裝扮</h3>
           <p>去商店幫 Buddy 找件喜歡的衣服</p>
           <div className="empty-actions">
-            <button className="btn-primary" style={{ padding: '10px 20px', fontSize: 13 }} onClick={() => setScreen('p4')}>去商店</button>
+            <button className="btn-primary" style={{ padding: '10px 20px', fontSize: 13 }} onClick={() => setScreen('p4', { tab: 'cosmetic' })}>去商店</button>
           </div>
         </div>
       ) : (
@@ -2616,8 +2632,19 @@ const ORDER_FILTER_EMPTY = {
 
 const P4Orders = ({ setScreen, state }) => {
   const [activeFilter, setActiveFilter] = useState('all');
+  const [expandedOrderId, setExpandedOrderId] = useState(null);
   const allOrders = state.orderHistory ?? [];
   const orders = activeFilter === 'all' ? allOrders : allOrders.filter(o => o.status === activeFilter);
+
+  const getPackageDetail = (orderName) => {
+    for (const [, cfg] of Object.entries(SHOP_IAP_CONFIG)) {
+      if (orderName.includes(cfg.name)) {
+        if (cfg.contents) return { type: 'contents', items: cfg.contents };
+        if (cfg.benefits) return { type: 'benefits', items: cfg.benefits };
+      }
+    }
+    return null;
+  };
 
   return (
     <div className="screen" style={{ background: 'var(--bg-cream, #FAE0B8)' }}>
@@ -2647,15 +2674,23 @@ const P4Orders = ({ setScreen, state }) => {
             {orders.map((order) => {
               const sc = STATUS_CONFIG[order.status] || STATUS_CONFIG.success;
               const isFailed = order.status === 'failed';
+              const pkgDetail = getPackageDetail(order.name);
+              const isExpanded = expandedOrderId === order.id;
               return (
                 <div key={order.id} className={`order-card${isFailed ? ' order-card-failed' : ''}`}>
-                  {/* 頂部：縮圖 + 商品名 + 狀態 */}
+                  {/* 頂部：縮圖 + 商品名 + 狀態 + 展開箭頭 */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
                     <div className="order-thumb">{order.thumb ?? '🛍️'}</div>
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ fontWeight: 800, fontSize: 15, color: '#222', marginBottom: 2 }}>{order.name}</div>
                       <span className={sc.cls}>{sc.label}</span>
                     </div>
+                    {pkgDetail && (
+                      <button onClick={() => setExpandedOrderId(isExpanded ? null : order.id)}
+                        style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 16, color: '#888', padding: '0 4px', lineHeight: 1 }}>
+                        {isExpanded ? '˅' : '›'}
+                      </button>
+                    )}
                   </div>
 
                   {/* 明細列 */}
@@ -2677,6 +2712,21 @@ const P4Orders = ({ setScreen, state }) => {
                       <span style={{ color: '#555' }}>{order.date}</span>
                     </div>
                   </div>
+
+                  {/* 禮包內容物 accordion */}
+                  {pkgDetail && isExpanded && (
+                    <div className="order-detail-panel">
+                      {pkgDetail.items.map((item, i) => (
+                        <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 6 }}>
+                          <span>{item.emoji}</span>
+                          <div>
+                            <div style={{ fontWeight: 700, color: '#333' }}>{item.name}</div>
+                            {item.sub && <div style={{ color: '#888' }}>{item.sub}</div>}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
 
                   {/* 失敗說明區塊 */}
                   {isFailed && (
