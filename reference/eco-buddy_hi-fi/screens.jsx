@@ -407,7 +407,7 @@ const P1Home = ({ state, dispatch, setScreen, dragManager, payload, showTutorial
           <button className={`dock-tab ${dockTab === 'tools' ? 'active' : ''}`} onClick={() => setDockTab('tools')}>玩具箱</button>
           <button className={`dock-tab ${dockTab === 'wardrobe' ? 'active' : ''}`} onClick={() => setDockTab('wardrobe')}>換衣間</button>
         </div>
-        <div className="dock" style={dockTab === 'wardrobe' && wardrobeHasItems ? { overflowY: 'auto' } : {}}>
+        <div className="dock" style={(dockTab === 'wardrobe' && wardrobeHasItems) || (dockTab === 'tools' && state.tools.length > 4) ? { overflowY: 'auto' } : {}}>
           <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:10 }}>
             {dockTab !== 'wardrobe' && (
               <button onClick={() => setDockInfoOpen(true)} style={{ display:'flex', alignItems:'center', gap:4, background:'none', border:'none', padding:0, cursor:'pointer' }}>
