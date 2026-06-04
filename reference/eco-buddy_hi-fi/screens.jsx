@@ -1139,8 +1139,8 @@ const P4Shop = ({ setScreen, state, dispatch, tweaks, payload }) => {
     { id: 'ball', emoji: '⚾', name: '小球', desc: '心情 +15', price: 25, currency: 'heart' },
     { id: 'snack', emoji: '🍪', name: '零食', desc: '體力 +15、心情 +15', price: 20, currency: 'heart' },
     ...(isPhase2 ? [
-      { id: 'feather-deluxe', emoji: '🪶', name: '限定逗貓棒禮盒', desc: '心情 +30 · 限定', price: 99, currency: 'cash', cashChannel: 'platform-iap' },
-      { id: 'brush-deluxe', emoji: '🪮', name: '豪華梳子組', desc: '潔淨 +30、心情 +20 · 限定', price: 149, currency: 'cash', cashChannel: 'platform-iap' },
+      { id: 'feather-deluxe', emoji: '🪶', name: '限定逗貓棒禮盒', desc: '心情 +30 · 限定', price: 99, currency: 'cash', cashChannel: 'platform-iap', category: 'tool' },
+      { id: 'brush-deluxe', emoji: '🪮', name: '豪華梳子組', desc: '潔淨 +30、心情 +20 · 限定', price: 149, currency: 'cash', cashChannel: 'platform-iap', category: 'tool' },
     ] : [])],
 
     cosmetic: COSMETIC_CATALOG.map(c => ({ ...c, currency: 'cash', cashChannel: 'platform-iap' })),
@@ -1525,7 +1525,7 @@ const ShopPurchaseModal = ({ item, state, onClose, onConfirm }) => {
 /* ----- P4 helper: 購買成功 Modal ----- */
 const ShopSuccessModal = ({ item, state, onClose, onGoToBag, onGoToWardrobe, onGoToManage, setScreen }) => {
   const isCash = item.paidWith === 'cash';
-  const isCosmetic = item.cashChannel === 'platform-iap';
+  const isCosmetic = item.cashChannel === 'platform-iap' && item.category !== 'tool';
   const orderId = item.orderId ?? null;
   return (
     <div className="modal-backdrop" onClick={onClose}>
