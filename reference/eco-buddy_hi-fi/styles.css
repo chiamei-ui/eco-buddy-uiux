@@ -36,7 +36,7 @@ img,svg{display:block;}
 *::-webkit-scrollbar{width:4px;height:4px;}
 *::-webkit-scrollbar-track{background:transparent;}
 *::-webkit-scrollbar-thumb{background:rgba(128,128,128,0.5);border-radius:99px;}
-*::-webkit-scrollbar-button{display:none;}
+*::-webkit-scrollbar-button{display:none!important;height:0!important;width:0!important;}
 *{scrollbar-width:thin;scrollbar-color:rgba(128,128,128,0.5) transparent;}
 
 /* ────── Stage layout ────── */
@@ -317,7 +317,7 @@ img,svg{display:block;}
 }
 .dock-tab.active{background:var(--ecoco-orange);color:#fff;}
 .dock::-webkit-scrollbar{width:4px;}
-.dock::-webkit-scrollbar-button{display:none;}
+.dock::-webkit-scrollbar-button{display:none!important;height:0!important;width:0!important;}
 .dock::-webkit-scrollbar-track{background:transparent;}
 .dock::-webkit-scrollbar-thumb{background:rgba(128,128,128,0.5);border-radius:99px;}
 .dock{
