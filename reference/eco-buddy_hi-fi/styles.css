@@ -32,6 +32,13 @@ html,body{height:100%;font-family:var(--font-cjk);color:var(--core-black);backgr
 button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;}
 img,svg{display:block;}
 
+/* ────── Global scrollbar ────── */
+*::-webkit-scrollbar{width:4px;height:4px;}
+*::-webkit-scrollbar-track{background:transparent;}
+*::-webkit-scrollbar-thumb{background:rgba(128,128,128,0.5);border-radius:99px;}
+*::-webkit-scrollbar-button{display:none;}
+*{scrollbar-width:thin;scrollbar-color:rgba(128,128,128,0.5) transparent;}
+
 /* ────── Stage layout ────── */
 .stage{
   position:fixed;inset:0;
@@ -49,11 +56,7 @@ img,svg{display:block;}
   border-radius:20px;
   padding:18px;
   overflow:auto;
-  scrollbar-width:thin;
-  scrollbar-color:rgba(255,255,255,0.2) transparent;
 }
-.stage-pane::-webkit-scrollbar{width:6px;}
-.stage-pane::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.18);border-radius:3px;}
 .stage-title{
   font-family:var(--font-en);
   font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;
@@ -118,7 +121,11 @@ img,svg{display:block;}
 }
 .screen.p4::-webkit-scrollbar,
 .screen.p5::-webkit-scrollbar,
-.screen.p7::-webkit-scrollbar { width:0; }
+.screen.p7::-webkit-scrollbar,
+.screen.p5 *::-webkit-scrollbar,
+.screen.p7 *::-webkit-scrollbar { display:none; }
+.screen.p5, .screen.p7,
+.screen.p5 *, .screen.p7 * { scrollbar-width:none; -ms-overflow-style:none; }
 .screen.p4 > .p4-sticky-top,
 .screen.p5 > .header,
 .screen.p7 > .header {
@@ -126,8 +133,7 @@ img,svg{display:block;}
   backdrop-filter:none;
 }
 .p4 .p4-sticky-top{background:var(--ecoco-yellow);border-radius:0 0 24px 24px;box-shadow:0 4px 16px rgba(0,0,0,0.08);}
-.cash-strip{display:flex;gap:10px;overflow-x:auto;padding:4px 18px 16px;scrollbar-width:none;-ms-overflow-style:none;}
-.cash-strip::-webkit-scrollbar{display:none;}
+.cash-strip{display:flex;gap:10px;overflow-x:auto;padding:4px 18px 16px;}
 .cash-card{flex:0 0 auto;width:200px;background:#fff;border-radius:16px;padding:12px;display:flex;align-items:center;gap:12px;box-shadow:0 4px 14px rgba(0,0,0,0.06);cursor:pointer;transition:transform .15s;}
 .cash-card:active{transform:scale(0.97);}
 .cash-card.purchased{opacity:.72;background:#F7F9FC;cursor:default;}
@@ -310,6 +316,10 @@ img,svg{display:block;}
   transition:background .15s,color .15s;
 }
 .dock-tab.active{background:var(--ecoco-orange);color:#fff;}
+.dock::-webkit-scrollbar{width:4px;}
+.dock::-webkit-scrollbar-button{display:none;}
+.dock::-webkit-scrollbar-track{background:transparent;}
+.dock::-webkit-scrollbar-thumb{background:rgba(128,128,128,0.5);border-radius:99px;}
 .dock{
   background:#fff;
   border-radius:0 20px 0 0;
@@ -695,10 +705,8 @@ img,svg{display:block;}
 .p5 .day-dot .pill{height:6px;border-radius:3px;background:rgba(255,255,255,0.3);margin-top:2px;}
 .p5 .day-dot.done .pill{background:var(--ecoco-yellow);}
 .p5 .day-dot.today .pill{background:#fff;}
-.p4 .tabs{display:flex;gap:6px;padding:8px 18px 12px;overflow-x:auto;scrollbar-width:none;-ms-overflow-style:none;}
-.p4 .tabs::-webkit-scrollbar{display:none;width:0;height:0;}
-.p5 .tabs{display:flex;padding:14px 18px 10px;gap:8px;overflow-x:auto;scrollbar-width:none;-ms-overflow-style:none;}
-.p5 .tabs::-webkit-scrollbar{display:none;width:0;height:0;}
+.p4 .tabs{display:flex;gap:6px;padding:8px 18px 12px;overflow-x:auto;}
+.p5 .tabs{display:flex;padding:14px 18px 10px;gap:8px;overflow-x:auto;}
 .p5 .tab{padding:8px 16px;border-radius:999px;font-size:13px;font-weight:700;color:#888;background:#fff;border:1px solid var(--border);white-space:nowrap;flex:0 0 auto;display:inline-flex;align-items:center;gap:4px;}
 .p5 .tab.active{background:var(--core-black);color:#fff;border-color:var(--core-black);}
 .p5 .tab.locked{opacity:.5;}
@@ -781,8 +789,7 @@ img,svg{display:block;}
 .p7 .section-progress{margin:0 18px 12px;height:5px;border-radius:99px;background:rgba(0,0,0,0.08);}
 .p7 .section-progress .fill{height:100%;border-radius:99px;background:var(--ecoco-orange);transition:width .6s ease;}
 
-.year-strip{display:flex;gap:10px;overflow-x:auto;padding:4px 18px 18px;scrollbar-width:none;-ms-overflow-style:none;}
-.year-strip::-webkit-scrollbar{display:none;}
+.year-strip{display:flex;gap:10px;overflow-x:auto;padding:4px 18px 18px;}
 .year-cell{
   flex:0 0 auto;width:195px;height:231px;border-radius:27px;
   background:#fff;border:1.5px solid var(--border);
