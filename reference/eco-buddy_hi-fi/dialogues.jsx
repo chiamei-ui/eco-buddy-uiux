@@ -31,9 +31,13 @@ const DIALOGUES = {
     adsLoad:     '廣告跑丟了… 等等再試試？',
     adsSkip:     '欸你沒看完耶！看完才有獎勵喔 👀',
     bagEmpty:    '背包空空的… 去廣告抽一個？🎁',
-    toolExpire:  'Buddy 等不及想玩了',
+    toolExpire:  '有玩具快過期了，快拿給 Buddy 玩吧 ~',
     toolExpired: '嗚… 道具不見了 😔 下次要記得用',
     foodStored:  '幫我存好了！等你準備好再給我～ 🍖',
+    toolStored: {
+      shop: '新玩具到家了！快拖給我玩～🎉',
+      ad:   'Buddy 收到新玩具了，超開心！✨',
+    },
   },
 
   // P2 掃碼 / P4 商店：畫面無角色，改用標準系統 UI（toast / alert），文案中性。

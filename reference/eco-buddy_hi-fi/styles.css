@@ -970,6 +970,9 @@ img,svg{display:block;}
 .bag-cell .timer.warn{color:var(--ecoco-orange);font-weight:700;}
 .bag-cell .badge{position:absolute;top:-4px;right:-4px;background:var(--ecoco-orange);color:#fff;font-family:var(--font-en);font-weight:800;font-size:11px;min-width:20px;height:20px;border-radius:10px;padding:0 5px;display:flex;align-items:center;justify-content:center;border:2px solid #fff;}
 .bag-cell .perm{position:absolute;top:6px;left:6px;font-size:9px;font-weight:800;background:var(--ecoco-blue);color:#fff;padding:1px 5px;border-radius:4px;letter-spacing:.05em;}
+@keyframes tool-glow{0%,100%{box-shadow:0 0 0 0 rgba(255,206,0,0),0 2px 8px rgba(0,0,0,0.06);}50%{box-shadow:0 0 0 5px rgba(255,206,0,0.4),0 4px 18px rgba(255,170,0,0.35);}}
+.bag-cell.new{border-color:#FFCE00;animation:tool-glow 1.8s ease-in-out infinite;}
+.food-cell.tool-new{animation:tool-glow 1.8s ease-in-out infinite;outline:2px solid #FFCE00;outline-offset:1px;}
 .empty-bag{text-align:center;padding:60px 30px;color:var(--gray-text);}
 .empty-bag .icon{font-size:64px;opacity:.4;margin-bottom:12px;}
 .empty-bag h3{font-size:15px;color:#222;margin-bottom:6px;}

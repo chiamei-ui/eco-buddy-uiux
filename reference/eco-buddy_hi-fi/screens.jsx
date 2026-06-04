@@ -157,6 +157,7 @@ const P1Home = ({ state, dispatch, setScreen, dragManager, payload, showTutorial
   const [ambientVisible, setAmbientVisible] = useState(true);
   const [ambientDismissing, setAmbientDismissing] = useState(false);
   const [pulsingIds, setPulsingIds] = useState(new Set());
+  const [toolPulsingIds, setToolPulsingIds] = useState(new Set());
   const [tutorialStep, setTutorialStep] = useState(showTutorial ? 0 : -1);
   const turtleRef = useRef(null);
   const turtleWrapRef = useRef(null);
@@ -203,6 +204,15 @@ const P1Home = ({ state, dispatch, setScreen, dragManager, payload, showTutorial
       setTimeout(() => setPulsingIds(new Set()), 2500);
       // show bubble after a 120ms delay so the tab switch settles first
       setTimeout(() => showBubble({ text: DIALOGUES.err.foodStored, error: false }), 120);
+    }
+    if (payload?.toolStored) {
+      setDockTab('tools');
+      setToolPulsingIds(new Set(payload.toolStored.ids || []));
+      setTimeout(() => setToolPulsingIds(new Set()), 2500);
+      const msg = payload.toolStored.source === 'shop'
+        ? DIALOGUES.err.toolStored.shop
+        : DIALOGUES.err.toolStored.ad;
+      setTimeout(() => showBubble({ text: msg, error: false }), 120);
     }
     const t = setTimeout(() => dismissAmbient(), 10000);
     return () => clearTimeout(t);
@@ -420,7 +430,7 @@ const P1Home = ({ state, dispatch, setScreen, dragManager, payload, showTutorial
         </> : dockTab === 'tools' ? <>
           <div className="dock-grid">
             {state.tools.length ? state.tools.map((t, i) =>
-            <ToolCell key={t.id} tool={t} dragManager={dragManager} onDrop={onDrop} showBubble={showBubble} />
+            <ToolCell key={t.id} tool={t} dragManager={dragManager} onDrop={onDrop} showBubble={showBubble} dispatch={dispatch} pulsing={toolPulsingIds.has(t.id)} />
             ) :
             <div style={{ gridColumn: '1/-1', padding: '18px', textAlign: 'center', color: '#888', fontSize: 13 }}>
                 還沒有道具～<br />
@@ -594,11 +604,14 @@ const FoodCell = ({ food, dragManager, onDrop, showBubble, pulsing }) => {
     </div>);
 };
 
-const ToolCell = ({ tool, dragManager, onDrop, showBubble }) => {
+const ToolCell = ({ tool, dragManager, onDrop, showBubble, dispatch, pulsing }) => {
   const expired = tool.hoursLeft != null && tool.hoursLeft <= 0;
   const warn    = !expired && tool.hoursLeft != null && tool.hoursLeft <= 24;
 
+  const clearNew = () => tool.isNew && dispatch?.({ type: 'CLEAR_NEW_TOOL', id: tool.id });
+
   const handlePointerDown = (e) => {
+    clearNew();
     if (expired) {
       showBubble?.({ text: '嗚… 這個不見了 😔' });
       return;
@@ -623,7 +636,7 @@ const ToolCell = ({ tool, dragManager, onDrop, showBubble }) => {
   return (
     <div className="food-slot">
       <div
-        className="food-cell has-stock"
+        className={`food-cell has-stock${tool.isNew ? ' tool-new' : ''}${pulsing ? ' pulsing' : ''}`}
         onPointerDown={handlePointerDown}
         style={{ position:'relative', opacity: expired ? 0.4 : 1, cursor: expired ? 'default' : 'grab' }}
       >
@@ -1390,7 +1403,19 @@ const P4Shop = ({ setScreen, state, dispatch, tweaks, payload }) => {
           item={successItem}
           state={state}
           onClose={() => setSuccessItem(null)}
-          onGoToBag={() => { setSuccessItem(null); setScreen('p9'); }}
+          onGoToBag={() => {
+            const item = successItem;
+            setSuccessItem(null);
+            const isFood = item && ['hotdog-pack','salad','berry','fish'].includes(item.id);
+            const isTool = item && !isFood && item.currency !== 'cash';
+            if (isTool) {
+              setScreen('p1', { toolStored: { ids: [item.id], source: 'shop' } });
+            } else if (isFood) {
+              setScreen('p1', { foodStored: true });
+            } else {
+              setScreen('p9');
+            }
+          }}
           onGoToWardrobe={() => { setSuccessItem(null); setScreen('p1', { openWardrobe: true }); }}
           onGoToManage={() => { setSuccessItem(null); setScreen('wardrobe-manage'); }}
           setScreen={setScreen}
@@ -1552,16 +1577,16 @@ const ShopSuccessModal = ({ item, state, onClose, onGoToBag, onGoToWardrobe, onG
             }}>好的，繼續</button>
           ) : isCosmetic ? (
             <>
-              <button onClick={onGoToManage} style={{
+              <button onClick={onGoToWardrobe} style={{
                 flex: 1, background: 'var(--gray-light)', color: '#555',
                 border: 'none', borderRadius: 999, padding: '13px 0',
                 fontWeight: 700, fontSize: 14, cursor: 'pointer',
-              }}>管理裝扮</button>
-              <button onClick={onGoToWardrobe} style={{
+              }}>前往換裝</button>
+              <button onClick={onGoToManage} style={{
                 flex: 1, background: 'var(--ecoco-orange)', color: '#fff',
                 border: 'none', borderRadius: 999, padding: '13px 0',
                 fontWeight: 800, fontSize: 14, cursor: 'pointer',
-              }}>前往換裝</button>
+              }}>管理裝扮</button>
             </>
           ) : (
             <>
@@ -1814,7 +1839,10 @@ const P6Ads = ({ setScreen, state, dispatch }) => {
             </div>
           </div>
           <div className="reward-actions">
-            <button className="btn-primary" onClick={() => {dispatch({ type: 'ADD_TOOL', tool: reward });setScreen('p9');}}>放入背包</button>
+            <button className="btn-primary" onClick={() => {
+              dispatch({ type: 'ADD_TOOL', tool: reward });
+              setScreen('p1', { toolStored: { ids: [reward.id], source: 'ad' } });
+            }}>放入背包</button>
           </div>
         </div>
       }
@@ -2202,7 +2230,7 @@ const P9Bag = ({ setScreen, state, dispatch }) => {
 
       <div className="bag-grid">
           {filtered.map((t) =>
-        <div key={t.id} className="bag-cell" onClick={showSnack} style={{ cursor: 'pointer' }}>
+        <div key={t.id} className={`bag-cell${t.isNew ? ' new' : ''}`} onClick={() => { if (t.isNew) dispatch({ type: 'CLEAR_NEW_TOOL', id: t.id }); showSnack(); }} style={{ cursor: 'pointer' }}>
               {t.permanent && <div className="perm">永久</div>}
               <div className="emoji">{t.emoji}</div>
               <div className="name">{t.name}</div>

@@ -68,9 +68,11 @@ function stateReducer(state, action){
     }
     case 'ADD_TOOL': {
       const existing = state.tools.find(t=>t.id===action.tool.id);
-      if (existing) return {...state, tools: state.tools.map(t => t.id===action.tool.id ? {...t, count:t.count+1} : t)};
-      return {...state, tools:[...state.tools, {...action.tool, count:1, hoursLeft:24}], adRemaining: Math.max(0, state.adRemaining-1)};
+      if (existing) return {...state, tools: state.tools.map(t => t.id===action.tool.id ? {...t, count:t.count+1, isNew:true} : t)};
+      return {...state, tools:[...state.tools, {...action.tool, count:1, hoursLeft:24, isNew:true}], adRemaining: Math.max(0, state.adRemaining-1)};
     }
+    case 'CLEAR_NEW_TOOL':
+      return {...state, tools: state.tools.map(t => t.id===action.id ? {...t, isNew:false} : t)};
     case 'COLLECT_BATCH':
       // 三帳本：體力 / 潔淨 / ECOCO 點數 各自獨立由 P2b 帶入
       return {
