@@ -328,6 +328,19 @@ img,svg{display:block;}
   height:196px;
   overflow:hidden;
 }
+.dock.dock-scrollable{
+  scrollbar-width:none;
+  -ms-overflow-style:none;
+}
+.dock.dock-scrollable::-webkit-scrollbar{
+  width:0;
+  height:0;
+}
+.dock.dock-scrollable::-webkit-scrollbar-button{
+  display:none!important;
+  width:0!important;
+  height:0!important;
+}
 .dock-title{font-size:14px;font-weight:700;color:#222;}
 .dock-hint{font-size:11px;color:var(--gray-text);margin-bottom:12px;}
 .dock-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}

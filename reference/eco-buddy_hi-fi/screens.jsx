@@ -317,6 +317,7 @@ const P1Home = ({ state, dispatch, setScreen, dragManager, payload, showTutorial
   const wardrobeIsPhase2 = (tweaks?.shopPhase ?? 1) >= 2;
   const wardrobeOwnedItems = COSMETIC_CATALOG.filter(c => (state.ownedCosmetics || []).includes(c.id));
   const wardrobeHasItems = wardrobeIsPhase2 && wardrobeOwnedItems.length > 0;
+  const dockScrollable = (dockTab === 'wardrobe' && wardrobeHasItems) || (dockTab === 'tools' && state.tools.length > 4);
 
   return (
     <div className="screen p1">
@@ -407,7 +408,7 @@ const P1Home = ({ state, dispatch, setScreen, dragManager, payload, showTutorial
           <button className={`dock-tab ${dockTab === 'tools' ? 'active' : ''}`} onClick={() => setDockTab('tools')}>玩具箱</button>
           <button className={`dock-tab ${dockTab === 'wardrobe' ? 'active' : ''}`} onClick={() => setDockTab('wardrobe')}>換衣間</button>
         </div>
-        <div className="dock" style={(dockTab === 'wardrobe' && wardrobeHasItems) || (dockTab === 'tools' && state.tools.length > 4) ? { overflowY: 'auto', paddingBottom: '44px' } : {}}>
+        <div className={`dock ${dockScrollable ? 'dock-scrollable' : ''}`} style={dockScrollable ? { overflowY: 'auto', paddingBottom: '44px' } : {}}>
           <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:10 }}>
             {dockTab !== 'wardrobe' && (
               <button onClick={() => setDockInfoOpen(true)} style={{ display:'flex', alignItems:'center', gap:4, background:'none', border:'none', padding:0, cursor:'pointer' }}>
