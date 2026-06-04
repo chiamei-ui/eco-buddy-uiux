@@ -121,6 +121,14 @@ function stateReducer(state, action){
     case 'SET_STAT': return {...state, stats:{...state.stats, [action.kind]: Math.min(100, Math.max(0, action.value))}};
     case 'SET_STOCK': return {...state, food: state.food.map((f,i)=>({...f, stock:action.stocks[i] ?? f.stock, state:action.stocks[i]===0?(f.state==='locked'?'locked':'low'):f.state}))};
     case 'CLEAR_BAG': return {...state, tools:[]};
+    case 'FILL_TOOLS': return {...state, tools:[
+      { id:'toy-d1', name:'小球',   emoji:'⚾', count:1, hoursLeft:72 },
+      { id:'toy-d2', name:'逗貓棒', emoji:'🪶', count:2, hoursLeft:18 },
+      { id:'toy-d3', name:'魚玩具', emoji:'🐟', count:1, hoursLeft:48 },
+      { id:'toy-d4', name:'毛線球', emoji:'🧶', count:1, hoursLeft:36 },
+      { id:'toy-d5', name:'雷射筆', emoji:'🔦', count:1, hoursLeft:24 },
+      { id:'toy-d6', name:'貓薄荷', emoji:'🌿', count:1, hoursLeft:12 },
+    ]};
     case 'TOUCH':
       // #2 觸碰角色：心情 +1，每日上限由 caller (P1Home) 自行追蹤
       return { ...state, stats: { ...state.stats, mood: Math.min(100, state.stats.mood + 1) } };
@@ -524,6 +532,13 @@ const InlineTweaks = ({ tweaks, setTweak, setScreen, state, dispatch, screen }) 
               <button onClick={()=>dispatch({ type:'BUY', item:{ id:'crystal-bow', cashChannel:'platform-iap' } })} style={tweakBtn}>＋🎀 蝴蝶結</button>
               <button onClick={()=>dispatch({ type:'BUY', item:{ id:'rainbow-halo', cashChannel:'platform-iap' } })} style={tweakBtn}>＋🌈 彩虹光暈</button>
               <button onClick={()=>dispatch({ type:'EQUIP_COSMETIC', id:null })} style={{...tweakBtn, background:'rgba(255,255,255,0.06)'}}>脫下裝扮</button>
+            </div>
+          </div>
+          <div style={{marginTop:10,paddingTop:10,borderTop:'1px solid rgba(255,255,255,0.08)'}}>
+            <div style={tweakLabel}>模擬玩具箱</div>
+            <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:6}}>
+              <button onClick={()=>dispatch({ type:'FILL_TOOLS' })} style={tweakBtn}>填入 6 個道具</button>
+              <button onClick={()=>dispatch({ type:'CLEAR_BAG' })} style={{...tweakBtn, background:'rgba(255,255,255,0.06)'}}>清空</button>
             </div>
           </div>
           <div style={{marginTop:10,paddingTop:10,borderTop:'1px solid rgba(255,255,255,0.08)'}}>
