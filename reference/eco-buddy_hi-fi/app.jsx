@@ -490,6 +490,21 @@ const InlineTweaks = ({ tweaks, setTweak, setScreen, state, dispatch, screen }) 
         </>
       )}
 
+      {/* P7 專屬 */}
+      {isP7 && (
+        <div style={{marginTop:10,paddingTop:10,borderTop:'1px solid rgba(255,255,255,0.08)'}}>
+          <div style={tweakLabel}>上線階段 (shopPhase)</div>
+          <Segmented
+            value={tweaks.shopPhase === 2 ? '2' : '1'}
+            onChange={v => setTweak('shopPhase', Number(v))}
+            options={[{v:'1',l:'Phase 1 封測'},{v:'2',l:'Phase 2 正式'}]}
+          />
+          <div style={{fontSize:10,color:'rgba(255,255,255,0.3)',marginTop:4,lineHeight:1.4}}>
+            Phase 1：夥伴日誌只顯示小海龜。Phase 2：開放北極熊、海豹、亮寶多角色。
+          </div>
+        </div>
+      )}
+
       {/* P1 專屬 */}
       {isP1 && (
         <>
