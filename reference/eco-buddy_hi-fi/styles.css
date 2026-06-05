@@ -975,7 +975,10 @@ img,svg{display:block;}
 }
 .p8-group-h>span:first-child{font-size:14px;font-weight:800;color:#222;}
 .p8-group-h .en{font-family:var(--font-en);font-size:10px;letter-spacing:.16em;font-weight:700;color:#aaa;}
-.p8 .screen-scroll{padding-top:0;padding-bottom:0;}
+.p8 .screen-scroll{padding-top:0;padding-bottom:0;scrollbar-width:none;-ms-overflow-style:none;}
+.p8 .screen-scroll::-webkit-scrollbar{width:0!important;height:0!important;display:none!important;}
+.p8 .screen-scroll::-webkit-scrollbar-button{display:none!important;width:0!important;height:0!important;}
+.screen.p8{overflow:hidden;}
 
 /* ───── P9 bag ───── */
 .p9 .header{padding:92px 18px 14px;display:flex;align-items:center;}
