@@ -539,6 +539,9 @@ const P1Home = ({ state, dispatch, setScreen, dragManager, payload, showTutorial
 
 };
 
+// TODO [上線版] 以下效果值為 hi-fi 原型佔位數字，正式版須從 API response 讀取：
+// feather: tool_cat_wand_mood_effect / brush: tool_brush_clean_effect + tool_brush_mood_effect
+// ball: tool_ball_mood_effect / snack: tool_snack_hp_effect + tool_snack_mood_effect
 const toolEffectMap = {
   feather: { label: '心情 +15' },
   brush:   { label: '潔淨 +15・心情 +10' },
@@ -903,6 +906,8 @@ const P2bResult = ({ setScreen, dispatch, tweaks = {}, setTweak = () => {} }) =>
    殘留路由與側欄入口同步移除。 */
 
 /* ----- P4 IAP Config (模擬後台 CMS/API 設定，前端不寫死任何商品內容) ----- */
+// TODO [上線版] price 欄位須向平台 SDK 查詢本地化價格（App Store: [IAP SKU: sprint_pack_199] / [IAP SKU: eco_pass_monthly]），
+// 不顯示此處 hardcode 的數字。裝扮各款 SKU 待上架後補充。
 const SHOP_IAP_CONFIG = {
   sprintPack: {
     id: 'sprint-pack', emoji: '🎁', name: '月底衝刺禮包', price: 199, currency: 'cash', cashChannel: 'newebpay',
@@ -1789,7 +1794,10 @@ const P6Ads = ({ setScreen, state, dispatch }) => {
   }, [step, adTime]);
 
   const skipAd = () => {
-    // generate reward
+    // TODO [上線版] 以下機率表與保底邏輯為 hi-fi 原型模擬，正式版須改為：
+    // 1. 呼叫後端開箱 API（POST /api/ads/open）
+    // 2. 後端執行掉落抽取（含保底計數），回傳道具 ID
+    // 3. 前端依 id 顯示動畫，不在前端持有機率數字或保底計數
     const rolls = [
     { id: 'feather', emoji: '🪶', name: '逗貓棒', prob: 40 },
     { id: 'brush', emoji: '🪮', name: '梳子', prob: 30 },
@@ -1831,6 +1839,7 @@ const P6Ads = ({ setScreen, state, dispatch }) => {
       {step === 2 &&
       <div className="step">
           <h2>恭喜獲得！</h2>
+          {/* TODO [上線版] 「24 小時」須改為讀取 [API: tool_free_expire_hours]，不寫死 */}
           <div className="sub">道具已加入背包，請於 24 小時內使用</div>
           <div className="box">
             <div className="reward-card">

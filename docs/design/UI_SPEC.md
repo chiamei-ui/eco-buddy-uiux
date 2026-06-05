@@ -90,7 +90,7 @@
 
 - 格數：4 格固定（1×4 橫排）
 - 顯示規則：4 格全顯示，未解鎖格顯示灰色虛線佔位（🔒）
-- 庫存數字 Badge：左上角顯示，**每格上限 12 個**
+- 庫存數字 Badge：左上角顯示，**每格上限 `[API: food_slot_max_count]` 個**（後台可調，預設 12）
 
 **Badge 視覺三狀態**：
 
@@ -138,9 +138,11 @@
 
 | 狀態 | 觸發條件 | 卡片視覺 | 右上角 Icon |
 |------|---------|---------|------------|
-| 正常 | 有效期 >24h（或永久類） | 正常顯示 | ℹ️ |
-| 即將過期 | 有效期 ≤24h 且 >0 | 正常顯示 | 橘色 ⏰（取代 ℹ️）|
+| 正常 | 有效期 > `[API: tool_warn_threshold_hours]` h（或永久類） | 正常顯示 | ℹ️ |
+| 即將過期 | 有效期 ≤ `[API: tool_warn_threshold_hours]` h 且 >0 | 正常顯示 | 橘色 ⏰（取代 ℹ️）|
 | 已過期 | 有效期 ≤0 | `opacity: 0.4` + 名稱顯示刪除線 | ✕（取代 ⏰ / ℹ️）|
+
+> `[API: tool_warn_threshold_hours]` 為後台可調閾值（預設 24h），前端依此判斷三態切換，不寫死數字。
 
 **三態 icon 優先級**：✕ > ⏰ > ℹ️（互斥，同一角落依狀態切換，不堆疊 icon）
 
@@ -172,8 +174,8 @@
 |------|------|
 | 大圖 | 食物插圖（放大版） |
 | 名稱 | 食物名稱 |
-| 效果值 | 依 GAME_MECHANICS.md（普通食物 體力 +10 / 稀有食物 體力 +15） |
-| 週配額 | 剩餘數量 / 上限（如 `本週剩 3 / 5`） |
+| 效果值 | `[API: food_hp_effect]`（普通食物 / 稀有食物各取對應欄位，不 hardcode） |
+| 週配額 | 剩餘數量 / `[API: food_weekly_quota]`（如 `本週剩 3 / 5`） |
 
 **道具格 Sheet 內容**：
 
@@ -181,8 +183,8 @@
 |------|------|
 | 大圖 | 道具插圖（放大版） |
 | 名稱 | 道具名稱 |
-| 效果值 | 依 GAME_MECHANICS.md（逗貓棒 心情 +15 / 小球 心情 +15 / 梳子 潔淨 +15 心情 +10 / 零食 體力 +15 心情 +15） |
-| 有效期類型 | 免費 24h / 付費 7 日 / 永久 |
+| 效果值 | 各道具依 API 欄位顯示：逗貓棒 `[API: tool_cat_wand_mood_effect]` / 小球 `[API: tool_ball_mood_effect]` / 梳子 `[API: tool_brush_clean_effect]`+`[API: tool_brush_mood_effect]` / 零食 `[API: tool_snack_hp_effect]`+`[API: tool_snack_mood_effect]` |
+| 有效期類型 | 免費 `[API: tool_free_expire_hours]`h / 付費 `[API: tool_paid_expire_days]` 日 / 永久 |
 
 **通用規則**：
 - 效果值從資料層動態帶入，與 GAME_MECHANICS.md 保持一致；前端不 hardcode 數值
@@ -232,11 +234,11 @@
 
 | 操作 | 結果 |
 |------|------|
-| 點擊 Buddy（當日 < 10 次） | 點擊反應動畫（歪頭 / 跳一下 / 揮手）+ 心情值 +1 |
-| 點擊 Buddy（當日 ≥ 10 次） | 點擊反應動畫照常播放，心情值不再增加 |
+| 點擊 Buddy（當日 < `[API: tap_daily_limit]` 次） | 點擊反應動畫（歪頭 / 跳一下 / 揮手）+ 心情值 `[API: tap_mood_gain]` |
+| 點擊 Buddy（當日 ≥ `[API: tap_daily_limit]` 次） | 點擊反應動畫照常播放，心情值不再增加 |
 | 拖曳食物/道具 → 角色展示區放開 | 觸發對應動畫 |
 
-> **設計注記（D5）**：達 10 次上限後動畫仍播放，避免「點不動」的死感。前端追蹤當日次數，後端最終核對心情上限。
+> **設計注記（D5）**：達每日上限後動畫仍播放，避免「點不動」的死感。前端追蹤當日次數，後端最終核對心情上限。`tap_mood_gain`（每次心情增量）與 `tap_daily_limit`（每日上限次數）均為後台可調數值，前端不寫死。
 
 ---
 
@@ -379,7 +381,7 @@
 - `取消`（ghost）/ `確認購買`（橘色 `rounded-full`）
 
 **IAP 版**：
-- 商品圖示 + 名稱 + NT$ 定價
+- 商品圖示 + 名稱 + 平台本地化定價（`[IAP SKU: eco_pass_monthly]` / `[IAP SKU: sprint_pack_199]` 各款；前端向 App Store / Google Play SDK 查詢，顯示回傳的本地化價格字串，不 hardcode NT$ 金額）
 - Apple Pay / Google Pay 選項
 - `取消`（ghost）/ `確認購買`（橘色 `rounded-full`）
 
@@ -442,9 +444,11 @@
 
 流程：各入口底部 Sheet 確認 → 廣告播放（全屏接管）→ 開箱短動畫（≈1 秒）→ 結果顯示
 
+> **後端執行原則**：廣告開箱掉落結果由後端決定並回傳（道具 ID），前端不持有機率表、不執行隨機抽取邏輯、不實作保底計數。前端收到後端 response 後播放對應動畫與結果顯示。
+
 **確認 Sheet 內容**（各入口共用）：
 - `今日剩 X 次 · 觀看 30 秒影片即可獲得`
-- Pity bar（4 格進度條）+ `連 3 次未抽到零食 → 第 4 次必給`
+- Pity bar（4 格進度條）+ `連 3 次未抽到零食 → 第 4 次必給`（保底邏輯由後端執行）
 - `觀看影片`（橘色）/ `取消`（ghost）
 
 **觸發入口**：
@@ -633,6 +637,61 @@
 | P1 道具包 | 背包全空 | 角色對話泡泡：「背包空空的… 去看廣告抽一個？🎁」|
 | P9 獨立頁 | 空背包 | Buddy 等待插圖 + 雙 CTA（看廣告抽 / 去商店逛）|
 | P1 食物欄 | 庫存全空 | 拖曳時角色對話泡泡引導帶食物回家 |
+
+---
+
+## 動態數值規則
+
+> 本章節定義所有「禁止前端 hardcode」的數值，所有欄位均從後端 API response 讀取。如欄位尚未提供，需在後端 API 待補清單登記。
+
+### 標注格式
+
+- 遊戲數值位置：`[API: <field_name>]`
+- IAP 商品定價位置：`[IAP SKU: <sku_id>]`
+
+### 禁止 hardcode 欄位清單
+
+| 欄位名稱 | 說明 | UI 顯示位置 |
+|---------|------|-----------|
+| `food_slot_max_count` | 食物格庫存上限 | P1 食物欄 Badge 顯示上限 |
+| `food_weekly_quota` | 每種食物每週上限 | P1 食物格 ℹ️ Sheet 週配額 |
+| `food_hp_effect` | 食物體力效果值（普通 / 稀有各有獨立欄位） | P1 / P2b 食物格 ℹ️ Sheet 效果值 |
+| `tool_cat_wand_mood_effect` | 逗貓棒心情效果值 | P1 / P9 道具格 ℹ️ Sheet 效果值 |
+| `tool_ball_mood_effect` | 小球心情效果值 | P1 / P9 道具格 ℹ️ Sheet 效果值 |
+| `tool_brush_clean_effect` | 梳子潔淨效果值 | P1 / P9 道具格 ℹ️ Sheet 效果值 |
+| `tool_brush_mood_effect` | 梳子心情效果值 | P1 / P9 道具格 ℹ️ Sheet 效果值 |
+| `tool_snack_hp_effect` | 零食體力效果值 | P1 / P9 道具格 ℹ️ Sheet 效果值 |
+| `tool_snack_mood_effect` | 零食心情效果值 | P1 / P9 道具格 ℹ️ Sheet 效果值 |
+| `tap_mood_gain` | 每次觸碰 Buddy 心情增量 | P1 觸碰互動 |
+| `tap_daily_limit` | 每日觸碰上限次數 | P1 觸碰互動 |
+| `tool_warn_threshold_hours` | 道具即將過期警示閾值（小時） | P1 / P9 道具格三態切換 |
+| `tool_free_expire_hours` | 免費道具有效期（小時） | P6 結果頁說明 / P9 道具 Badge |
+| `tool_paid_expire_days` | 付費消耗類道具有效期（天） | P9 道具 Badge |
+
+### IAP SKU 清單
+
+| SKU ID | 商品名稱 | 說明 |
+|--------|---------|------|
+| `eco_pass_monthly` | 月度通行證 | 前端向平台 SDK 查詢本地化價格顯示 |
+| `sprint_pack_199` | 月底衝刺禮包 | 前端向平台 SDK 查詢本地化價格顯示 |
+
+> 裝扮各款 SKU ID 待商品上架後補充。
+
+### 廣告開箱 API 確認
+
+廣告開箱請求：前端 → 後端（發送開箱 request）→ 後端回傳本次獲得道具 ID → 前端播放動畫。
+後端執行掉落抽取（含保底邏輯），前端程式碼中不得出現掉落機率數字或保底計數邏輯。
+
+### 後端 API 待確認欄位
+
+以下欄位需後端工程師確認已提供或排入計劃：
+
+- [ ] `food_slot_max_count`、`food_weekly_quota`、`food_hp_effect`（普通 / 稀有）
+- [ ] `tool_*_effect`（各道具各屬性效果，共 7 個欄位）
+- [ ] `tap_mood_gain`、`tap_daily_limit`
+- [ ] `tool_warn_threshold_hours`、`tool_free_expire_hours`、`tool_paid_expire_days`
+- [ ] 廣告開箱 API：後端執行掉落抽取並回傳道具 ID
+- [ ] IAP SKU 清單：`eco_pass_monthly`、`sprint_pack_199`、裝扮各款 SKU
 
 ---
 
