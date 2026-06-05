@@ -71,11 +71,11 @@
 | 插槽 | Boolean 變數名 | 配件名稱 | 中文 |
 |------|--------------|---------|------|
 | S1 | `has_armor` | Tech Armor | 科技護甲 |
-| S2 | `has_halo` | Rainbow Halo | 彩虹光暈 |
+| S2 | `has_halo` | Rainbow Halo | 彩虹光暈 ※ |
 | S3 | `has_laurel` | Laurel Wreath | 月桂花環 |
 | S4 | `has_disco` | Disco Ball | 迪斯可球 |
 | S5 | `has_dark` | Dark Core | 黑暗核心 |
-| S6 | `has_cycle_crown` | Cycle Crown | 循環王冠 |
+| S6 | `has_cycle_crown` | Cycle Crown | 循環王冠 ※ |
 
 ### Skin Override（S7–S10）｜特殊型態觸發時自動啟用，取代本體外觀
 
@@ -85,6 +85,21 @@
 | S8 | `has_frenzy` | Frenzy Overlay | 狂熱疊加層 |
 | S9 | `has_bottle` | PET Bottle Overlay | PET 瓶疊加層 |
 | S10 | `has_golden` | Golden Overlay | 黃金疊加層 |
+
+#### S2 ※ FX3 共存規則
+
+當角色處於 **#27 或 #36**（clean 高階 + `has_halo=true`）：S2 彩虹光環**取代** FX3 柔和白色光暈，避免雙層光環疊加。其他 clean 高階型態（#09、#18、#24 等）：FX3 正常顯示。
+
+#### S6 ※ 四條責任規則（Rive 與後端職責劃分）
+
+| 條 | 主體 | 規則 |
+|---|---|---|
+| (a) Rive 自驅 | Rive | `has_cycle_crown` 由 `false→true` 之瞬間，Rive 自動將 `has_halo` 設為 `true` |
+| (b) 後端責任 | 後端 | 送出 `has_cycle_crown=false` 時，**必須**一併明確指定 `has_halo` 目標值（true 或 false）；Rive 在 `has_cycle_crown` 由 `true→false` 時**不自動處理** `has_halo` |
+| (c) Override 優先 | 後端 | 任何時點後端傳入之 `has_halo` 值，優先於 (a) 條 Rive 自驅值 |
+| (d) 月底結算 | 後端 | 統一重置所有 `has_*` 為 `false`；送 `has_cycle_crown=false` 同時將 `has_halo` 一併重置，符合 (b) 條「明確指定」要求 |
+
+> 詳細連動規則及 #27→#36 切換例外見 [CHARACTER_TYPES.md §三](CHARACTER_TYPES.md)。
 
 ---
 

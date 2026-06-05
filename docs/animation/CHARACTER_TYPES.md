@@ -1,0 +1,113 @@
+# ECO Buddy 角色型態規格 Character Type Specifications
+
+**版本 / Version**：v1.0  
+**更新日期**：2026-06-05  
+**Owner**：窗口設計師 @idahsueh-cmd  
+**資料來源**：RFP v1.0（`ecoco-private/specs/ECOCO_RFP_EcoBuddy_v1_0_20260515.docx`）§4、§5  
+**適用對象**：前端工程師（@shangchian）、外包動畫師（Anastasiia）
+
+> 本文件為 RFP §4 完整轉錄。型態 ID 以 `#NN` 格式標注，可直接 Ctrl+F 搜尋。
+
+---
+
+## 一、基礎型態 #01–#27 Base States
+
+三維度（hp / clean / mood）各分低（L：0–30）、中（M：31–65）、高（H：66–100）三段，共 3×3×3 = 27 種基礎型態。
+
+| # | 組合 Combo | 狀態標籤 ZH / EN | 體型 Body | 外觀 Appearance | 表情動作 Expression |
+|---|---|---|---|---|---|
+| #01 | 低-低-低 / L-L-L | 瀕危史萊姆 / Endangered Slime | 乾癟 60% / Gaunt 60% | 沾滿泥濘，灰暗 / Covered in mud, dark | 閉眼哭泣，瑟瑟發抖 / Eyes closed crying, trembling |
+| #02 | 低-低-中 / L-L-M | 髒髒小可憐 / Dirty Little Wretch | 乾癟，不規則 / Gaunt, irregular | 帶有污漬斑點 / Stained spots | 睜大眼發呆，偶爾流口水 / Wide-eyed daze, occasional drool |
+| #03 | 低-低-高 / L-L-H | 樂觀泥巴球 / Optimistic Mud Ball | 乾癟，跳躍感 / Gaunt, bouncy | 粗糙無光澤 / Rough, matte | 傻笑，手舞足蹈，愛心粒子 / Goofy grin, flailing, heart particles |
+| #04 | 低-中-低 / L-M-L | 憂鬱紙片人 / Depressed Paper Doll | 瘦弱如紙片 / Paper-thin | 霧面基礎材質 / Basic matte material | 皺眉，嘆氣，肩膀下垂 / Frowning, sighing, drooping shoulders |
+| #05 | 低-中-中 / L-M-M | 標準初生嬰 / Standard Newborn | 瘦小但完整 / Small but complete | 乾淨霧面 / Clean matte | 眼神平靜，規律眨眼 / Calm gaze, regular blinking |
+| #06 | 低-中-高 / L-M-H | 迷你啦啦隊 / Mini Cheerleader | 嬌小，動作大 / Petite, expressive | 乾淨明亮 / Clean and bright | 開心揮手，充滿活力 / Happy waving, full of energy |
+| #07 | 低-高-低 / L-H-L | 易碎玻璃心 / Fragile Glass Heart | 瘦削 60% / Slender 60% | 晶瑩剔透折射光 / Crystal-clear refracting light | 眉頭深鎖，小心翼翼 / Furrowed brow, cautious |
+| #08 | 低-高-中 / L-H-M | 靜謐水晶 / Quiet Crystal | 嬌小精緻 60% / Delicate 60% | 散發柔和白色光芒 / Emitting soft white glow | 閉目養神，細微呼吸律動 / Eyes closed, subtle breathing rhythm |
+| #09 | 低-高-高 / L-H-H | 閃耀精靈 / Radiant Sprite | 嬌小，動作靈活 / Petite, nimble | 自帶高光與星漾粒子（FX7，取代 FX1）/ Built-in highlight and FX7 star particles (replaces FX1) | 雙眼發亮，快速原地旋轉 / Eyes sparkling, rapid spin-in-place |
+| #10 | 中-低-低 / M-L-L | 暴躁泥獸 / Raging Mud Beast | 適中略沉重 / Medium, slightly heavy | 大面積髒污混濁 / Large-area dirt, murky | 齜牙裂嘴，跺腳 / Baring teeth, stomping |
+| #11 | 中-低-中 / M-L-M | 迷茫拾荒者 / Confused Scavenger | 體型標準 / Standard size | 局部灰塵暗沉 / Partial dust, dim | 左右張望，抓頭 / Looking around, scratching head |
+| #12 | 中-低-高 / M-L-H | 樂天泥巴客 / Carefree Mud Traveler | 標準 100% / Standard 100% | 泥巴如裝飾紋路 / Mud as decorative pattern | 憨笑，拍打肚子 / Chuckling, belly-patting |
+| #13 | 中-中-低 / M-M-L | 鬧脾氣市民 / Sulky Citizen | 比例標準 / Standard proportions | 乾淨簡約科技材質 / Clean minimalist tech material | 雙手抱胸，撇嘴 / Arms crossed, pouting |
+| #14 | 中-中-中 / M-M-M | **【預設】環保初心 / [Default] Eco-Mindset** | 標準俐落 / Standard, clean | 乾淨霧面高質感 / Clean matte, high-quality | 平靜呼吸，溫和微笑 / Calm breathing, gentle smile |
+| #15 | 中-中-高 / M-M-H | 快樂小幫手 / Happy Helper | 標準，活潑 / Standard, lively | 乾淨色彩飽和 / Clean, saturated colors | 咧嘴大笑，原地轉圈 / Beaming smile, spinning in place |
+| #16 | 中-高-低 / M-H-L | 傲嬌貴族 / Tsundere Noble | 標準 100% / Standard 100% | 表面光滑金屬反射 / Smooth metallic reflection | 閉眼轉頭，高姿態 / Eyes closed, head turned, aloof |
+| #17 | 中-高-中 / M-H-M | 優雅守護者 / Elegant Guardian | 標準 100% / Standard 100% | 半透明微光流動 / Semi-transparent glowing shimmer | 溫柔注視，從容微笑 / Gentle gaze, composed smile |
+| #18 | 中-高-高 / M-H-H | 科技大使 / Tech Ambassador | 標準 100% / Standard 100% | 全息投影質感 / Holographic projection texture | 充滿自信，發送愛心 / Full of confidence, sending hearts |
+| #19 | 高-低-低 / H-L-L | 臃腫污染源 / Bloated Pollution Source | 巨大，底部拖泥 / Massive, trailing mud | 佈滿黑色油污 / Covered in black oil stains | 眼神凶狠，低沉吼叫 / Fierce glare, low growl |
+| #20 | 高-低-中 / H-L-M | 遲緩巨漢 / Sluggish Giant | 巨大圓滾滾 / Massive and round | 沾滿灰塵粗糙 / Dusty and rough | 眼神平靜，緩慢點頭 / Calm gaze, slow nod |
+| #21 | 高-低-高 / H-L-H | 樂天胖達 / Carefree Chubster | 巨大有彈性 / Massive and elastic | 髒污明顯，汗珠粒子（FX5）/ Visible grime, FX5 sweat-drop particles | 捧腹大笑，地上打滾 / Belly-laughing, rolling on the ground |
+| #22 | 高-中-低 / H-M-L | 悶悶不樂巨球 / Gloomy Giant Ball | 圓潤坐地 / Round, seated | 乾淨霧面，色調偏冷 / Clean matte, cool tones | 嘟嘴，賴坐不走 / Pouting, stubbornly sitting |
+| #23 | 高-中-中 / H-M-M | 溫和巨獸 / Gentle Giant | 體積龐大穩定 / Massive and stable | 乾淨亮面品牌色 / Clean glossy brand color | 沉穩深呼吸，點頭 / Steady deep breathing, nodding |
+| #24 | 高-中-高 / H-M-H | 彈力大福 / Bouncy Mochi | 極度圓潤麻糬 / Extremely round, mochi-like | 乾淨彈性光澤 / Clean elastic sheen | 開心彈跳，Q 彈震動 / Happy bouncing, jelly-like trembling |
+| #25 | 高-高-低 / H-H-L | 悲傷神獸 / Sorrowing Divine Beast | 巨大且莊嚴 / Massive and majestic | 發光光暈（白色）/ Glowing halo (white) | 眉頭深鎖，低頭，發光眼淚（FX6）/ Furrowed brow, head down, FX6 glowing tears |
+| #26 | 高-高-中 / H-H-M | 沉睡巨像 / Slumbering Colossus | 雄偉穩如泰山 / Majestic and immovable | 完美珍珠光澤 / Perfect pearl luster | 規律眨眼，偶爾回頭張望 / Regular blinking, occasional glance back |
+| #27 | 高-高-高 / H-H-H | **【頂規】ECOCO 領袖 / [Peak] ECOCO Leader** | 飽滿圓潤完美 / Full, round, perfect | 散發彩虹漸層全息光芒；自動開啟 S2（has_halo）/ Rainbow gradient holographic glow; auto-enables S2 (has_halo) | 耀眼自信，華麗登場 / Dazzling confidence, grand entrance |
+
+> **#27 觸發條件**：三維度需同時在高階（66–100）才觸發。後端確認累計滿值天數 ≥ 7 天後方切換至 #36「循環之神」。
+
+---
+
+## 二、特殊隱藏型態 #28–#36 Special Hidden States
+
+後端依解鎖條件判定後主動寫入 Rive State Machine 對應 Boolean。Rive 端**僅依 has_* 值顯示視覺**，不負責解鎖條件判定。
+
+| # | 解鎖條件 | 狀態標籤 ZH / EN | 解鎖門檻說明 | 自動啟用插槽 |
+|---|---|---|---|---|
+| #28 | HP ≥ 95 且當週餵食 ≥ 5 次 | 暴食過載者 / Overfed Overload | hp_level ≥ 95，同週觸發餵食 ≥ 5 次 | S7（`has_overfed`） |
+| #29 | 潔淨度連續 7 天 ≥ 90 | 潔癖大師 / Neatness Master | 連續 7 自然日 clean_level ≥ 90 | S3（`has_laurel`） |
+| #30 | 心情 ≥ 95 且點擊達上限 | 瘋狂點擊狂 / Click Maniac | mood_level ≥ 95 且當日觸摸達上限（20 次） | S8（`has_frenzy`） |
+| #31 | 累計回收寶特瓶 ≥ 500 | 寶特瓶國王 / PET Bottle King | 後端累計達標後推送解鎖 | S9（`has_bottle`） |
+| #32 | 累計回收電池 ≥ 200 | 電能機甲 / Energy Mech | 後端累計達標後推送解鎖 | S1（`has_armor`） |
+| #33 | 連續 30 天未登入 | （懲罰）壞滅核心 / Corruption Core | 全屬性衰減至 0，登入後觸發；`has_dark=true` 強制鎖定至月底，期間用戶養成行為由後端正常累積但 Rive 視覺強制顯示 #33 | S5（`has_dark`） |
+| #34 | 連續登入 ≥ 7 天 | 派對動物 / Party Animal | 連續 7 自然日每日登入 | S4（`has_disco`） |
+| #35 | 首次完成任意金額 IAP 儲值 | 黃金暴發戶 / Golden Nouveau Riche | 任一 IAP 交易完成後自動解鎖 | S10（`has_golden`） |
+| #36 | 三維度同時達滿值且累計 ≥ 7 天 | **【傳說】循環之神 / [Legend] Cycle God** | 三者同時達 100，後端累計達滿值天數 ≥ 7 天；每日結算，不需連續；累計天數於月底結算時歸零，不跨月延續 | 後端送 `has_cycle_crown=true` |
+
+---
+
+## 三、has_halo / has_cycle_crown 連動規則
+
+> RFP §4.1 表尾備註完整轉錄。
+
+### #27 與 has_halo
+
+- **進入 #27**：後端同步將 `has_halo` 設為 `true`（S2 彩虹光環顯示）
+- **離開 #27**（一般情況）：後端同步將 `has_halo` 設為 `false`
+
+### #27 → #36 切換例外
+
+當角色由 #27 切換至 #36（後端同步送 `has_cycle_crown=true`）：
+
+- 後端**不應**同步送 `has_halo=false`
+- `has_halo=true` 得以維持，因為此切換點後端不傳 `has_halo=false`
+- S6 的 `(a)` 條自驅機制（見下方）在此情境下為 no-op（has_halo 已為 true），並非「持續維持」機制
+- 本例外**覆寫**「離開 #27 時將 has_halo 設為 false」之通用規則
+
+### S6 循環之冠四條責任規則
+
+| 條 | 主體 | 規則 |
+|---|---|---|
+| (a) Rive 自驅 | Rive | `has_cycle_crown` 由 `false→true` 之瞬間，Rive 自動將 `has_halo` 設為 `true` |
+| (b) 後端責任 | 後端 | 送出 `has_cycle_crown=false` 時，必須一併明確指定 `has_halo` 目標值（true 或 false）；Rive 在 `has_cycle_crown` 由 `true→false` 切換時**不自動處理** `has_halo` |
+| (c) Override 優先 | 後端 | 任何時點後端傳入之 `has_halo` 值（含與 `has_cycle_crown` 同時傳入者），優先於 (a) 條 Rive 自驅值 |
+| (d) 月底結算 | 後端 | 後端統一將所有 `has_*` 重置為 `false`；送 `has_cycle_crown=false` 同時將 `has_halo` 一併重置為 `false`，符合 (b) 條「明確指定」要求，無須另行單獨傳送 |
+
+### 月底結算重置清單
+
+後端月底結算後須重置以下所有插槽為 `false`，三大屬性重置為 `50`：
+
+`has_halo`、`has_cycle_crown`、`has_armor`、`has_laurel`、`has_disco`、`has_dark`、`has_overfed`、`has_frenzy`、`has_bottle`、`has_golden`
+
+---
+
+## 四、FX3 / S2 共存規則
+
+當角色處於 **#27 或 #36**（clean 高階 + `has_halo=true`）：
+- **S2 彩虹光環取代 FX3 柔和白色光暈**，避免雙層光環疊加
+
+其他 clean 高階型態（如 #09、#18、#24）：FX3 依 [ANIMATION_LIST.md](ANIMATION_LIST.md) §FX3 規格**正常顯示**。
+
+---
+
+*Based on RFP v1.0 — 2026-05-15。如 RFP 有修訂，本文件同步更新並記錄異動。*
