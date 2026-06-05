@@ -52,8 +52,8 @@ PM 改了影響動畫的決策時，**主動傳訊息給外包**，不要假設�
 
 ---
 
-## 待辦清單
+## 任務清單在哪裡
 
-來源：`openspec/changes/p4-shop-phase-rollout`（P4 商店分階段上線）
+開發待辦已統一移到 `docs/dev/FRONTEND_BACKEND_HANDOFF.md`。
 
-- [ ] **11.1** 在 `docs/animation/NAMING.md` S1–S6 插槽標注 Phase 1 hero 裝扮款（彩虹光暈、循環王冠等）
+這份 onboarding 只作為 30 秒上手導覽；實際任務、負責角色與對應規格請看 dev 文件。

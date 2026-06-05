@@ -60,13 +60,8 @@ LINE 標 `@chiamei-ui`（UI/UX）或 `@andrewtainan`（PM）。
 
 ---
 
-## 待辦清單
+## 任務清單在哪裡
 
-來源：`openspec/changes/p4-shop-phase-rollout`（P4 商店分階段上線）
+開發待辦已統一移到 `docs/dev/FRONTEND_BACKEND_HANDOFF.md`。
 
-- [ ] **7.1** 串接藍新 NewebPay（callback、對帳）
-- [ ] **7.2** 串接 Apple StoreKit / Google Play Billing（裝扮 IAP entitlement 驗證）
-- [ ] **7.6** 訂單資料模型須儲存 `cashChannel`、`payMethod`、`gatewayOrderId`（藍新）、`platformTransactionId`（IAP）；成功頁與訂單紀錄共用同一筆，不得各自產生
-- [ ] **7.7** Phase 2 上線前客訴視角 UAT：取消付款、付款逾時、付款成功未入庫、重複購買防呆、退款查詢（藍新找 ECOCO 客服；IAP 找 App Store / Google Play）
-- [ ] **10.1** feature flag 介接 `shopPhase`，前端 fetch 一次後快取至 session
-- [ ] **10.2** 緊急回滾測試：Phase 2 → Phase 1，禮包與裝扮 Tab 回 Coming Soon，進行中的交易不受影響
+這份 onboarding 只作為 30 秒上手導覽；實際任務、負責角色與對應規格請看 dev 文件。

@@ -78,10 +78,8 @@ AI 會自動跨檔案閱讀，不用你手動切換。
 
 ---
 
-## 待辦清單
+## 任務清單在哪裡
 
-來源：`openspec/changes/p4-shop-phase-rollout`（P4 商店分階段上線）
+開發待辦已統一移到 `docs/dev/FRONTEND_BACKEND_HANDOFF.md`。
 
-- [ ] **7.3** 禮包 Tab CTA 點擊跳轉藍新網頁付款（hi-fi 僅模擬）
-- [ ] **7.4** 裝扮 Tab CTA 點擊觸發平台 IAP（StoreKit / Play Billing）；設備判斷副標（App Store / Google Play）
-- [ ] **12.3** review `openspec/changes/p4-shop-phase-rollout/specs/` 四份規格的可實作性，回報給 `@chiamei-ui`
+這份 onboarding 只作為 30 秒上手導覽；實際任務、負責角色與對應規格請看 dev 文件。

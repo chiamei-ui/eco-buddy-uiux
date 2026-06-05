@@ -38,9 +38,8 @@
 
 ---
 
-## 待辦清單
+## 任務清單在哪裡
 
-來源：`openspec/changes/p4-shop-phase-rollout`（P4 商店分階段上線）
+開發待辦已統一移到 `docs/dev/FRONTEND_BACKEND_HANDOFF.md`。
 
-- [ ] **12.2** review `openspec/changes/p4-shop-phase-rollout/proposal.md` 與 `design.md`
-- [ ] **12.4** 於 `docs/decisions/CURRENT.md` 寫入 #26 / #27 / #28 / #29
+這份 onboarding 只作為 30 秒上手導覽；實際任務、負責角色與對應規格請看 dev 文件。

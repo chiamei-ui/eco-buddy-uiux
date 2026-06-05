@@ -28,6 +28,7 @@
 | `decisions/` | PM 所有定案決策 | PM | PM (@andrewtainan) |
 | `design/` | 設計系統、頁面規格、文案規則、**GAME_MECHANICS.md（所有數值）** | 設計師、前端、後端 | UI/UX (@chiamei-ui) |
 | `product/` | 使用者流程、對話文案、FAQ | PM、設計師 | PM、UI/UX |
+| `dev/` | 工程交接、角色任務清單、開發待辦 | 前端、後端、PM、設計師 | UI/UX (@chiamei-ui) |
 | `animation/` | 動畫需求清單、發案規格、**NAMING.md（命名手冊）**、**ROADMAP.md（合作階段）** | 窗口設計師、前端 | 窗口設計師 (@idahsueh-cmd) |
 | `briefs/` | PM 核心原則與改版方向 | PM、設計師 | PM (@andrewtainan) |
 | `archive/` | 歷史版本，只讀不改 | — | 無人（全員唯讀） |
