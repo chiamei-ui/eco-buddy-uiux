@@ -111,7 +111,9 @@ img,svg{display:block;}
   display:flex;flex-direction:column;
 }
 .screen-scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-top:50px;}
-.screen-scroll::-webkit-scrollbar{width:0;}
+.screen-scroll::-webkit-scrollbar{width:0;height:0;}
+.screen-scroll::-webkit-scrollbar-button{display:none!important;width:0!important;height:0!important;}
+.screen-scroll{scrollbar-width:none;-ms-overflow-style:none;}
 
 /* Tab pages — block-flow scroll so children keep natural height, sticky header pinned at top */
 .screen.p4, .screen.p5, .screen.p7 {
@@ -124,7 +126,10 @@ img,svg{display:block;}
 .screen.p7::-webkit-scrollbar,
 .screen.p5 *::-webkit-scrollbar,
 .screen.p7 *::-webkit-scrollbar { display:none; }
-.screen.p5, .screen.p7,
+.screen.p4::-webkit-scrollbar-button,
+.screen.p5::-webkit-scrollbar-button,
+.screen.p7::-webkit-scrollbar-button { display:none!important; width:0!important; height:0!important; }
+.screen.p4, .screen.p5, .screen.p7,
 .screen.p5 *, .screen.p7 * { scrollbar-width:none; -ms-overflow-style:none; }
 .screen.p4 > .p4-sticky-top,
 .screen.p5 > .header,
