@@ -77,8 +77,6 @@
 | S5 | `has_dark` | Dark Core | 黑暗核心 |
 | S6 | `has_cycle_crown` | Cycle Crown | 循環王冠 |
 
-> Phase 1 hero：S2 彩虹光暈、S6 循環王冠（優先上線）；S1 / S3 / S4 / S5 留作後續月度更新或通行證限定。依據：`docs/decisions/CURRENT.md` #28.3。
-
 ### Skin Override（S7–S10）｜特殊型態觸發時自動啟用，取代本體外觀
 
 | 插槽 | Boolean 變數名 | 配件名稱 | 中文 |
