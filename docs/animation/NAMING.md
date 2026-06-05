@@ -68,16 +68,14 @@
 
 ### 裝飾配件（S1–S6）｜可疊加，不取代本體外觀
 
-| 插槽 | Boolean 變數名 | 配件名稱 | 中文 | 上線階段 |
-|------|--------------|---------|------|---------|
-| S1 | `has_armor` | Tech Armor | 科技護甲 | 後續分批 |
-| S2 | `has_halo` | Rainbow Halo | 彩虹光暈 | **Phase 1 hero** |
-| S3 | `has_laurel` | Laurel Wreath | 月桂花環 | 後續分批 |
-| S4 | `has_disco` | Disco Ball | 迪斯可球 | 後續分批 |
-| S5 | `has_dark` | Dark Core | 黑暗核心 | 後續分批 |
-| S6 | `has_cycle_crown` | Cycle Crown | 循環王冠 | **Phase 1 hero** |
-
-> Phase 1 hero（S2、S6）優先上線；其餘插槽留作月度更新或通行證限定。依據：`docs/decisions/CURRENT.md` #28.3。
+| 插槽 | Boolean 變數名 | 配件名稱 | 中文 |
+|------|--------------|---------|------|
+| S1 | `has_armor` | Tech Armor | 科技護甲 |
+| S2 | `has_halo` | Rainbow Halo | 彩虹光暈 |
+| S3 | `has_laurel` | Laurel Wreath | 月桂花環 |
+| S4 | `has_disco` | Disco Ball | 迪斯可球 |
+| S5 | `has_dark` | Dark Core | 黑暗核心 |
+| S6 | `has_cycle_crown` | Cycle Crown | 循環王冠 |
 
 ### Skin Override（S7–S10）｜特殊型態觸發時自動啟用，取代本體外觀
 
