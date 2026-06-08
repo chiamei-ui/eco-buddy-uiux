@@ -287,6 +287,7 @@ const PushDemo = ({ setScreen }) => {
 
 /* ───────── Top-level App ───────── */
 const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+  "viewportSize": "md",
   "shopPhase": 1,
   "p2DemoType": "recycle",
   "p2ErrKind": null,
@@ -302,6 +303,11 @@ const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
 
 const P8_SUBS = new Set(['p8-faq', 'p4-orders']);
 const TAB_ORDER = ['p1','p4','p5','p7'];
+const VIEWPORT_SIZE_OPTIONS = [
+  { v:'sm', l:'小 360×780' },
+  { v:'md', l:'中 390×844' },
+  { v:'lg', l:'大 430×932' },
+];
 
 const App = () => {
   const [screen, _setScreen] = useState('p1');
@@ -378,7 +384,7 @@ const App = () => {
 
       {/* Center: iPhone */}
       <div className="stage-center">
-        <div className="iphone">
+        <div className={`iphone iphone-${tweaks.viewportSize || 'md'}`}>
           <div className="iphone-screen">
             <div className="iphone-notch"></div>
             <div key={screen} className={slideDir ? `screen-slide-${slideDir}` : undefined} onAnimationEnd={() => setSlideDir(null)} style={{ position: 'absolute', inset: 0, overflow: 'hidden' }}>
@@ -474,6 +480,17 @@ const InlineTweaks = ({ tweaks, setTweak, setScreen, state, dispatch, screen }) 
       border:'1px solid rgba(255,255,255,0.08)',
       borderRadius:20,padding:16,color:'#fff',
     }}>
+
+      <div style={tweakLabel}>手機尺寸檢查</div>
+      <Segmented
+        value={tweaks.viewportSize || 'md'}
+        onChange={v => setTweak('viewportSize', v)}
+        options={VIEWPORT_SIZE_OPTIONS}
+      />
+      <div style={{fontSize:10,color:'rgba(255,255,255,0.35)',marginTop:4,lineHeight:1.4}}>
+        只調整 hi-fi 手機框，方便檢查小 / 中 / 大螢幕差異。
+      </div>
+      <TweakDivider />
 
       {/* 開發範圍：僅在影響 Phase 的畫面顯示 */}
       {(isP4 || isP5) && (
