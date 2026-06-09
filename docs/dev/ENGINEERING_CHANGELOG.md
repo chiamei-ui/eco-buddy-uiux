@@ -26,6 +26,15 @@
 - `scripts/update-engineering-changelog.ps1`
 
 <!-- AUTO-ENTRIES -->
+<!-- engineering-change:d47ebb979a080452 -->
+## 2026-06-09 14:40:50 +08:00
+
+- Triggered scopes: design spec, product flow
+- Files:
+  - `docs/design/GAME_MECHANICS.md` (design spec)
+  - `docs/design/UI_SPEC.md` (design spec)
+  - `docs/product/USER_FLOW.md` (product flow)
+
 <!-- engineering-change:f4fd19027af4e51f -->
 ## 2026-06-08 17:46:15 +08:00
 
@@ -36,5 +45,6 @@
   - `reference/eco-buddy_hi-fi/app.jsx` (hi-fi reference)
   - `reference/eco-buddy_hi-fi/styles.css` (hi-fi reference)
   - `scripts/update-engineering-changelog.ps1` (handoff automation)
+
 
 
