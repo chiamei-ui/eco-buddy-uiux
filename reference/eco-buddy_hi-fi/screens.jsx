@@ -13,7 +13,7 @@ const OB_STEPS = [
   { refKey: 'adsBtnRef',     pad: 8,  radius: 24, textRight: true,
     title: '免費道具 🎁',           text: '看廣告領道具，每天最多 5 次' },
   { refKey: 'dockTabsRef',   pad: 6,  radius: 16,
-    title: '食物欄、玩具箱、換衣間', text: '切換查看食物、道具和裝扮，拖到夥伴身上使用' },
+    title: 'Buddy 的餐袋、玩具箱、換衣間', text: '切換查看食物、道具和裝扮，拖到夥伴身上使用' },
   { refKey: 'tabbarRef',     pad: 4,  radius: 12,
     title: '四大功能',              text: '快來探索遊戲中的每個小驚喜吧！' },
 ];
@@ -404,7 +404,7 @@ const P1Home = ({ state, dispatch, setScreen, dragManager, payload, showTutorial
 
       <div className="dock-shell" ref={dockRef}>
         <div className="dock-tabs" ref={dockTabsRef}>
-          <button className={`dock-tab ${dockTab === 'food' ? 'active' : ''}`} onClick={() => setDockTab('food')}>食物欄</button>
+          <button className={`dock-tab ${dockTab === 'food' ? 'active' : ''}`} onClick={() => setDockTab('food')}>Buddy 的餐袋</button>
           <button className={`dock-tab ${dockTab === 'tools' ? 'active' : ''}`} onClick={() => setDockTab('tools')}>玩具箱</button>
           <button className={`dock-tab ${dockTab === 'wardrobe' ? 'active' : ''}`} onClick={() => setDockTab('wardrobe')}>換衣間</button>
         </div>
@@ -470,7 +470,7 @@ const P1Home = ({ state, dispatch, setScreen, dragManager, payload, showTutorial
         <ItemInfoSheet onClose={() => setDockInfoOpen(false)}>
           {dockTab === 'food' ? (
             <div>
-              <div style={{ fontSize:17, fontWeight:900, marginBottom:10 }}>食物欄說明</div>
+              <div style={{ fontSize:17, fontWeight:900, marginBottom:10 }}>Buddy 的餐袋說明</div>
               <div style={{ fontSize:13, color:'#444', lineHeight:1.7, marginBottom:12 }}>
                 <div>• 拖曳食物到 Buddy 身上即可餵食</div>
                 <div>• 每份食物讓 Buddy 體力 +5</div>
@@ -863,7 +863,7 @@ const P2bResult = ({ setScreen, dispatch, tweaks = {}, setTweak = () => {} }) =>
           </div>
         </div>
         <div className="footer">
-          <button className="btn-primary" onClick={handleDone}>存進食物欄</button>
+          <button className="btn-primary" onClick={handleDone}>存進餐袋</button>
         </div>
       </div>
     </div>
@@ -882,7 +882,7 @@ const SHOP_IAP_CONFIG = {
     desc: '幫 Buddy 在月底衝到最佳狀態，選出最美的夥伴日誌',
     activeWindow: '每月 22–28 日',
     contents: [
-      { emoji: '🍔', name: '月份限定食物 ×10', sub: '不佔週配額，直接存入食物欄' },
+      { emoji: '🍔', name: '月份限定食物 ×10', sub: '不佔週配額，直接存入餐袋' },
       { emoji: '🪮', name: '精華梳 ×3', sub: '潔淨 +30 · 心情 +20' },
       { emoji: '🍪', name: '豪華零食 ×3', sub: '體力 +30 · 心情 +25' },
       { emoji: '🎀', name: '月份限定裝扮 ×1', sub: '永久穿戴，當月主題' },
