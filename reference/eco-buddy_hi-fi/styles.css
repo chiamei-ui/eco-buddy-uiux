@@ -552,8 +552,8 @@ img,svg{display:block;}
   color:#fff;font-size:13px;font-weight:600;cursor:pointer;
 }
 .rp-count{
-  font-family:var(--font-en);font-size:34px;font-weight:900;
-  color:#fff;line-height:1;margin:0 3px;
+  font-family:var(--font-en);font-size:46px;font-weight:900;
+  color:#fff;line-height:1;margin:0 4px;
 }
 .rp-info-btn{
   margin-left:auto;width:22px;height:22px;
@@ -565,18 +565,20 @@ img,svg{display:block;}
 .rp-cards--single{grid-template-columns:1fr;}
 .rpc{
   background:#fff;border-radius:16px;
-  padding:14px 14px;display:flex;align-items:center;gap:12px;
+  padding:0;display:flex;align-items:stretch;
+  overflow:hidden;min-height:80px;
 }
 .rpc-icon-bg{
-  width:46px;height:46px;border-radius:12px;
+  width:62px;flex-shrink:0;
   display:flex;align-items:center;justify-content:center;
-  font-size:26px;flex-shrink:0;
+  font-size:28px;
 }
-.rpc--food .rpc-icon-bg{background:#FFE4CC;}
-.rpc--clean .rpc-icon-bg{background:#E5EAFF;}
+.rpc--food .rpc-icon-bg{background:#FFD5A8;}
+.rpc--clean .rpc-icon-bg{background:#DDE5FF;}
 .rpc--hp   .rpc-icon-bg{background:#FFE0E5;}
+.rpc-right{padding:10px 14px;display:flex;flex-direction:column;justify-content:center;}
 .rpc-label{font-size:11px;font-weight:700;color:#888;margin-bottom:2px;}
-.rpc-val{font-family:var(--font-en);font-size:26px;font-weight:900;line-height:1.1;}
+.rpc-val{font-family:var(--font-en);font-size:28px;font-weight:900;line-height:1.1;}
 .rpc--food  .rpc-val{color:var(--ecoco-orange);}
 .rpc--clean .rpc-val{color:#1F3DBF;}
 .rpc--hp    .rpc-val{color:#FF4D63;}
