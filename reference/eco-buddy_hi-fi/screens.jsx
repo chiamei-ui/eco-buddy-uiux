@@ -804,7 +804,13 @@ const P2bResult = ({ setScreen, dispatch, tweaks = {}, setTweak = () => {} }) =>
               <div style={{ marginBottom: 6 }}>3–6 號乾電池 → 體力 +5 / 顆</div>
               <div style={{ fontWeight: 700, color: '#1a1a1a', marginBottom: 2 }}>潔淨（收瓶機）</div>
               <div>投入 → 潔淨 +2 / 個</div>
-              <div>退瓶 → 潔淨 -1 / 個</div>
+              <div style={{ marginBottom: 6 }}>退瓶 → 潔淨 -1 / 個</div>
+              <div style={{ fontWeight: 700, color: '#1a1a1a', marginBottom: 2 }}>潔淨（電池機）</div>
+              <div>投入 → 潔淨 +5 / 顆</div>
+              <div style={{ marginBottom: 4 }}>退電池 → 潔淨 -1 / 顆</div>
+              <div style={{ fontSize: 11, color: '#888', lineHeight: 1.5 }}>
+                潔淨淨值不為負，≤0 顯示 0。
+              </div>
               <div style={{ fontSize: 11, color: '#888', marginTop: 4, lineHeight: 1.5 }}>
                 註：體力 / 潔淨 / ECOCO 點數為三條獨立帳本，由同一次投瓶分別計算。
               </div>
