@@ -7,8 +7,8 @@ const REFILL_SESSION = {
   emoji: '🧺',
   capacity: '500 ml',
   amount: 9999,
-  hp: 20,
-  clean: 20,
+  hp: 99,
+  clean: 99,
   location: '台南 仁德補充站',
   time: '2026.06.15 14:32',
 };
@@ -77,14 +77,18 @@ const P12RefillResult = ({ setScreen, state, dispatch, payload, tweaks = {} }) =
         </div>
         <div className="rp-cards">
           <div className="rpc rpc--hp">
-            <div className="rpc-icon-bg">❤️</div>
+            <div className="rpc-icon-bg">
+              <img src="assets/icon-hp.svg" alt="" />
+            </div>
             <div className="rpc-right">
               <div className="rpc-label">體力值</div>
               <div className="rpc-val">+{session.hp}</div>
             </div>
           </div>
           <div className="rpc rpc--clean">
-            <div className="rpc-icon-bg">💧</div>
+            <div className="rpc-icon-bg">
+              <img src="assets/icon-clean.svg" alt="" />
+            </div>
             <div className="rpc-right">
               <div className="rpc-label">潔淨值</div>
               <div className="rpc-val">+{session.clean}</div>

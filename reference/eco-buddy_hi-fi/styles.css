@@ -507,10 +507,9 @@ img,svg{display:block;}
   overflow:hidden;min-height:0;
 }
 .rs-rays{
-  position:absolute;inset:0;
-  background:repeating-conic-gradient(rgba(255,248,180,0.07) 0deg 8deg,transparent 8deg 16deg);
+  display:none;
 }
-.rs-stars{position:absolute;inset:0;pointer-events:none;}
+.rs-stars{display:none;}
 .rs-star{
   position:absolute;color:#FFD700;font-style:normal;line-height:1;
   animation:star-pulse 2.2s ease-in-out infinite;
@@ -524,66 +523,91 @@ img,svg{display:block;}
 .rs-star.s6{top:38%;right:8%;font-size:18px;animation-delay:.45s;}
 .rs-title{
   position:relative;z-index:1;
-  width:290px;margin-top:10px;flex-shrink:0;
+  width:323px;max-width:calc(100% - 36px);margin-top:28px;flex-shrink:0;
+  transform-origin:50% 45%;
+  animation:result-title-pop .7s cubic-bezier(.2,.9,.25,1.25) both;
 }
 .rs-turtle{
   position:relative;z-index:1;
   flex:1;display:flex;align-items:center;justify-content:center;
+  margin-top:-70px;
+  animation:result-buddy-pop .72s .18s cubic-bezier(.2,.9,.25,1.2) both;
 }
 .rs-spotlight{
-  position:absolute;bottom:0;left:50%;transform:translateX(-50%);
-  width:140px;height:22px;
-  background:radial-gradient(ellipse,rgba(255,255,200,.35) 0%,transparent 70%);
-  border-radius:50%;
+  display:none;
 }
 
 /* bottom result panel */
 .result-panel{
-  background:#FAE0B8;
-  border-radius:24px 24px 0 0;
-  padding:18px 18px 28px;
+  background:transparent;
+  padding:0 18px 58px;
   display:flex;flex-direction:column;gap:10px;
   flex-shrink:0;
 }
 .rp-info-row{
-  background:#1A1A1A;border-radius:14px;
-  padding:13px 16px;
-  display:flex;align-items:center;flex-wrap:wrap;gap:3px;
+  min-height:59px;
+  background:#050505;border:1px solid #F6DFA0;border-radius:18px;
+  padding:8px 14px;
+  display:flex;align-items:center;justify-content:center;gap:8px;
   color:#fff;font-size:13px;font-weight:600;cursor:pointer;
 }
 .rp-count{
-  font-family:var(--font-en);font-size:46px;font-weight:900;
-  color:#fff;line-height:1;margin:0 4px;
+  font-family:var(--font-en);font-size:40px;font-weight:900;
+  color:#FFD500;line-height:1;
 }
 .rp-info-btn{
-  margin-left:auto;width:22px;height:22px;
-  background:rgba(255,255,255,.18);border-radius:50%;
+  margin-left:4px;width:19px;height:19px;
+  background:#777;border-radius:50%;
   display:flex;align-items:center;justify-content:center;
-  font-size:12px;font-weight:800;font-family:serif;flex-shrink:0;
+  color:#111;font-size:12px;font-weight:900;font-family:serif;flex-shrink:0;
 }
 .rp-cards{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
 .rp-cards--single{grid-template-columns:1fr;}
+.rp-cards--single .rpc{justify-content:center;}
 .rpc{
-  background:#fff;border-radius:16px;
-  padding:0;display:flex;align-items:stretch;
-  overflow:hidden;min-height:80px;
+  background:#fff;border:2px solid var(--ecoco-orange);border-radius:18px;
+  padding:0 12px;display:flex;align-items:center;justify-content:center;
+  overflow:hidden;min-height:60px;
+  animation:reward-card-glow 1s .68s ease-out both;
 }
+.rpc:nth-child(2){animation-delay:.8s;}
 .rpc-icon-bg{
-  width:62px;flex-shrink:0;
+  width:54px;flex-shrink:0;
   display:flex;align-items:center;justify-content:center;
-  font-size:28px;
+  font-size:30px;
 }
-.rpc--food .rpc-icon-bg{background:#FFD5A8;}
-.rpc--clean .rpc-icon-bg{background:#DDE5FF;}
-.rpc--hp   .rpc-icon-bg{background:#FFE0E5;}
-.rpc-right{padding:10px 14px;display:flex;flex-direction:column;justify-content:center;}
-.rpc-label{font-size:11px;font-weight:700;color:#888;margin-bottom:2px;}
-.rpc-val{font-family:var(--font-en);font-size:28px;font-weight:900;line-height:1.1;}
+.rpc-icon-bg img{display:block;width:auto;height:auto;}
+.rpc--hp .rpc-icon-bg img{width:35px;}
+.rpc--clean .rpc-icon-bg img{width:30px;}
+.rpc-right{padding:5px 0;display:flex;flex-direction:column;justify-content:center;}
+.rpc-label{font-size:11px;font-weight:700;color:#555;margin-bottom:0;}
+.rpc-val{font-family:var(--font-en);font-size:28px;font-weight:900;line-height:1;}
 .rpc--food  .rpc-val{color:var(--ecoco-orange);}
-.rpc--clean .rpc-val{color:#1F3DBF;}
-.rpc--hp    .rpc-val{color:#FF4D63;}
-.result-panel .footer{padding:2px 0 0;}
-.result-panel .footer .btn-primary{width:100%;}
+.rpc--clean .rpc-val{color:var(--ecoco-orange);}
+.rpc--hp    .rpc-val{color:var(--ecoco-orange);}
+.result-panel .footer{padding:0;}
+.result-panel .footer .btn-primary{
+  width:100%;min-height:58px;border-radius:18px;box-shadow:none;
+}
+@keyframes result-title-pop{
+  0%{opacity:0;transform:scale(.62) translateY(-10px);}
+  65%{opacity:1;transform:scale(1.06) translateY(2px);}
+  100%{opacity:1;transform:scale(1) translateY(0);}
+}
+@keyframes result-buddy-pop{
+  0%{opacity:0;transform:translateY(90px) scale(.68);}
+  62%{opacity:1;transform:translateY(-12px) scale(1.05);}
+  82%{transform:translateY(5px) scale(.98);}
+  100%{opacity:1;transform:translateY(0) scale(1);}
+}
+@keyframes reward-card-glow{
+  0%{opacity:0;transform:translateY(12px) scale(.96);box-shadow:0 0 0 rgba(255,80,0,0);}
+  45%{opacity:1;transform:translateY(0) scale(1.02);box-shadow:0 0 22px 7px rgba(255,146,58,.72);}
+  100%{opacity:1;transform:translateY(0) scale(1);box-shadow:0 0 12px 3px rgba(255,80,0,.34);}
+}
+@media (prefers-reduced-motion:reduce){
+  .rs-title,.rs-turtle,.rpc{animation:none;}
+}
 .btn-primary{
   background:var(--ecoco-orange);color:#fff;font-weight:700;
   padding:14px;border-radius:999px;font-size:15px;
@@ -995,111 +1019,9 @@ img,svg{display:block;}
 
 /* ═══════════════ D2 補充站購買 Loop ═══════════════ */
 
-/* ───── P12 · 洗劑消費結果頁（結構對齊 P2b）───── */
-.p12{
-  background:url('./assets/bg.svg') top center / cover no-repeat;
-  display:flex;flex-direction:column;
-  overflow-y:auto;overflow-x:hidden;
-}
-.p12::-webkit-scrollbar{width:0;}
-
-.p12 .hero{
-  margin:60px 18px 12px;
-  background:#fff;
-  border-radius:22px;
-  padding:18px 18px 14px;
-  overflow:hidden;
-  box-shadow:0 12px 32px rgba(0,0,0,0.06);
-}
-.p12 .hero .eyebrow{
-  font-family:var(--font-en);font-weight:800;font-size:10px;letter-spacing:.16em;
-  color:var(--ecoco-dark-cyan);
-}
-.p12 .hero h2{
-  font-size:19px;font-weight:900;color:#222;margin-top:3px;
-}
-.p12 .hero .meta{
-  font-size:11px;color:#666;margin-top:4px;
-  display:flex;align-items:center;gap:6px;
-}
-.p12 .hero .meta .dot{width:5px;height:5px;border-radius:50%;background:var(--ecoco-dark-cyan);}
-
-.p12 .purchased{
-  margin-top:12px;background:#F7F9FC;border-radius:14px;padding:10px 12px;
-  display:flex;align-items:center;gap:10px;
-  border:1px solid rgba(0,0,0,0.07);
-}
-.p12 .purchased .thumb{
-  width:48px;height:48px;border-radius:12px;flex:0 0 auto;
-  background:linear-gradient(180deg, #EAF6FA, #C6DCE4);
-  display:flex;align-items:center;justify-content:center;font-size:26px;
-}
-.p12 .purchased .info{flex:1;min-width:0;}
-.p12 .purchased .info .n{font-size:13px;font-weight:800;color:#222;}
-.p12 .purchased .cap-chip{
-  display:inline-flex;background:#EAF6FA;color:var(--ecoco-dark-cyan);
-  padding:2px 8px;border-radius:999px;
-  font-family:var(--font-en);font-size:10px;font-weight:800;letter-spacing:.04em;
-  white-space:nowrap;margin-top:3px;
-}
-.p12 .gain-preview{display:flex;gap:8px;}
-.p12 .gain-preview .g{
-  text-align:center;background:var(--gray-bg);padding:6px 10px;border-radius:10px;min-width:54px;
-}
-.p12 .gain-preview .g .lbl{display:block;font-size:9px;font-weight:800;letter-spacing:.04em;color:#888;}
-.p12 .gain-preview .g b{font-family:var(--font-en);font-weight:900;font-size:16px;line-height:1;}
-.p12 .gain-preview .g.hp b{color:var(--hp-red);}
-.p12 .gain-preview .g.clean b{color:var(--clean-blue);}
-
-.p12 .no-charge-note{
-  margin-top:10px;padding:7px 10px;
-  background:rgba(0,118,169,0.08);color:var(--ecoco-dark-cyan);
-  border-radius:8px;font-size:10.5px;font-weight:700;text-align:center;letter-spacing:.02em;
-}
-
-/* result body — 龜 (放大) + value-rise 浮字 */
-.p12 .result-body{flex:1;display:flex;flex-direction:column;}
-.p12 .turtle-row{
-  flex:1;display:flex;align-items:flex-end;justify-content:center;
-  padding:0 0 16px;position:relative;
-}
-.p12 .turtle-row .turtle-img{
-  width:180px;height:auto;
-  filter:drop-shadow(0 20px 28px rgba(0,0,0,0.16));
-}
-.p12 .turtle-row .bubble{
-  background:#fff;
-  box-shadow:0 8px 22px rgba(0,0,0,0.12);
-}
-
-.p12 .bars{padding:0 18px;display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-.p12 .bar-card{
-  background:#fff;border-radius:16px;padding:14px 12px 12px;
-  box-shadow:0 6px 18px rgba(0,0,0,0.06);
-  position:relative;display:flex;flex-direction:column;
-}
-.p12 .bar-card .bar-head{display:flex;align-items:baseline;justify-content:space-between;gap:6px;margin-bottom:6px;}
-.p12 .bar-card .lbl{font-size:11.5px;font-weight:800;color:#444;white-space:nowrap;}
-.p12 .bar-card .val{font-family:var(--font-en);font-size:10px;color:#888;font-weight:700;white-space:nowrap;}
-.p12 .bar-card .val b{font-size:15px;color:#222;font-weight:900;}
-.p12 .bar{position:relative;height:8px;border-radius:4px;background:#F0F3F7;overflow:visible;}
-.p12 .bar .fill{position:absolute;left:0;top:0;bottom:0;border-radius:4px;transition:width .08s linear;}
-.p12 .hp-card .fill{background:linear-gradient(90deg, #FF7A8C, var(--hp-red));}
-.p12 .clean-card .fill{background:linear-gradient(90deg, #6F8BEF, var(--clean-blue));}
-.p12 .bar .from-mark{position:absolute;top:-2px;bottom:-2px;width:2px;background:rgba(0,0,0,0.25);border-radius:1px;}
-.p12 .bar-card .gain{
-  align-self:flex-end;
-  font-family:var(--font-en);font-weight:900;font-size:12px;
-  padding:2px 9px;border-radius:999px;margin-top:8px;
-}
-.p12 .hp-card .gain{color:var(--hp-red);background:#FFE6EA;}
-.p12 .clean-card .gain{color:var(--clean-blue);background:#E6ECFF;}
-
-.p12 .footer{padding:14px 18px 28px;}
-.p12 .footer .btn-primary{width:100%;}
-.p12 .footer .btn-primary:disabled{opacity:.55;background:#ccc;box-shadow:none;cursor:not-allowed;}
-.p12 .footer .meta-note{
-  text-align:center;font-size:10.5px;color:#888;margin-top:10px;line-height:1.4;
+/* P12 與 P2b 共用滿版結果頁，只保留計算期間的 disabled 狀態。 */
+.p12 .result-panel .btn-primary:disabled{
+  opacity:.55;background:#ccc;box-shadow:none;cursor:not-allowed;
 }
 
 /* ───── P1 統一掍描按鈕 ───── */

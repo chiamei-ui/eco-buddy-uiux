@@ -771,9 +771,9 @@ const P2bResult = ({ setScreen, dispatch, tweaks = {}, setTweak = () => {} }) =>
   const [showEvolve, setShowEvolve] = useState(false);
   const evolveNavRef = React.useRef(null);
 
-  const ITEM_COUNT = 15; // mock: PET 12 個 + 電池 3 顆
-  const HP_GAIN = 39;
-  const CLEAN_GAIN = 24;
+  const ITEM_COUNT = 999;
+  const HP_GAIN = 99;
+  const CLEAN_GAIN = 99;
   const POINTS_GAIN = 18;
 
   const navigate = (navFn) => {
@@ -847,7 +847,9 @@ const P2bResult = ({ setScreen, dispatch, tweaks = {}, setTweak = () => {} }) =>
             </div>
           )}
           <div className="rpc rpc--clean">
-            <div className="rpc-icon-bg">💧</div>
+            <div className="rpc-icon-bg">
+              <img src="assets/icon-clean.svg" alt="" />
+            </div>
             <div className="rpc-right">
               <div className="rpc-label">潔淨值</div>
               <div className="rpc-val">+{CLEAN_GAIN}</div>
