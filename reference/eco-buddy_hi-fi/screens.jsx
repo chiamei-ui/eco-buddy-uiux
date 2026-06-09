@@ -763,7 +763,7 @@ const EvolveOverlay = ({ onDone, newFormName = '夏日龜 ☀️' }) => {
   );
 };
 
-/* ═══════════════ P2b · 回收結果頁（滿版·對齊 P12）═══════════════ */
+/* ═══════════════ P2b · 回收結果頁（滿版）═══════════════ */
 const P2bResult = ({ setScreen, dispatch, tweaks = {}, setTweak = () => {} }) => {
   const quotaFull = tweaks.p2bQuotaFull || false;
   const willEvolve = tweaks.p2bEvolve || false;
@@ -771,46 +771,28 @@ const P2bResult = ({ setScreen, dispatch, tweaks = {}, setTweak = () => {} }) =>
   const [showEvolve, setShowEvolve] = useState(false);
   const evolveNavRef = React.useRef(null);
 
-  // mock 本批投瓶組成 — PET 12 個 / 電池 3 顆 / 退瓶 0
-  // 體力：PET 12*2 + 電池 3*5 = 39；潔淨：投入 12*2 - 退瓶 0*1 = 24（電池機不給潔淨）
+  const ITEM_COUNT = 15; // mock: PET 12 個 + 電池 3 顆
   const HP_GAIN = 39;
   const CLEAN_GAIN = 24;
   const POINTS_GAIN = 18;
 
   const navigate = (navFn) => {
-    if (willEvolve) {
-      evolveNavRef.current = navFn;
-      setShowEvolve(true);
-    } else {
-      navFn();
-    }
+    if (willEvolve) { evolveNavRef.current = navFn; setShowEvolve(true); }
+    else navFn();
   };
 
-  const handleStore = () => {
-    dispatch({ type: 'COLLECT_BATCH', quotaFull: false, hpGain: HP_GAIN, cleanGain: CLEAN_GAIN, pointsGain: POINTS_GAIN });
-    navigate(() => setScreen('p1', { foodStored: true }));
-  };
-
-  const handleComplete = () => {
-    dispatch({ type: 'COLLECT_BATCH', quotaFull: true, hpGain: HP_GAIN, cleanGain: CLEAN_GAIN, pointsGain: POINTS_GAIN });
-    navigate(() => setScreen('p1'));
+  const handleDone = () => {
+    dispatch({ type: 'COLLECT_BATCH', quotaFull, hpGain: HP_GAIN, cleanGain: CLEAN_GAIN, pointsGain: POINTS_GAIN });
+    navigate(() => setScreen('p1', quotaFull ? {} : { foodStored: true }));
   };
 
   return (
     <div className="screen p2b">
-      {showEvolve && (
-        <EvolveOverlay onDone={() => { setShowEvolve(false); evolveNavRef.current?.(); }} />
-      )}
+      {showEvolve && <EvolveOverlay onDone={() => { setShowEvolve(false); evolveNavRef.current?.(); }} />}
       <StatusBar />
       {showInfo && (
-        <div
-          onClick={() => setShowInfo(false)}
-          style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.45)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-        >
-          <div
-            onClick={e => e.stopPropagation()}
-            style={{ background: '#fff', borderRadius: 20, padding: '24px 22px', width: '78%', maxWidth: 300 }}
-          >
+        <div onClick={() => setShowInfo(false)} style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.6)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div onClick={e => e.stopPropagation()} style={{ background: '#fff', borderRadius: 20, padding: '24px 22px', width: '78%', maxWidth: 300 }}>
             <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 12, color: '#1a1a1a' }}>換算說明</div>
             <div style={{ fontSize: 13, lineHeight: 1.85, color: '#555' }}>
               <div style={{ fontWeight: 700, color: '#1a1a1a', marginBottom: 2 }}>體力（收瓶機）</div>
@@ -823,83 +805,61 @@ const P2bResult = ({ setScreen, dispatch, tweaks = {}, setTweak = () => {} }) =>
               <div style={{ fontWeight: 700, color: '#1a1a1a', marginBottom: 2 }}>潔淨（收瓶機）</div>
               <div>投入 → 潔淨 +2 / 個</div>
               <div>退瓶 → 潔淨 -1 / 個</div>
-              <div style={{ marginBottom: 6 }}>電池機不影響潔淨</div>
               <div style={{ fontSize: 11, color: '#888', marginTop: 4, lineHeight: 1.5 }}>
                 註：體力 / 潔淨 / ECOCO 點數為三條獨立帳本，由同一次投瓶分別計算。
               </div>
             </div>
-            <button
-              onClick={() => setShowInfo(false)}
-              style={{ marginTop: 18, width: '100%', padding: '10px 0', borderRadius: 99, background: '#FF5000', color: '#fff', border: 'none', fontWeight: 700, fontSize: 14, cursor: 'pointer' }}
-            >知道了</button>
+            <button onClick={() => setShowInfo(false)} style={{ marginTop: 18, width: '100%', padding: '10px 0', borderRadius: 99, background: '#FF5000', color: '#fff', border: 'none', fontWeight: 700, fontSize: 14, cursor: 'pointer' }}>知道了</button>
           </div>
         </div>
       )}
-      <div className="sheet-grip" style={{marginTop:14}} />
-      <div className="hero" style={{ position: 'relative' }}>
-        <button
-          onClick={() => setShowInfo(true)}
-          style={{ position: 'absolute', top: 10, right: 12, width: 22, height: 22, borderRadius: '50%', border: 'none', background: 'rgba(0,0,0,0.08)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0, color: '#888', fontSize: 13, fontWeight: 700, fontFamily: 'serif', lineHeight: 1 }}
-        >i</button>
-        <div className="eyebrow">BUDDY GIFT · 給 Buddy 的禮物</div>
-        <h2>Buddy 收到你的心意了</h2>
-        <div className="meta">
-          <span className="dot"></span>
-          2026.06.15 14:32 · 家樂福 仁德店
+      <div className="result-scene">
+        <div className="rs-rays" />
+        <div className="rs-stars">
+          <span className="rs-star s1">✦</span>
+          <span className="rs-star s2">✦</span>
+          <span className="rs-star s3">✦</span>
+          <span className="rs-star s4">✦</span>
+          <span className="rs-star s5">✦</span>
+          <span className="rs-star s6">✦</span>
         </div>
-        <div className="recycle-stats">
-          <div><b>12</b><span>投入瓶罐</span></div>
-          <div><b>3</b><span>投電池數</span></div>
-          <div><b>0</b><span>退瓶數</span></div>
-          <div><b>+{POINTS_GAIN}</b><span>ECOCO 點數</span></div>
+        <img src="assets/p2b-title.svg" className="rs-title" alt="" />
+        <div className="rs-turtle">
+          <TurtleImg style={{ width: 160, position: 'relative', zIndex: 1 }} />
+          <div className="rs-spotlight" />
         </div>
       </div>
-
-      <div className="result-body">
-        <div className="section-title">你帶回了這些</div>
-        <div className="gain-row">
-          <div className={`gain-card gain-card--food${quotaFull ? ' gain-card--locked' : ''}`}>
-            {quotaFull
-              ? <><div className="gc-emoji">🔒</div><div className="gc-label">本週食物</div><div className="gc-val gc-val--muted">已領完</div></>
-              : <><div className="gc-emoji">🌭</div><div className="gc-label">熱狗堡</div><div className="gc-val">×5</div></>}
-          </div>
-          <div className="gain-card gain-card--hp">
-            <div className="gc-emoji">❤</div>
-            <div className="gc-label">Buddy 體力</div>
-            <div className="gc-val">+{HP_GAIN}</div>
-          </div>
-          <div className="gain-card gain-card--clean">
-            <div className="gc-emoji">✨</div>
-            <div className="gc-label">Buddy 潔淨</div>
-            <div className="gc-val">+{CLEAN_GAIN}</div>
+      <div className="result-panel">
+        <div className="rp-info-row" onClick={() => setShowInfo(true)}>
+          <span>謝謝你帶來</span>
+          <span className="rp-count">{ITEM_COUNT}</span>
+          <span>份禮物！</span>
+          <span className="rp-info-btn">i</span>
+        </div>
+        <div className={`rp-cards${quotaFull ? ' rp-cards--single' : ''}`}>
+          {!quotaFull && (
+            <div className="rpc rpc--food">
+              <div className="rpc-icon-bg">🌭</div>
+              <div className="rpc-right">
+                <div className="rpc-label">熱狗堡</div>
+                <div className="rpc-val">+99</div>
+              </div>
+            </div>
+          )}
+          <div className="rpc rpc--clean">
+            <div className="rpc-icon-bg">💧</div>
+            <div className="rpc-right">
+              <div className="rpc-label">潔淨值</div>
+              <div className="rpc-val">+{CLEAN_GAIN}</div>
+            </div>
           </div>
         </div>
-        <div className="next-week-preview">
-          <div className="nwp-thumb-wrap">
-            <div className="nwp-thumb">🥦</div>
-            <div className="nwp-thumb-mask"></div>
-          </div>
-          <div className="nwp-body">
-            <div className="nwp-badge">下週預告</div>
-            <div className="nwp-hp">+8 體力</div>
-            <div className="nwp-hp-label">每份讓 Buddy 更有力</div>
-          </div>
-          <div className="nwp-time">
-            <div className="nwp-time-label">開搶時間</div>
-            <div className="nwp-time-val">週三 12:00</div>
-          </div>
+        <div className="footer">
+          <button className="btn-primary" onClick={handleDone}>存進食物欄</button>
         </div>
       </div>
-
-      <div className="footer">
-        {quotaFull ? (
-          <button className="btn-primary" onClick={handleComplete}>完成</button>
-        ) : (
-          <button className="btn-primary" onClick={handleStore}>先放食物欄</button>
-        )}
-      </div>
-    </div>);
-
+    </div>
+  );
 };
 
 /* P3 餵食動畫頁已依 #22（2026-05-29）廢除：餵食改在 P1 原地播放。
