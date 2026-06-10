@@ -2034,7 +2034,7 @@ const P8Profile = ({ setScreen, state, tweaks }) => {
         { icon: '✅', label: '今日陪伴', sub: '還有 3 件事可以做', go: 'p5' },
         { icon: '🛒', label: '商店',     sub: `點數 ${state.points.toLocaleString()}`, go: 'p4' },
         { icon: '🧾', label: '購買紀錄', sub: (state.pointsOrderHistory && state.pointsOrderHistory.length > 0) ? state.pointsOrderHistory[0].name : (state.orderHistory && state.orderHistory.length > 0 ? state.orderHistory[0].name : '尚無購買紀錄'), go: 'p4-orders' },
-        { icon: 'pt', label: '點數明細', sub: '本月 +382 · 帶食物回家 12 次', action: () => setShowPointSrc(true) },
+        { icon: 'pt', label: '點數明細', sub: '本月 +382 · 帶禮物回家 12 次', action: () => setShowPointSrc(true) },
       ],
     },
     {
@@ -2603,7 +2603,8 @@ const ORDER_FILTER_EMPTY = {
   failed:  '太好了，沒有失敗的訂單！',
 };
 
-const P4Orders = ({ setScreen, state, payload }) => {
+const P4Orders = ({ setScreen, state, payload, tweaks }) => {
+  const isPhase2 = (tweaks?.shopPhase ?? 1) >= 2;
   const [activeTab, setActiveTab] = useState(payload?.defaultTab ?? 'points');
   const [activeFilter, setActiveFilter] = useState('all');
   const [expandedOrderId, setExpandedOrderId] = useState(null);
@@ -2634,7 +2635,7 @@ const P4Orders = ({ setScreen, state, payload }) => {
       <div style={{ display: 'flex', borderBottom: '1.5px solid #E8DDD0', margin: '0 18px' }}>
         {[
           { id: 'points', label: <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><img src="assets/icon-ecoco-point.svg" width="14" height="14" alt="" />ECOCO 點數</span> },
-          { id: 'cash',   label: '💳 現金' },
+          ...(isPhase2 ? [{ id: 'cash', label: '💳 現金' }] : []),
         ].map(t => (
           <button key={t.id} onClick={() => setActiveTab(t.id)} style={{
             flex: 1, background: 'none', border: 'none', cursor: 'pointer',

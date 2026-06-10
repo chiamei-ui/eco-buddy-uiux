@@ -376,7 +376,7 @@ const App = () => {
       case 'p10': return <P7Dex setScreen={setScreen} state={state} dispatch={dispatch} onOpenPicker={() => setDexPickerOpen(true)} tweaks={tweaks} />;
       case 'p11': return <P11Pack setScreen={setScreen} />;
       case 'p12': return <P12RefillResult setScreen={setScreen} state={state} dispatch={dispatch} payload={screenPayload} tweaks={tweaks} />;
-      case 'p4-orders': return <P4Orders setScreen={setScreen} state={state} payload={screenPayload} />;
+      case 'p4-orders': return <P4Orders setScreen={setScreen} state={state} payload={screenPayload} tweaks={tweaks} />;
       case 'p8-faq':     return <P8Faq setScreen={setScreen} />;
       default: return null;
     }
@@ -479,9 +479,10 @@ const InlineTweaks = ({ tweaks, setTweak, setScreen, state, dispatch, screen }) 
   const isP5  = screen === 'p5';
   const isP12 = screen === 'p12';
   const isP7  = screen === 'p7' || screen === 'p10';
-  const isP8  = screen === 'p8';
+  const isP8       = screen === 'p8';
+  const isP4Orders = screen === 'p4-orders';
   const showStats = isP1 || isP2b || isP12 || isP7;
-  const hasContent = isP1 || isP2 || isP2b || isP4 || isP5 || isP12 || isP7 || isP8;
+  const hasContent = isP1 || isP2 || isP2b || isP4 || isP5 || isP12 || isP7 || isP8 || isP4Orders;
 
   return (
     <div style={{
@@ -679,6 +680,21 @@ const InlineTweaks = ({ tweaks, setTweak, setScreen, state, dispatch, screen }) 
                     borderRadius:6,color:'#fff',fontSize:12,padding:'4px 6px',textAlign:'right'}} />
               </div>
             ))}
+          </div>
+        </>
+      )}
+
+      {/* P4 購買紀錄專屬 */}
+      {isP4Orders && (
+        <>
+          <div style={tweakLabel}>上線階段 (shopPhase)</div>
+          <Segmented
+            value={tweaks.shopPhase === 2 ? '2' : '1'}
+            onChange={v => setTweak('shopPhase', Number(v))}
+            options={[{v:'1',l:'Phase 1 封測'},{v:'2',l:'Phase 2 正式'}]}
+          />
+          <div style={{fontSize:10,color:'rgba(255,255,255,0.3)',marginTop:4,lineHeight:1.4}}>
+            Phase 1：只有點數 Tab。Phase 2：加開現金 Tab。
           </div>
         </>
       )}
