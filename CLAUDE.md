@@ -8,7 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 > 舊 Rive 動畫預覽工具計畫已封存至 `archive/rive-plan/`，程式碼封存至 `archive/rive-previewer/`。
 
-當前狀態：UI/UX 設計階段。詳見 [docs/product/USER_FLOW.md](docs/product/USER_FLOW.md)。
+當前狀態：UI/UX 設計階段，產出為可互動 hi-fi 原型（`reference/eco-buddy_hi-fi/`），尚無正式 production app。詳見 [docs/product/USER_FLOW.md](docs/product/USER_FLOW.md)。
 
 ## Architecture
 
@@ -20,9 +20,55 @@ eco-buddy/
 ├── docs/         # 所有規格文件（README.md 為導覽入口）
 ├── openspec/     # change proposals & 規格
 ├── character/    # 角色素材，唯讀
-├── reference/    # 外部參考，唯讀
+├── reference/
+│   └── eco-buddy_hi-fi/  # ⭐ 唯一活躍程式碼：可互動 hi-fi 原型（React + Babel standalone）
+├── tests/        # Playwright 驗證腳本（驗證 hi-fi 流程與遊戲邏輯）
+├── scripts/      # 自動化腳本（pre-commit changelog 等）
 └── assets/       # 設計資源
 ```
+
+> 注意：`reference/eco-buddy_hi-fi/` 雖在 `reference/` 下，但**不是唯讀外部參考**——它是專案目前唯一活躍維護的程式碼，由 `[design]` commit 持續更新（write owner：UI/UX @chiamei-ui）。`reference/` 其餘內容才是唯讀參考。
+
+## Commands
+
+本專案無 build step——hi-fi 原型由瀏覽器端 Babel standalone 即時編譯 JSX。
+
+| 動作 | 指令 |
+|------|------|
+| 本機預覽原型 | `npx serve reference/eco-buddy_hi-fi -p 3333` → 開 `http://localhost:3333` |
+| 跑全部驗證 | `npx playwright test`（webServer 會自動 `serve` 在 :3333） |
+| 跑單一測試 | `npx playwright test -g "Tab 順序"`（`-g` 配 test 標題關鍵字） |
+| 看測試報告 | `npx playwright show-report` |
+| 首次安裝 | `npm install && npx playwright install chromium` |
+
+- Playwright 設定見 [playwright.config.js](playwright.config.js)：viewport 鎖 iPhone 15 Pro（390×844），baseURL `:3333`。
+- 測試斷言**直接綁定 PM 定案**（如 #22 廢除「立即使用」、三維名稱體力/潔淨/心情、商店雙軌 #16/#17、禁用詞掃描）。改動原型若動到這些行為，先確認對應決策，再同步測試。
+- Tab 順序（`夥伴/商店/今日陪伴/夥伴日誌`）hi-fi 與 USER_FLOW §B 已於 2026-06-10 對齊。
+
+### Git hooks（已透過 `core.hooksPath .githooks` 啟用）
+
+- [.githooks/pre-commit](.githooks/pre-commit) → 跑 [scripts/update-engineering-changelog.ps1](scripts/update-engineering-changelog.ps1)：偵測 staged 的 design/product/decision/hi-fi/asset 變更，自動 append 一筆到 [docs/dev/ENGINEERING_CHANGELOG.md](docs/dev/ENGINEERING_CHANGELOG.md) 並 `git add`。需要 PowerShell（`pwsh` 或 `powershell.exe`）。
+- 若 clone 後 hook 沒生效：`git config core.hooksPath .githooks`。
+
+## hi-fi 原型架構
+
+`reference/eco-buddy_hi-fi/` 是無打包的單頁 React App，[index.html](reference/eco-buddy_hi-fi/index.html) 用 `<script type="text/babel">` 依序載入 JSX（全域 scope，**非 ES module**，檔案間靠全域變數共享，無 import/export）：
+
+| 檔案 | 內容 |
+|------|------|
+| `app.jsx` | `DEFAULT_STATE` + `stateReducer`（useReducer 單一狀態樹）、`SCREENS` 畫面清單、`TAB_ORDER`、`<App>` 路由（`screen` state + `setScreen(id, payload)`）、左側 `ScreenNav` 開發導覽 |
+| `screens.jsx` | 主要畫面元件（P1Home、P2Scan、P2bResult、P4Shop、P5Missions…），最大檔 |
+| `screens-d2.jsx` | 延伸畫面元件 |
+| `components.jsx` | 共用元件 |
+| `dialogues.jsx` | Buddy 對話文案 |
+| `tweaks-panel.jsx` | 開發用即時調參面板（`tweaks` 物件，含 `shopPhase` 等 gate 開關） |
+
+關鍵架構點：
+
+- **狀態集中於 `stateReducer`**：FEED / USE_TOOL / COLLECT_BATCH / REFILL_RESULT / BUY / LOCK_DEX 等 action。三帳本（體力/潔淨/ECOCO 點數）在 reducer 中各自獨立計算，勿合併。
+- **畫面以 code 標示**（P0、P1、P2b、P12…），`SCREENS` 陣列為單一來源；測試靠 `ScreenNav` 的 code 跳轉。
+- **快取破壞機制**：`index.html` 每個 JSX 引用帶 `?v=NNN`。編輯任一 hi-fi JSX 後，**必須遞增該版本號**才能在瀏覽器看到變更（`.claude/bump-hifi-version.ps1` 為自動遞增 hook，靠本機 `settings.local.json` 註冊；若未啟用需手動改 `index.html` 的 `v=`）。
+- **無 fallback**：reducer 與元件遵循全域規範，不寫預設值降級；遊戲數值最終需讀 API（見下方動態數值規則），原型中的數字僅為 demo。
 
 ## 文件優先順序（衝突時）
 
