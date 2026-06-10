@@ -1560,7 +1560,7 @@ const ShopSuccessModal = ({ item, state, onClose, onGoToBag, onGoToWardrobe, onG
 /* ----- P4 helper: 點數來源 sheet ----- */
 const PointsSourceSheet = ({ state, onClose }) => {
   const sources = [
-    { kind: 'recycle', icon: '♻️', name: '帶食物回家累積', sub: '本月 12 次 · 累計 238 次', value: 216 },
+    { kind: 'recycle', icon: '♻️', name: '帶禮物回家累積', sub: '本月 12 次 · 累計 238 次', value: 216 },
     { kind: 'refill', icon: '💧', name: '補充站消費累積', sub: '本月 3 次 消費回饋', value: 124 },
     { kind: 'mission', icon: '✅', name: '今日陪伴累積', sub: '本月完成 18 項', value: 42 },
   ];
@@ -1589,6 +1589,9 @@ const PointsSourceSheet = ({ state, onClose }) => {
               <div className="v">+{s.value}<small>pt</small></div>
             </div>
           ))}
+        </div>
+        <div style={{ fontSize: 11, color: '#aaa', textAlign: 'center', margin: '12px 0 12px' }}>
+          詳細點數紀錄，請至一般模式 &gt; 點數歷程查看。
         </div>
         <button className="close-btn" onClick={onClose}>關閉</button>
       </div>
