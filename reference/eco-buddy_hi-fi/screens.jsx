@@ -404,7 +404,7 @@ const P1Home = ({ state, dispatch, setScreen, dragManager, payload, showTutorial
 
       <div className="dock-shell" ref={dockRef}>
         <div className="dock-tabs" ref={dockTabsRef}>
-          <button className={`dock-tab ${dockTab === 'food' ? 'active' : ''}`} onClick={() => setDockTab('food')}>Buddy 的餐袋</button>
+          <button className={`dock-tab ${dockTab === 'food' ? 'active' : ''}`} onClick={() => setDockTab('food')}>餐袋</button>
           <button className={`dock-tab ${dockTab === 'tools' ? 'active' : ''}`} onClick={() => setDockTab('tools')}>玩具箱</button>
           <button className={`dock-tab ${dockTab === 'wardrobe' ? 'active' : ''}`} onClick={() => setDockTab('wardrobe')}>換衣間</button>
         </div>
@@ -473,12 +473,12 @@ const P1Home = ({ state, dispatch, setScreen, dragManager, payload, showTutorial
               <div style={{ fontSize:17, fontWeight:900, marginBottom:10 }}>Buddy 的餐袋說明</div>
               <div style={{ fontSize:13, color:'#444', lineHeight:1.7, marginBottom:12 }}>
                 <div>• 拖曳食物到 Buddy 身上即可餵食</div>
-                <div>• 每份食物讓 Buddy 體力 +5</div>
-                <div>• 每週配額 5 個，每格顯示剩餘庫存</div>
+                <div>• 每次餵食讓 Buddy 體力 +1~5（每次不同）</div>
+                <div>• 每種食物每週有配額，週三 12:00 重置</div>
                 <div>• 數量 ≤ 2 時卡片變淡，提醒快用完</div>
               </div>
               <div style={{ background:'#FFF3E0', borderRadius:12, padding:'10px 14px', fontSize:12, color:'#7A4800' }}>
-                💡 帶食物回家（投瓶機）每週可補充配額
+                💡 帶食物回家可補充餐袋，配額用完後當週不再增加
               </div>
             </div>
           ) : (
