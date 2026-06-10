@@ -1398,3 +1398,16 @@ img,svg{display:block;}
   gap:12px;padding:60px 20px;
   color:#aaa;font-size:14px;font-weight:600;
 }
+
+/* ── P1 responsive layout by device frame ──────────────────────────────── */
+/* sm 360×780: dock 下移 15px，角色縮小並下移 */
+.iphone-sm .turtle-stage { padding-bottom: 273px; }
+.iphone-sm .turtle-img   { width: 158px; }
+.iphone-sm .dock-shell   { bottom: 29px; }
+.iphone-sm .side-actions { bottom: 265px; }
+
+/* lg 430×932: dock 上移 25px，角色放大並上移 */
+.iphone-lg .turtle-stage { padding-bottom: 313px; }
+.iphone-lg .turtle-img   { width: 200px; }
+.iphone-lg .dock-shell   { bottom: 69px; }
+.iphone-lg .side-actions { bottom: 305px; }
