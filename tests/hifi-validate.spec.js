@@ -98,25 +98,21 @@ test.beforeEach(async ({ page }) => {
 });
 
 // ══════════════════════════════════════════════════════════════════════════════
-// § 1  SPEC CONFLICT — Tab 順序
-// USER_FLOW §B: 夥伴 / 商店 / 夥伴日誌 / 今日陪伴
+// § 1  Tab 順序 — hi-fi 與 USER_FLOW §B 一致
+// USER_FLOW §B（2026-06-10 對齊 hi-fi）: 夥伴 / 商店 / 今日陪伴 / 夥伴日誌
 // hi-fi TAB_ORDER: ['p1','p4','p5','p7'] = 夥伴 / 商店 / 今日陪伴 / 夥伴日誌
 // ══════════════════════════════════════════════════════════════════════════════
 
-test('【衝突記錄】Tab 順序：今日陪伴 與 夥伴日誌 位置與 USER_FLOW §B 相反', async ({ page }) => {
+test('Tab 順序：夥伴 / 商店 / 今日陪伴 / 夥伴日誌（與 USER_FLOW §B 一致）', async ({ page }) => {
   const tabs = await page.evaluate(() =>
     Array.from(document.querySelectorAll('.tab-hit'))
       .sort((a, b) => parseFloat(a.style.left) - parseFloat(b.style.left))
       .map(btn => btn.getAttribute('aria-label'))
   );
 
-  console.log('  USER_FLOW §B 規格：夥伴 / 商店 / 夥伴日誌 / 今日陪伴');
-  console.log('  hi-fi 實際順序：', tabs.join(' / '));
+  console.log('  Tab 順序：', tabs.join(' / '));
 
-  // 確認 hi-fi 目前是 [夥伴, 商店, 今日陪伴, 夥伴日誌]（記錄衝突用）
   expect(tabs).toEqual(['夥伴', '商店', '今日陪伴', '夥伴日誌']);
-  // 明確標記與規格不符
-  expect(tabs).not.toEqual(['夥伴', '商店', '夥伴日誌', '今日陪伴']);
 });
 
 // ══════════════════════════════════════════════════════════════════════════════

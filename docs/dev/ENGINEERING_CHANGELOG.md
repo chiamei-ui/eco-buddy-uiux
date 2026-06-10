@@ -26,6 +26,13 @@
 - `scripts/update-engineering-changelog.ps1`
 
 <!-- AUTO-ENTRIES -->
+<!-- engineering-change:6096d99a62db6568 -->
+## 2026-06-10 11:13:07 +08:00
+
+- Triggered scopes: product flow
+- Files:
+  - `docs/product/USER_FLOW.md` (product flow)
+
 <!-- engineering-change:927921a323c8148f -->
 ## 2026-06-10 11:02:05 +08:00
 
@@ -121,6 +128,7 @@
   - `reference/eco-buddy_hi-fi/app.jsx` (hi-fi reference)
   - `reference/eco-buddy_hi-fi/styles.css` (hi-fi reference)
   - `scripts/update-engineering-changelog.ps1` (handoff automation)
+
 
 
 
