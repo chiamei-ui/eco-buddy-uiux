@@ -525,7 +525,6 @@ img,svg{display:block;}
   position:relative;z-index:1;
   width:323px;max-width:calc(100% - 36px);margin-top:28px;flex-shrink:0;
   transform-origin:50% 45%;
-  animation:result-title-pop .7s cubic-bezier(.2,.9,.25,1.25) both;
 }
 .rs-turtle{
   position:relative;z-index:1;

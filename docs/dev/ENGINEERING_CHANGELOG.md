@@ -26,6 +26,15 @@
 - `scripts/update-engineering-changelog.ps1`
 
 <!-- AUTO-ENTRIES -->
+<!-- engineering-change:64cfc2754cb14f4a -->
+## 2026-06-10 16:12:47 +08:00
+
+- Triggered scopes: hi-fi reference
+- Files:
+  - `reference/eco-buddy_hi-fi/assets/p12-title.svg` (hi-fi reference)
+  - `reference/eco-buddy_hi-fi/assets/p2b-title.svg` (hi-fi reference)
+  - `reference/eco-buddy_hi-fi/styles.css` (hi-fi reference)
+
 <!-- engineering-change:6096d99a62db6568 -->
 ## 2026-06-10 11:13:07 +08:00
 
@@ -128,6 +137,7 @@
   - `reference/eco-buddy_hi-fi/app.jsx` (hi-fi reference)
   - `reference/eco-buddy_hi-fi/styles.css` (hi-fi reference)
   - `scripts/update-engineering-changelog.ps1` (handoff automation)
+
 
 
 
