@@ -5,6 +5,10 @@ ecoco-private/
 # Claude Code 個人本地設定（每人角色不同，不共用）
 .claude/settings.local.json
 
+# 大型二進位媒體（> 5MB，留雲端）
+*.mov
+*.mp4
+
 # Playwright
 node_modules/
 playwright-report/
