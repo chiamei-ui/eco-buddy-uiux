@@ -29,6 +29,10 @@ const DEFAULT_STATE = {
     { id: 'ORD-20260515', name: '五月衝刺禮包', thumb: '🎁', price: 199, payMethod: '藍新 NewebPay',    date: '2026-05-15', status: 'pending' },
     { id: 'ORD-20260520', name: '五月衝刺禮包', thumb: '🎁', price: 199, payMethod: '信用卡',           date: '2026-05-20', status: 'failed', failReason: '信用卡授權失敗，請確認卡片額度是否充足' },
   ],
+  pointsOrderHistory: [
+    { id: 'PTS-20260601', name: '基礎食物補給包', thumb: '🌭', pointsCost: 80,  date: '2026-06-01 10:23' },
+    { id: 'PTS-20260605', name: '逗貓棒',         thumb: '🪶', pointsCost: 120, date: '2026-06-05 15:47' },
+  ],
   dexStates: [
     { code:'01', name:'瀕死邊緣', unlocked:true,  tint:'grayscale(0.5) brightness(0.7)' },
     { code:'07', name:'潔癖徹底', unlocked:true,  tint:'brightness(1.05) saturate(0.7)' },
@@ -149,6 +153,11 @@ function stateReducer(state, action){
       return {
         ...state,
         orderHistory: [{ id: action.id, name: action.name, thumb: action.thumb, price: action.price, payMethod: action.payMethod, date: action.date, status: 'success' }, ...state.orderHistory],
+      };
+    case 'PURCHASE_POINTS':
+      return {
+        ...state,
+        pointsOrderHistory: [{ id: action.id, name: action.name, thumb: action.thumb, pointsCost: action.pointsCost, date: action.date }, ...state.pointsOrderHistory],
       };
     case 'CLAIM_MISSION':
       // #21 日常任務獎勵：食物 ×1 + 心情 +3（食物加在第一個未鎖食物格）
@@ -367,7 +376,7 @@ const App = () => {
       case 'p10': return <P7Dex setScreen={setScreen} state={state} dispatch={dispatch} onOpenPicker={() => setDexPickerOpen(true)} tweaks={tweaks} />;
       case 'p11': return <P11Pack setScreen={setScreen} />;
       case 'p12': return <P12RefillResult setScreen={setScreen} state={state} dispatch={dispatch} payload={screenPayload} tweaks={tweaks} />;
-      case 'p4-orders': return <P4Orders setScreen={setScreen} state={state} />;
+      case 'p4-orders': return <P4Orders setScreen={setScreen} state={state} payload={screenPayload} />;
       case 'p8-faq':     return <P8Faq setScreen={setScreen} />;
       default: return null;
     }

@@ -677,19 +677,6 @@ img,svg{display:block;}
   padding:1px 5px;border-radius:999px;
   line-height:1.4;
 }
-.p4 .sprint-banner{
-  margin:6px 18px 12px;
-  background:linear-gradient(135deg, #FF5000, #FF7E00);
-  border-radius:20px;padding:14px 16px;color:#fff;
-  display:flex;align-items:center;gap:12px;
-  box-shadow:0 10px 24px rgba(255,80,0,0.25);
-}
-.p4 .sprint-banner .icon{font-size:32px;}
-.p4 .sprint-banner .label{font-family:var(--font-en);font-weight:700;font-size:11px;letter-spacing:.1em;opacity:.9;}
-.p4 .sprint-banner h3{font-size:16px;font-weight:900;line-height:1.2;}
-.p4 .sprint-banner .countdown{margin-left:auto;background:rgba(255,255,255,0.2);padding:6px 10px;border-radius:10px;text-align:center;}
-.p4 .sprint-banner .countdown b{display:block;font-family:var(--font-en);font-size:18px;font-weight:900;line-height:1;}
-.p4 .sprint-banner .countdown span{font-size:10px;}
 .shop-grid{padding:4px 18px 20px;display:grid;grid-template-columns:1fr 1fr;gap:12px;}
 .shop-card{background:#fff;border-radius:18px;padding:12px;box-shadow:0 4px 14px rgba(0,0,0,0.04);position:relative;}
 .shop-card .thumb{aspect-ratio:1;background:var(--gray-bg);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:42px;margin-bottom:8px;position:relative;}
@@ -1259,38 +1246,7 @@ img,svg{display:block;}
 /* dispenser button big rounds */
 .tap-area{cursor:pointer;-webkit-tap-highlight-color:transparent;}
 
-/* ───── P4 · IAP 商品（月底衝刺禮包 + 月度通行證） ───── */
-
-/* 月底衝刺禮包 hero banner */
-.p4-sprint-hero{
-  margin:8px 18px 4px;
-  background:linear-gradient(130deg,#FF5000 0%,#FF8C00 100%);
-  border-radius:20px;padding:16px;color:#fff;
-  display:flex;align-items:flex-start;gap:14px;
-  cursor:pointer;box-shadow:0 8px 24px rgba(255,80,0,0.28);
-  transition:transform .15s;
-}
-.p4-sprint-hero:active{transform:scale(.97);}
-.p4-sprint-hero .sprint-icon{font-size:36px;flex:0 0 auto;line-height:1;margin-top:2px;}
-.p4-sprint-hero .sprint-body{flex:1;min-width:0;}
-.p4-sprint-hero .sprint-tag{
-  display:inline-block;background:rgba(255,255,255,0.22);
-  font-size:10px;font-weight:800;letter-spacing:.08em;
-  padding:3px 8px;border-radius:6px;margin-bottom:5px;
-}
-.p4-sprint-hero h3{font-size:16px;font-weight:900;line-height:1.2;}
-.p4-sprint-hero .sprint-brief{font-size:11px;opacity:.88;margin-top:3px;line-height:1.4;}
-.p4-sprint-hero .sprint-price{font-size:15px;font-weight:900;margin-top:6px;font-family:var(--font-en);}
-.p4-sprint-hero .sprint-cd{
-  flex:0 0 auto;background:rgba(255,255,255,0.18);
-  border-radius:12px;padding:8px 10px;text-align:center;min-width:52px;
-}
-.p4-sprint-hero .sprint-cd b{display:block;font-size:20px;font-weight:900;font-family:var(--font-en);line-height:1;}
-.p4-sprint-hero .sprint-cd span{font-size:9px;font-weight:700;opacity:.85;display:block;margin-top:2px;}
-.p4-sprint-hero.purchased{
-  background:linear-gradient(130deg,#aaa 0%,#888 100%);
-  box-shadow:none;cursor:default;
-}
+/* ───── P4 · IAP 商品（月度通行證） ───── */
 
 /* 月度通行證 card */
 .p4-pass-row{

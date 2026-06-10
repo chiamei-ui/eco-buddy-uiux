@@ -903,25 +903,6 @@ const SHOP_IAP_CONFIG = {
   },
 };
 
-/* ----- P4 helper: SprintHeroBanner (月底衝刺禮包) ----- */
-const SprintHeroBanner = ({ purchased, daysLeft = 6, onClick }) => (
-  <div className={`p4-sprint-hero${purchased ? ' purchased' : ''}`} onClick={!purchased ? onClick : undefined}>
-    <div className="sprint-icon">🎁</div>
-    <div className="sprint-body">
-      <div className="sprint-tag">限時優惠 · 22–28 日</div>
-      <h3>月底衝刺禮包</h3>
-      <div className="sprint-brief">食物 ×10 ・ 稀有道具 ×6 ・ 月份限定裝扮</div>
-      <div className="sprint-price">NT$ 199</div>
-    </div>
-    <div className="sprint-cd">
-      {purchased
-        ? <><b>✓</b><span>本月已領</span></>
-        : <><b>{daysLeft}</b><span>天後結束</span></>
-      }
-    </div>
-  </div>
-);
-
 /* ----- P4 helper: MonthlyPassCard (月度通行證) ----- */
 const MonthlyPassCard = ({ hasPass, validUntil = '6/30', onClick }) => (
   <div className={`p4-pass-row${hasPass ? ' active' : ''}`} onClick={!hasPass ? onClick : undefined}>
@@ -1147,23 +1128,6 @@ const P4Shop = ({ setScreen, state, dispatch, tweaks, payload }) => {
         </div>
       </div>
 
-{/* Coming Soon bar — 禮包 / 裝扮 Phase 1 時顯示 */}
-      {!isPhase2 && (tab === 'package' || tab === 'cosmetic') && (
-        <div style={{
-          margin: '0 18px 12px',
-          background: '#FFF3E0',
-          borderRadius: 12,
-          padding: '10px 16px',
-          display: 'flex',
-          alignItems: 'center',
-          gap: 8,
-        }}>
-          <span style={{ fontSize: 18 }}>🔔</span>
-          <span style={{ fontSize: 13, fontWeight: 700, color: '#7A4800' }}>
-            付費道具即將推出，敬請期待
-          </span>
-        </div>
-      )}
 
 {/* 禮包分頁 — 2-column grid */}
       {(() => {
@@ -1365,6 +1329,11 @@ const P4Shop = ({ setScreen, state, dispatch, tweaks, payload }) => {
               const thumb = Object.entries(thumbMap).find(([k]) => item.name.includes(k))?.[1] ?? '🛍️';
               const payMethod = item.cashChannel === 'platform-iap' ? 'Apple / Google Pay' : '藍新 NewebPay';
               dispatch({ type: 'PURCHASE_CASH', id: orderId, name: item.name, thumb, price: item.price, payMethod, date: new Date().toISOString().slice(0, 10) });
+            } else {
+              orderId = `PTS-${String(Date.now()).slice(-8)}`;
+              const now = new Date();
+              const dateStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+              dispatch({ type: 'PURCHASE_POINTS', id: orderId, name: item.name, thumb: item.emoji ?? '🛍️', pointsCost: item.price, date: dateStr });
             }
             setPurchasing(null);
             setSuccessItem({ ...item, paidWith: method, orderId });
@@ -1579,7 +1548,7 @@ const ShopSuccessModal = ({ item, state, onClose, onGoToBag, onGoToWardrobe, onG
         </div>
         {isCash && (
           <button
-            onClick={() => { onClose(); setScreen('p4-orders'); }}
+            onClick={() => { onClose(); setScreen('p4-orders', { defaultTab: 'cash' }); }}
             style={{ marginTop: 10, background: 'none', border: 'none', color: '#888', fontSize: 13, cursor: 'pointer', textDecoration: 'underline' }}
           >查看訂單 ›</button>
         )}
@@ -2064,9 +2033,7 @@ const P8Profile = ({ setScreen, state, tweaks }) => {
       items: [
         { icon: '✅', label: '今日陪伴', sub: '還有 3 件事可以做', go: 'p5' },
         { icon: '🛒', label: '商店',     sub: `點數 ${state.points.toLocaleString()}`, go: 'p4' },
-        isPhase2
-          ? { icon: '🧾', label: '購買紀錄', sub: state.orderHistory && state.orderHistory.length > 0 ? state.orderHistory[0].name : '尚無購買紀錄', go: 'p4-orders' }
-          : { icon: '🧾', label: '購買紀錄', sub: '即將推出，敬請期待', locked: true },
+        { icon: '🧾', label: '購買紀錄', sub: (state.pointsOrderHistory && state.pointsOrderHistory.length > 0) ? state.pointsOrderHistory[0].name : (state.orderHistory && state.orderHistory.length > 0 ? state.orderHistory[0].name : '尚無購買紀錄'), go: 'p4-orders' },
         { icon: 'pt', label: '點數明細', sub: '本月 +382 · 帶食物回家 12 次', action: () => setShowPointSrc(true) },
       ],
     },
@@ -2636,11 +2603,14 @@ const ORDER_FILTER_EMPTY = {
   failed:  '太好了，沒有失敗的訂單！',
 };
 
-const P4Orders = ({ setScreen, state }) => {
+const P4Orders = ({ setScreen, state, payload }) => {
+  const [activeTab, setActiveTab] = useState(payload?.defaultTab ?? 'points');
   const [activeFilter, setActiveFilter] = useState('all');
   const [expandedOrderId, setExpandedOrderId] = useState(null);
+
   const allOrders = state.orderHistory ?? [];
   const orders = activeFilter === 'all' ? allOrders : allOrders.filter(o => o.status === activeFilter);
+  const pointsOrders = state.pointsOrderHistory ?? [];
 
   const getPackageDetail = (orderName) => {
     for (const [, cfg] of Object.entries(SHOP_IAP_CONFIG)) {
@@ -2660,104 +2630,143 @@ const P4Orders = ({ setScreen, state }) => {
         <h2 style={{ fontSize: 22, fontWeight: 900, color: '#222', marginTop: 8 }}>購買紀錄</h2>
       </div>
 
-      {/* 篩選 Chip 列 */}
-      <div style={{ display: 'flex', gap: 8, padding: '8px 18px 12px', overflowX: 'auto', scrollbarWidth: 'none' }}>
-        {ORDER_FILTER_OPTIONS.map(f => (
-          <button key={f.id} onClick={() => setActiveFilter(f.id)} className={`order-filter-chip${activeFilter === f.id ? ' active' : ''}`}>
-            {f.label}
-          </button>
+      {/* 雙 Tab */}
+      <div style={{ display: 'flex', borderBottom: '1.5px solid #E8DDD0', margin: '0 18px' }}>
+        {[
+          { id: 'points', label: <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><img src="assets/icon-ecoco-point.svg" width="14" height="14" alt="" />ECOCO 點數</span> },
+          { id: 'cash',   label: '💳 現金' },
+        ].map(t => (
+          <button key={t.id} onClick={() => setActiveTab(t.id)} style={{
+            flex: 1, background: 'none', border: 'none', cursor: 'pointer',
+            padding: '10px 0', fontSize: 14, fontWeight: activeTab === t.id ? 800 : 500,
+            color: activeTab === t.id ? 'var(--ecoco-orange, #FF5000)' : '#444',
+            borderBottom: activeTab === t.id ? '2.5px solid var(--ecoco-orange, #FF5000)' : '2.5px solid transparent',
+            marginBottom: -1.5, transition: 'all .15s',
+          }}>{t.label}</button>
         ))}
       </div>
 
-      <div className="screen-scroll" style={{ paddingTop: 0 }}>
-        {orders.length === 0 ? (
-          <div className="order-empty">
-            <div style={{ fontSize: 56 }}>🧾</div>
-            <div>{activeFilter === 'all' ? '還沒有購買紀錄' : ORDER_FILTER_EMPTY[activeFilter]}</div>
-          </div>
-        ) : (
-          <div style={{ padding: '0 16px', display: 'flex', flexDirection: 'column', gap: 10 }}>
-            {orders.map((order) => {
-              const sc = STATUS_CONFIG[order.status] || STATUS_CONFIG.success;
-              const isFailed = order.status === 'failed';
-              const pkgDetail = getPackageDetail(order.name);
-              const isExpanded = expandedOrderId === order.id;
-              return (
-                <div key={order.id} className={`order-card${isFailed ? ' order-card-failed' : ''}`}>
-                  {/* 頂部：縮圖 + 商品名 + 狀態 + 展開箭頭 */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
+      {activeTab === 'points' ? (
+        <div className="screen-scroll" style={{ paddingTop: 12 }}>
+          {pointsOrders.length === 0 ? (
+            <div className="order-empty">
+              <img src="assets/icon-ecoco-point.svg" width="56" height="56" alt="" />
+              <div>還沒有點數消費紀錄</div>
+            </div>
+          ) : (
+            <div style={{ padding: '0 16px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {pointsOrders.map((order) => (
+                <div key={order.id} className="order-card">
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                     <div className="order-thumb">{order.thumb ?? '🛍️'}</div>
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontWeight: 800, fontSize: 15, color: '#222', marginBottom: 2 }}>{order.name}</div>
-                      <span className={sc.cls}>{sc.label}</span>
+                      <div style={{ fontWeight: 800, fontSize: 15, color: '#222', marginBottom: 4 }}>{order.name}</div>
+                      <div style={{ fontSize: 12, color: '#aaa' }}>{order.date}</div>
                     </div>
-                    {pkgDetail && (
-                      <button onClick={() => setExpandedOrderId(isExpanded ? null : order.id)}
-                        style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 16, color: '#888', padding: '0 4px', lineHeight: 1 }}>
-                        {isExpanded ? '˅' : '›'}
-                      </button>
-                    )}
-                  </div>
-
-                  {/* 明細列 */}
-                  <div style={{ fontSize: 12, color: '#888', display: 'flex', flexDirection: 'column', gap: 4, borderTop: '1px solid #F0EDE8', paddingTop: 10 }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                      <span>訂單編號</span>
-                      <span style={{ fontFamily: 'var(--font-en)', fontWeight: 600, color: '#555' }}>{order.id}</span>
-                    </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                      <span>金額</span>
-                      <span style={{ fontWeight: 700, color: '#060E9F' }}>NT$ {order.price}</span>
-                    </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                      <span>付款方式</span>
-                      <span style={{ fontWeight: 600, color: '#555' }}>💳 {order.payMethod ?? '—'}</span>
-                    </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                      <span>購買日期</span>
-                      <span style={{ color: '#555' }}>{order.date}</span>
+                    <div style={{ fontWeight: 800, fontSize: 16, color: 'var(--ecoco-orange, #FF5000)', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: 3 }}>
+                      <img src="assets/icon-ecoco-point.svg" width="15" height="15" alt="" />{order.pointsCost}
                     </div>
                   </div>
-
-                  {/* 禮包內容物 accordion */}
-                  {pkgDetail && isExpanded && (
-                    <div className="order-detail-panel">
-                      {pkgDetail.items.map((item, i) => (
-                        <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 6 }}>
-                          <span>{item.emoji}</span>
-                          <div>
-                            <div style={{ fontWeight: 700, color: '#333' }}>{item.name}</div>
-                            {item.sub && <div style={{ color: '#888' }}>{item.sub}</div>}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  {/* 失敗說明區塊 */}
-                  {isFailed && (
-                    <div className="order-fail-reason">
-                      {order.failReason || '付款未成功，請確認卡片資訊或聯繫您的銀行'}
-                    </div>
-                  )}
-
-                  {/* 失敗後續行動 */}
-                  {isFailed && (
-                    <div className="order-failed-actions">
-                      <button className="order-action-ghost" onClick={() => window.open('https://ecocogroup.zendesk.com/hc/zh-tw/requests/new?ticket_form_id=41244248648473', '_blank', 'noreferrer')}>聯繫客服</button>
-                      <button className="order-action-primary" onClick={() => setScreen('p4')}>重新購買</button>
-                    </div>
-                  )}
                 </div>
-              );
-            })}
-          </div>
-        )}
-
-        <div style={{ padding: '24px 20px 40px', textAlign: 'center', fontSize: 11, color: '#aaa', lineHeight: 1.6 }}>
-          裝扮類商品由 App Store / Google Play 管理，請至手機系統查詢訂單
+              ))}
+            </div>
+          )}
         </div>
-      </div>
+      ) : (
+        <>
+          {/* 篩選 Chip 列 */}
+          <div style={{ display: 'flex', gap: 8, padding: '8px 18px 12px', overflowX: 'auto', scrollbarWidth: 'none' }}>
+            {ORDER_FILTER_OPTIONS.map(f => (
+              <button key={f.id} onClick={() => setActiveFilter(f.id)} className={`order-filter-chip${activeFilter === f.id ? ' active' : ''}`}>
+                {f.label}
+              </button>
+            ))}
+          </div>
+
+          <div className="screen-scroll" style={{ paddingTop: 0 }}>
+            {orders.length === 0 ? (
+              <div className="order-empty">
+                <div style={{ fontSize: 56 }}>🧾</div>
+                <div>{activeFilter === 'all' ? '還沒有購買紀錄' : ORDER_FILTER_EMPTY[activeFilter]}</div>
+              </div>
+            ) : (
+              <div style={{ padding: '0 16px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+                {orders.map((order) => {
+                  const sc = STATUS_CONFIG[order.status] || STATUS_CONFIG.success;
+                  const isFailed = order.status === 'failed';
+                  const pkgDetail = getPackageDetail(order.name);
+                  const isExpanded = expandedOrderId === order.id;
+                  return (
+                    <div key={order.id} className={`order-card${isFailed ? ' order-card-failed' : ''}`}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
+                        <div className="order-thumb">{order.thumb ?? '🛍️'}</div>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ fontWeight: 800, fontSize: 15, color: '#222', marginBottom: 2 }}>{order.name}</div>
+                          <span className={sc.cls}>{sc.label}</span>
+                        </div>
+                        {pkgDetail && (
+                          <button onClick={() => setExpandedOrderId(isExpanded ? null : order.id)}
+                            style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 16, color: '#888', padding: '0 4px', lineHeight: 1 }}>
+                            {isExpanded ? '˅' : '›'}
+                          </button>
+                        )}
+                      </div>
+
+                      <div style={{ fontSize: 12, color: '#888', display: 'flex', flexDirection: 'column', gap: 4, borderTop: '1px solid #F0EDE8', paddingTop: 10 }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                          <span>訂單編號</span>
+                          <span style={{ fontFamily: 'var(--font-en)', fontWeight: 600, color: '#555' }}>{order.id}</span>
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                          <span>金額</span>
+                          <span style={{ fontWeight: 700, color: '#060E9F' }}>NT$ {order.price}</span>
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                          <span>付款方式</span>
+                          <span style={{ fontWeight: 600, color: '#555' }}>💳 {order.payMethod ?? '—'}</span>
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                          <span>購買日期</span>
+                          <span style={{ color: '#555' }}>{order.date}</span>
+                        </div>
+                      </div>
+
+                      {pkgDetail && isExpanded && (
+                        <div className="order-detail-panel">
+                          {pkgDetail.items.map((item, i) => (
+                            <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 6 }}>
+                              <span>{item.emoji}</span>
+                              <div>
+                                <div style={{ fontWeight: 700, color: '#333' }}>{item.name}</div>
+                                {item.sub && <div style={{ color: '#888' }}>{item.sub}</div>}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      {isFailed && (
+                        <div className="order-fail-reason">
+                          {order.failReason || '付款未成功，請確認卡片資訊或聯繫您的銀行'}
+                        </div>
+                      )}
+
+                      {isFailed && (
+                        <div className="order-failed-actions">
+                          <button className="order-action-ghost" onClick={() => window.open('https://ecocogroup.zendesk.com/hc/zh-tw/requests/new?ticket_form_id=41244248648473', '_blank', 'noreferrer')}>聯繫客服</button>
+                          <button className="order-action-primary" onClick={() => setScreen('p4')}>重新購買</button>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            <div style={{ paddingBottom: 40 }} />
+          </div>
+        </>
+      )}
     </div>
   );
 };
