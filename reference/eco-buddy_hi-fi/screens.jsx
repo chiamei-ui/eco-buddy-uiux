@@ -862,8 +862,11 @@ const P2bResult = ({ setScreen, dispatch, tweaks = {}, setTweak = () => {} }) =>
             </div>
           </div>
         </div>
+        {quotaFull && (
+          <div className="rp-quota-note">本週食物都收齊啦，下週再一起加油吧！</div>
+        )}
         <div className="footer">
-          <button className="btn-primary" onClick={handleDone}>存進餐袋</button>
+          <button className="btn-primary" onClick={handleDone}>{quotaFull ? '完成' : '存進餐袋'}</button>
         </div>
       </div>
     </div>
