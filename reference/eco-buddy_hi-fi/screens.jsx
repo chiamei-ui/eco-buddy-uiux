@@ -9,7 +9,7 @@ const OB_STEPS = [
   { refKey: 'modeBtnRef',    pad: 8,  radius: 20, textRight: true,
     title: '切換一般模式',          text: '點這裡可以回到 ECOCO 的一般功能' },
   { refKey: 'scanBtnRef',    pad: 8,  radius: 24, textRight: true,
-    title: '帶食物回家 📦',         text: '投瓶後對準機台螢幕條碼，就有機會換到食物哦！' },
+    title: '帶禮物回家 📦',         text: '投瓶後對準機台螢幕條碼，就有機會換到食物哦！' },
   { refKey: 'adsBtnRef',     pad: 8,  radius: 24, textRight: true,
     title: '免費道具 🎁',           text: '看廣告領道具，每天最多 5 次' },
   { refKey: 'dockTabsRef',   pad: 6,  radius: 16,
@@ -478,7 +478,7 @@ const P1Home = ({ state, dispatch, setScreen, dragManager, payload, showTutorial
                 <div>• 數量 ≤ 2 時卡片變淡，提醒快用完</div>
               </div>
               <div style={{ background:'#FFF3E0', borderRadius:12, padding:'10px 14px', fontSize:12, color:'#7A4800' }}>
-                💡 帶食物回家可補充餐袋，配額用完後當週不再增加
+                💡 帶禮物回家可補充餐袋，配額用完後當週不再增加
               </div>
             </div>
           ) : (
@@ -1414,7 +1414,7 @@ const ShopPurchaseModal = ({ item, state, onClose, onConfirm }) => {
         {!isCash && insufficient ? (
           <div style={{ background: '#FFF3F0', borderRadius: 12, padding: '14px 16px', marginBottom: 14 }}>
             <div style={{ fontWeight: 800, color: '#D9382A', fontSize: 15, marginBottom: 4 }}>ECOCO 點數不足，無法完成購買</div>
-            <div style={{ fontSize: 13, color: '#888' }}>再去帶食物回家給 Buddy</div>
+            <div style={{ fontSize: 13, color: '#888' }}>再去帶禮物回家給 Buddy</div>
           </div>
         ) : !isCash ? (
           <div className="pay-row active" style={{ marginBottom: 14 }}>
@@ -1619,7 +1619,7 @@ const P5Missions = ({ setScreen, state, dispatch, tweaks }) => {
 
   const missionData = [
     { id: 'login',   icon: '📅', title: '來看看 Buddy',      reward: '食物 ×1 · 心情 +3', progress: 1, total: 1, claimed: false },
-    { id: 'recycle', icon: '♻️', title: '帶食物回家',         reward: '食物 ×1 · 心情 +3', progress: 1, total: 1, claimed: true  },
+    { id: 'recycle', icon: '♻️', title: '帶禮物回家',         reward: '食物 ×1 · 心情 +3', progress: 1, total: 1, claimed: true  },
     { id: 'feed',    icon: '🍖', title: '為 Buddy 準備一餐',  reward: '食物 ×1 · 心情 +3', progress: 2, total: 3, claimed: false },
     { id: 'tap',     icon: '👋', title: '摸摸 Buddy 5 次',    reward: '食物 ×1 · 心情 +3', progress: 5, total: 5, claimed: false },
     { id: 'ad',      icon: '🎬', title: '看 Buddy 收禮物',    reward: '食物 ×1 · 心情 +3', progress: 0, total: 1, claimed: false },
@@ -2471,7 +2471,7 @@ const FAQ_DATA = [
       { q: '怎麼讓 Buddy 心情變好？', a: '每天摸摸 Buddy（每日上限 10 次，每次 +1）、給 Buddy 玩玩具（逗貓棒、小球、零食都能讓 Buddy 開心，梳子也會順帶提振心情）、完成今日陪伴，都能讓 Buddy 心情變好。' },
       { q: '為什麼 Buddy 的狀態會自己下降？', a: 'Buddy 想你了。三個狀態每天會各自慢慢下降一些，記得常回來看看牠。' },
       { q: 'Buddy 什麼時候可以變身？', a: '當 Buddy 三個狀態都達到一定數值，就會觸發變身機會。每隻 Buddy 有自己的變身條件，可在夥伴日誌查看目前進度。6 月小海龜共有 9 個樣子可以遇見。' },
-      { q: 'Buddy 體力歸零會怎樣？', a: 'Buddy 會進入睡眠狀態，等你帶食物回家給牠補充體力就能喚醒。Buddy 不會消失，放心！' },
+      { q: 'Buddy 體力歸零會怎樣？', a: 'Buddy 會進入睡眠狀態，等你帶禮物回家給牠補充體力就能喚醒。Buddy 不會消失，放心！' },
     ],
   },
   {
@@ -2493,13 +2493,13 @@ const FAQ_DATA = [
       { q: '月底要做什麼？', a: '月底前 5 天會出現提醒，從這個月遇到過的 Buddy 樣子裡挑一個收進日誌。結算後 3 天內仍可進去調整，超過時間沒選會由系統自動挑分數最高的填入。' },
       { q: '更換次數怎麼用？', a: '日誌格子鎖入後若想換掉，每次修改消耗 1 次更換次數。月底首次鎖入是免費的，不需要更換次數。次數不足時，鎖入畫面會出現「增加更換次數 →」連結，可進入「更換次數包」購買補充。' },
       { q: '更換次數會過期嗎？', a: '不會，機會永遠有效。' },
-      { q: '為什麼有些格子是空的？', a: '空格代表那個月還沒有陪伴記錄。繼續每天帶食物回家給 Buddy，就能慢慢填滿每一格！' },
+      { q: '為什麼有些格子是空的？', a: '空格代表那個月還沒有陪伴記錄。繼續每天帶禮物回家給 Buddy，就能慢慢填滿每一格！' },
     ],
   },
   {
     cat: '點數與商店', id: 'points',
     items: [
-      { q: '怎麼取得 ECOCO 點數？', a: '帶食物回家給 Buddy、在補充站消費、完成今日陪伴，都能獲得 ECOCO 點數。' },
+      { q: '怎麼取得 ECOCO 點數？', a: '帶禮物回家給 Buddy、在補充站消費、完成今日陪伴，都能獲得 ECOCO 點數。' },
       { q: 'ECOCO 點數會過期嗎？', a: '詳細內容請至 ECOCO 官網常見問題查看。' },
       { q: '商店可以買什麼？', a: '商店分為食物、玩具、裝扮、禮包四個分類。食物與玩具用 ECOCO 點數購買；裝扮與禮包（月底衝刺禮包、月度通行證等）用現金購買。點數與現金不互換、不互買，每張卡片都會標示「點數」或「NT$」。' },
       { q: '月底衝刺禮包是什麼？', a: '每月 22–28 日上架，幫 Buddy 在月底前衝一波狀態與日誌收藏的限時禮包，商店頁會置頂顯示倒數天數。' },

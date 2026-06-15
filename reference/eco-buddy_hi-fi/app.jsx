@@ -232,7 +232,7 @@ const SCREENS = [
   { code:'P0', id:'p0',    label:'一般模式-首頁', section:'主流程' },
   { code:'P1', id:'p1',    label:'夥伴首頁 · Hub' },
   { code:'P2', id:'p2',    label:'機台條碼' },
-  { code:'P2b',id:'p2b',   label:'帶食物回家結果' },
+  { code:'P2b',id:'p2b',   label:'帶禮物回家結果' },
   { code:'P12',id:'p12',   label:'補充站消費結果', section:'補充站 Loop' },
   { code:'P4', id:'p4',    label:'商店', section:'底部 Tab' },
   { code:'P5', id:'p5',    label:'今日陪伴' },
