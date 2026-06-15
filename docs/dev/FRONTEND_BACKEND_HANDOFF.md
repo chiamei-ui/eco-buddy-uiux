@@ -152,7 +152,7 @@
 
 ### 6.3 PM
 
-- [ ] **12.2** review `openspec/changes/p4-shop-phase-rollout/proposal.md` 與 `design.md`
+- [ ] **12.2** review `openspec/changes/archive/2026-06-03-p4-shop-phase-rollout/proposal.md` 與 `design.md`
 - [ ] **12.4** 於 `docs/decisions/CURRENT.md` 寫入 #26 / #27 / #28 / #29
 
 ### 6.4 窗口設計師（動畫對接）

@@ -10,7 +10,7 @@
 
 ## 設計系統依據
 
-所有畫面遵循 `ECOCO_DESIGN.md`：
+所有畫面遵循 `DESIGN_SYSTEM.md`：
 - 主色 `#FF5000`（橘）/ 次色 `#060E9F`（藍）/ 輔助 `#FFCE00`（黃）
 - 頁面底色 `#FAE0B8`（奶油膚），卡片白 `#FFFFFF`
 - 字型 Noto Sans TC（中文）/ Inter（英數）
@@ -43,7 +43,7 @@
 
 - 位置：角色右上方
 - 消失：10 秒自動消失 + 點擊 ✕ 提早關閉
-- 文案來源：`stat_dialogue_copy.md`
+- 文案來源：`docs/product/STAT_DIALOGUE.md`
 
 ### 模式切換器
 
@@ -768,7 +768,7 @@
 
 ## 附錄 A — 推播文案表
 
-> 本表為單一來源（D7），`user-flow.md` §A（衰減觸發）與 §J（月底）引用此處，避免文案漂移。
+> 本表為單一來源（D7），`USER_FLOW.md` §A（衰減觸發）與 §J（月底）引用此處，避免文案漂移。
 
 ### 推播通用規則
 
@@ -800,7 +800,7 @@
 
 ---
 
-## 附錄 B — UAT 驗收 Checklist（對照 user-flow.md v1.7）
+## 附錄 B — UAT 驗收 Checklist（對照 USER_FLOW.md v1.7）
 
 > 由 PM 簽核前，設計師逐項對照原型截圖確認。
 

@@ -357,7 +357,7 @@ xl:  1280px → 卡片 4 欄
 
 ### 快速啟動 Prompt
 ```
-請依照 ECOCO_DESIGN.md 建構 ECO Buddy UI。
+請依照 DESIGN_SYSTEM.md 建構 ECO Buddy UI。
 頁面底色 #FAE0B8（奶油膚），主色 #FF5000（橘），次色 #060E9F（藍），字型 Noto Sans TC。
 卡片 bg-white rounded-2xl shadow-sm，按鈕 CTA rounded-full。
 每頁必須有 Buddy 的視覺存在（全身、縮圖、或對話泡泡）。
@@ -367,7 +367,7 @@ xl:  1280px → 卡片 4 欄
 
 ### 建立新頁面
 ```
-使用 ECOCO_DESIGN.md 建立 [頁面描述]。
+使用 DESIGN_SYSTEM.md 建立 [頁面描述]。
 - 頁面背景: bg-[#FAE0B8]（奶油膚，不是白色）
 - 卡片: bg-white rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.06)]
 - 主要 CTA: bg-[#FF5000] text-white rounded-full font-bold
@@ -379,7 +379,7 @@ xl:  1280px → 卡片 4 欄
 
 ### 建立卡片元件
 ```
-依照 ECOCO_DESIGN.md 建立卡片：
+依照 DESIGN_SYSTEM.md 建立卡片：
 bg-white rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.06)]
 hover:shadow-[0_8px_24px_rgba(0,0,0,0.10)] hover:-translate-y-0.5 transition-all duration-200
 標題: font-bold text-[#1A1A1A] text-lg

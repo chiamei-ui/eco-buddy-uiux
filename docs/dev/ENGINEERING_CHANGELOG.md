@@ -26,6 +26,17 @@
 - `scripts/update-engineering-changelog.ps1`
 
 <!-- AUTO-ENTRIES -->
+<!-- engineering-change:ded148cb931c8931 -->
+## 2026-06-15 10:53:26 +08:00
+
+- Triggered scopes: PM decision, design spec, engineering handoff
+- Files:
+  - `docs/decisions/CURRENT.md` (PM decision)
+  - `docs/design/DESIGN_NOTES.md` (design spec)
+  - `docs/design/DESIGN_SYSTEM.md` (design spec)
+  - `docs/design/UI_SPEC.md` (design spec)
+  - `docs/dev/FRONTEND_BACKEND_HANDOFF.md` (engineering handoff)
+
 <!-- engineering-change:2b56fa7200ae17c5 -->
 ## 2026-06-12 14:30:10 +08:00
 
@@ -146,6 +157,7 @@
   - `reference/eco-buddy_hi-fi/app.jsx` (hi-fi reference)
   - `reference/eco-buddy_hi-fi/styles.css` (hi-fi reference)
   - `scripts/update-engineering-changelog.ps1` (handoff automation)
+
 
 
 
