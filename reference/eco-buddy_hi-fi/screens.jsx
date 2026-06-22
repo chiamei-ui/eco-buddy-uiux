@@ -588,12 +588,15 @@ const FoodCell = ({ food, dragManager, onDrop, showBubble, pulsing }) => {
     window.addEventListener('pointermove', onMove);
     window.addEventListener('pointerup', onUp);
   };
-  const cls = food.state === 'locked' ? 'locked' : food.stock <= 2 ? 'low' : 'has-stock';
+  const isEmpty = food.state !== 'locked' && food.stock <= 0;
+  const cls = food.state === 'locked' ? 'locked' : isEmpty ? 'empty' : food.stock <= 2 ? 'low' : 'has-stock';
   return (
     <div className="food-slot">
       <div ref={cellRef} className={`food-cell ${cls}${pulsing ? ' pulsing' : ''}`} onPointerDown={handlePointerDown}>
         {food.state === 'locked'
           ? <span className="lock">🔒</span>
+          : isEmpty
+            ? <span className="empty-plate" aria-hidden="true">🍽️</span>
           : <>
               <span className="emoji">{food.emoji}</span>
               {food.stock > 0 && <span className="badge">{food.stock}</span>}
@@ -602,7 +605,7 @@ const FoodCell = ({ food, dragManager, onDrop, showBubble, pulsing }) => {
       </div>
       {food.state !== 'locked' && (
         <div className="food-label">
-          <span className="name">{food.name}</span>
+          <span className="name">{isEmpty ? '空餐盤' : food.name}</span>
         </div>
       )}
     </div>);
@@ -1803,6 +1806,11 @@ const P6Ads = ({ setScreen, state, dispatch }) => {
 
 };
 
+const P7DetailOverlay = ({ onClose, children }) => ReactDOM.createPortal(
+  <div className="year-detail-overlay" onClick={onClose}>{children}</div>,
+  document.querySelector('.iphone-screen')
+);
+
 /* ═══════════════ P7 · Dex ═══════════════ */
 const P7Dex = ({ setScreen, state, dispatch, onOpenPicker, tweaks }) => {
   const isPhase2 = (tweaks?.shopPhase ?? 1) >= 2;
@@ -1880,7 +1888,7 @@ const P7Dex = ({ setScreen, state, dispatch, onOpenPicker, tweaks }) => {
   };
 
   return (
-    <div className="screen p7">
+    <div className={`screen p7${detailMo || detailState ? ' detail-open' : ''}`}>
       <StatusBar />
       <div className="header">
         <h2>夥伴日誌</h2>
@@ -1915,7 +1923,7 @@ const P7Dex = ({ setScreen, state, dispatch, onOpenPicker, tweaks }) => {
       {detailMo && (() => {
         const charState = states.find(s => s.code === detailMo.code);
         return (
-          <div className="year-detail-overlay" onClick={() => setDetailMo(null)}>
+          <P7DetailOverlay onClose={() => setDetailMo(null)}>
             <div className="year-detail-sheet" onClick={e => e.stopPropagation()}>
               <button className="year-detail-close" onClick={() => setDetailMo(null)}>✕</button>
               <div className="year-detail-collected">已收藏 ✓</div>
@@ -1925,7 +1933,7 @@ const P7Dex = ({ setScreen, state, dispatch, onOpenPicker, tweaks }) => {
               <div className="year-detail-month">{String(detailMo.m).padStart(2, '0')} 月 · 2026 年度</div>
               {charState?.legendary && <div className="year-detail-rarity">✦ 傳說</div>}
             </div>
-          </div>
+          </P7DetailOverlay>
         );
       })()}
 
@@ -1981,7 +1989,7 @@ const P7Dex = ({ setScreen, state, dispatch, onOpenPicker, tweaks }) => {
       </div>
 
       {detailState && (
-        <div className="year-detail-overlay" onClick={() => setDetailState(null)}>
+        <P7DetailOverlay onClose={() => setDetailState(null)}>
           <div className="year-detail-sheet" onClick={e => e.stopPropagation()}>
             <button className="year-detail-close" onClick={() => setDetailState(null)}>✕</button>
             {detailState.unlocked
@@ -2002,7 +2010,7 @@ const P7Dex = ({ setScreen, state, dispatch, onOpenPicker, tweaks }) => {
             <div className="year-detail-month">本月 6 月 · {detailState.character?.name || '小海龜'}</div>
             {detailState.legendary && detailState.unlocked && <div className="year-detail-rarity">✦ 傳說</div>}
           </div>
-        </div>
+        </P7DetailOverlay>
       )}
 
     </div>);

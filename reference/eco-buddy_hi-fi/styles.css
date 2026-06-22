@@ -366,6 +366,8 @@ img,svg{display:block;}
 .food-cell.has-stock{ background:var(--ecoco-orange-soft); border:1.5px solid #FFB28A; }
 .food-cell.has-stock.dragging{transform:scale(1.15) translateY(-6px);box-shadow:0 12px 24px rgba(255,80,0,0.3);z-index:30;}
 .food-cell.low{ background:#fff; border:1.5px dashed #FFB28A; opacity:.85; }
+.food-cell.empty{background:#F7F7F8;border:1.5px dashed #D7D9DE;cursor:default;}
+.food-cell .empty-plate{font-size:32px;line-height:1;filter:grayscale(1);opacity:.42;}
 .food-cell.locked{ background:#F4F6FA; border:1.5px dashed #D0D5DD; cursor:not-allowed; }
 .food-cell .badge{
   position:absolute;top:5px;right:5px;
@@ -789,6 +791,7 @@ img,svg{display:block;}
 
 /* ───── P7 dex ───── */
 .p7{background:#EEF0FF;color:var(--core-black);}
+.p7.detail-open{overflow:hidden;}
 .p7 .header{padding:54px 18px 20px;background:var(--ecoco-blue);border-radius:0 0 28px 28px;color:#fff;}
 .p7 .header h2{font-size:22px;font-weight:900;color:#fff;}
 .p7 .header .en{font-family:var(--font-en);font-size:11px;letter-spacing:.16em;font-weight:700;color:rgba(255,255,255,0.55);}
