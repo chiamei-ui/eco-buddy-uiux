@@ -1871,6 +1871,7 @@ const P7Dex = ({ setScreen, state, dispatch, onOpenPicker, tweaks }) => {
   })();
   const stripRef = useRef(null);
   const currentCellRef = useRef(null);
+  const screenRef = useRef(null);
   const [detailMo, setDetailMo] = useState(null);
   const [detailState, setDetailState] = useState(null);
 
@@ -1882,13 +1883,25 @@ const P7Dex = ({ setScreen, state, dispatch, onOpenPicker, tweaks }) => {
     }
   }, []);
 
+  const overlayOpen = !!(detailMo || detailState);
+  useEffect(() => {
+    const el = screenRef.current;
+    if (!el) return;
+    if (overlayOpen) {
+      el.scrollTop = el.scrollTop; // force-stop WebKit inertia scroll
+      el.style.overflowY = 'hidden';
+    } else {
+      el.style.overflowY = '';
+    }
+  }, [overlayOpen]);
+
   const handleCellClick = (mo) => {
     if (mo.filled) setDetailMo(mo);
     else if (mo.current) onOpenPicker && onOpenPicker();
   };
 
   return (
-    <div className={`screen p7${detailMo || detailState ? ' detail-open' : ''}`}>
+    <div ref={screenRef} className={`screen p7${overlayOpen ? ' detail-open' : ''}`}>
       <StatusBar />
       <div className="header">
         <h2>夥伴日誌</h2>

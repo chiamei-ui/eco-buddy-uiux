@@ -1,4 +1,7 @@
-## ADDED Requirements
+## Purpose
+P1 夥伴首頁 UI 規格——食物欄、道具欄、觸碰互動、Header 等元素的顯示與行為要求。
+
+## Requirements
 
 ### Requirement: 食物欄存量上限
 P1 食物欄每格 SHALL 顯示累積存量 Badge，上限值 SHALL 從 API 欄位 `[API: food_slot_max_count]` 讀取（預設參考值 12）；每次餵食扣 1，歸零後需重新回收補充。前端 SHALL NOT hardcode 數字 12。
