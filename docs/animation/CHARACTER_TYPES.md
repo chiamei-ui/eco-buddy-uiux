@@ -1,9 +1,9 @@
 # ECO Buddy 角色型態規格 Character Type Specifications
 
-**版本 / Version**：v1.0  
-**更新日期**：2026-06-05  
+**版本 / Version**：v1.1  
+**更新日期**：2026-06-24  
 **Owner**：窗口設計師 @idahsueh-cmd  
-**資料來源**：RFP v1.0（`ecoco-private/specs/ECOCO_RFP_EcoBuddy_v1_0_20260515.docx`）§4、§5  
+**資料來源**：RFP v1.1（`ecoco-private/specs/ECOCO_RFP_EcoBuddy_v1_1_20260624.docx`）§4、§5  
 **適用對象**：前端工程師（@shangchian）、外包動畫師（Anastasiia）
 
 > 本文件為 RFP §4 完整轉錄。型態 ID 以 `#NN` 格式標注，可直接 Ctrl+F 搜尋。
@@ -16,14 +16,14 @@
 
 | # | 組合 Combo | 狀態標籤 ZH / EN | 體型 Body | 外觀 Appearance | 表情動作 Expression |
 |---|---|---|---|---|---|
-| #01 | 低-低-低 / L-L-L | 瀕危史萊姆 / Endangered Slime | 乾癟 60% / Gaunt 60% | 沾滿泥濘，灰暗 / Covered in mud, dark | 閉眼哭泣，瑟瑟發抖 / Eyes closed crying, trembling |
+| #01 | 低-低-低 / L-L-L | 瀕危史萊姆 / Endangered Slime | 乾癟下沉 / Gaunt, low-energy | 沾滿泥濘，灰暗 / Covered in mud, dark | 閉眼哭泣，瑟瑟發抖 / Eyes closed crying, trembling |
 | #02 | 低-低-中 / L-L-M | 髒髒小可憐 / Dirty Little Wretch | 乾癟，不規則 / Gaunt, irregular | 帶有污漬斑點 / Stained spots | 睜大眼發呆，偶爾流口水 / Wide-eyed daze, occasional drool |
 | #03 | 低-低-高 / L-L-H | 樂觀泥巴球 / Optimistic Mud Ball | 乾癟，跳躍感 / Gaunt, bouncy | 粗糙無光澤 / Rough, matte | 傻笑，手舞足蹈，愛心粒子 / Goofy grin, flailing, heart particles |
 | #04 | 低-中-低 / L-M-L | 憂鬱紙片人 / Depressed Paper Doll | 瘦弱如紙片 / Paper-thin | 霧面基礎材質 / Basic matte material | 皺眉，嘆氣，肩膀下垂 / Frowning, sighing, drooping shoulders |
 | #05 | 低-中-中 / L-M-M | 標準初生嬰 / Standard Newborn | 瘦小但完整 / Small but complete | 乾淨霧面 / Clean matte | 眼神平靜，規律眨眼 / Calm gaze, regular blinking |
 | #06 | 低-中-高 / L-M-H | 迷你啦啦隊 / Mini Cheerleader | 嬌小，動作大 / Petite, expressive | 乾淨明亮 / Clean and bright | 開心揮手，充滿活力 / Happy waving, full of energy |
-| #07 | 低-高-低 / L-H-L | 易碎玻璃心 / Fragile Glass Heart | 瘦削 60% / Slender 60% | 晶瑩剔透折射光 / Crystal-clear refracting light | 眉頭深鎖，小心翼翼 / Furrowed brow, cautious |
-| #08 | 低-高-中 / L-H-M | 靜謐水晶 / Quiet Crystal | 嬌小精緻 60% / Delicate 60% | 散發柔和白色光芒 / Emitting soft white glow | 閉目養神，細微呼吸律動 / Eyes closed, subtle breathing rhythm |
+| #07 | 低-高-低 / L-H-L | 易碎玻璃心 / Fragile Glass Heart | 瘦削下沉 / Slender, low-energy | 晶瑩剔透折射光 / Crystal-clear refracting light | 眉頭深鎖，小心翼翼 / Furrowed brow, cautious |
+| #08 | 低-高-中 / L-H-M | 靜謐水晶 / Quiet Crystal | 嬌小精緻 / Delicate, petite | 散發柔和白色光芒 / Emitting soft white glow | 閉目養神，細微呼吸律動 / Eyes closed, subtle breathing rhythm |
 | #09 | 低-高-高 / L-H-H | 閃耀精靈 / Radiant Sprite | 嬌小，動作靈活 / Petite, nimble | 自帶高光與星漾粒子（FX7，取代 FX1）/ Built-in highlight and FX7 star particles (replaces FX1) | 雙眼發亮，快速原地旋轉 / Eyes sparkling, rapid spin-in-place |
 | #10 | 中-低-低 / M-L-L | 暴躁泥獸 / Raging Mud Beast | 適中略沉重 / Medium, slightly heavy | 大面積髒污混濁 / Large-area dirt, murky | 齜牙裂嘴，跺腳 / Baring teeth, stomping |
 | #11 | 中-低-中 / M-L-M | 迷茫拾荒者 / Confused Scavenger | 體型標準 / Standard size | 局部灰塵暗沉 / Partial dust, dim | 左右張望，抓頭 / Looking around, scratching head |
@@ -59,7 +59,7 @@
 | #30 | 心情 ≥ 95 且點擊達上限 | 瘋狂點擊狂 / Click Maniac | mood_level ≥ 95 且當日觸摸達上限（20 次） | S8（`has_frenzy`） |
 | #31 | 累計回收寶特瓶 ≥ 500 | 寶特瓶國王 / PET Bottle King | 後端累計達標後推送解鎖 | S9（`has_bottle`） |
 | #32 | 累計回收電池 ≥ 200 | 電能機甲 / Energy Mech | 後端累計達標後推送解鎖 | S1（`has_armor`） |
-| #33 | 連續 30 天未登入 | （懲罰）壞滅核心 / Corruption Core | 全屬性衰減至 0，登入後觸發；`has_dark=true` 強制鎖定至月底，期間用戶養成行為由後端正常累積但 Rive 視覺強制顯示 #33 | S5（`has_dark`） |
+| #33 | 三大屬性同時歸零（hp=0、clean=0、mood=0）後首次登入 | （懲罰）壞滅核心 / Corruption Core | 三大屬性同時歸零後首次登入觸發；後端須於屬性全歸零時停止衰減結算（以 0 為下限）；`has_dark=true` 強制鎖定至月底，期間用戶養成行為由後端正常累積但 Rive 視覺強制顯示 #33 | S5（`has_dark`） |
 | #34 | 連續登入 ≥ 7 天 | 派對動物 / Party Animal | 連續 7 自然日每日登入 | S4（`has_disco`） |
 | #35 | 首次完成任意金額 IAP 儲值 | 黃金暴發戶 / Golden Nouveau Riche | 任一 IAP 交易完成後自動解鎖 | S10（`has_golden`） |
 | #36 | 三維度同時達滿值且累計 ≥ 7 天 | **【傳說】循環之神 / [Legend] Cycle God** | 三者同時達 100，後端累計達滿值天數 ≥ 7 天；每日結算，不需連續；累計天數於月底結算時歸零，不跨月延續 | 後端送 `has_cycle_crown=true` |
@@ -110,4 +110,4 @@
 
 ---
 
-*Based on RFP v1.0 — 2026-05-15。如 RFP 有修訂，本文件同步更新並記錄異動。*
+*Based on RFP v1.1 — 2026-06-24。如 RFP 有修訂，本文件同步更新並記錄異動。*
