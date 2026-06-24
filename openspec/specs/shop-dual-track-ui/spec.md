@@ -11,9 +11,10 @@ P4 商店 SHALL 分為「ECOCO 點數消費區」與「真實金流 IAP 區」�
 - **WHEN** 用戶查看 ECOCO 點數消費區
 - **THEN** 該區僅包含基礎食物補給包、一般道具（逗貓棒 / 小球 / 梳子 / 零食）、清潔用品，且每項商品 data `currency` 為 `'heart'`
 
-#### Scenario: IAP 區商品內容
+#### Scenario: IAP 區商品內容（更新 #26/#27/#33）
 - **WHEN** 用戶查看真實金流 IAP 區
-- **THEN** 該區包含月底衝刺禮包 NT$199、月度通行證 NT$149、稀有限定裝飾、圖鑑加速 / 特殊道具，以及 Phase 2 玩具現金商品；每項商品 data `currency` 為 `'cash'`
+- **THEN** 該區包含裝扮（永久穿戴）、月度通行證、**稀有食物**、**道具禮包**、月底衝刺禮包，以及 Phase 2 玩具現金商品；每項商品 data `currency` 為 `'cash'`
+- **AND** App 內數位商品 `cashChannel` SHALL 為 `'platform-iap'`；ECOCO 點數儲值等非 App 內數位服務 `cashChannel` 為 `'newebpay'`
 
 #### Scenario: 點數與現金不互換
 - **WHEN** 用戶嘗試以點數購買 IAP 區商品（或反之）

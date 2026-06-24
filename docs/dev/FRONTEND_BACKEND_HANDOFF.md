@@ -52,7 +52,6 @@
 | Buddy 角色動畫 | 固定尺寸 placeholder / 暫用靜態圖 | 正式 Rive 動畫 |
 | 食物 icon | 固定尺寸 placeholder | 正式食物圖像 |
 | 玩具 / 道具 icon | 固定尺寸 placeholder | 正式道具圖像 |
-| 今日陪伴圖像 | 暫用通用 icon | 正式陪伴任務圖像 |
 | 開箱動畫 | 暫用簡化轉場 | 正式開箱動畫 |
 
 > placeholder 必須保留正式素材預計尺寸，避免日後換圖造成跑版。
@@ -102,8 +101,9 @@
 | 變身過場 | 白光、縮放、粒子、overlay 結束後回到指定頁面狀態 | `UI_SPEC.md` 變身動畫章節 |
 | 食物 icon | 普通 / 稀有食物圖像，需符合固定尺寸與狀態顯示 | `UI_SPEC.md` P1 食物欄 |
 | 玩具 / 道具 icon | 逗貓棒、小球、梳子、零食等道具圖像 | `UI_SPEC.md` P1 / P9 |
-| 今日陪伴圖像 | 每日 / 週 / 月陪伴項目的圖像或 icon | `UI_SPEC.md` P5 |
 | 開箱圖像 / 動畫 | 廣告開箱結果呈現與獎勵圖像 | `UI_SPEC.md` P6 |
+
+> **P5 今日陪伴**：不需要陪伴項目專屬圖像或 icon。P5 僅沿用獎勵物品（食物）的既有縮圖，不另行製作陪伴任務圖示。新增陪伴項目時不需要新素材交付。
 
 ---
 
@@ -137,7 +137,7 @@
 
 ### 6.1 前端工程師
 
-- [ ] **7.3** 禮包 Tab CTA 點擊跳轉藍新網頁付款（hi-fi 僅模擬）
+- [ ] **7.3** ~~禮包 Tab CTA 點擊跳轉藍新網頁付款~~（**已廢棄 #33**：App 內數位禮包改走 platform-iap；若禮包內容含 App 內數位道具／食物，CTA 觸發 StoreKit / Play Billing，不跳轉藍新）
 - [ ] **7.4** 裝扮 Tab CTA 點擊觸發平台 IAP（StoreKit / Play Billing）；設備判斷副標（App Store / Google Play）
 - [ ] **12.3** review `openspec/changes/p4-shop-phase-rollout/specs/` 四份規格的可實作性，回報給 `@chiamei-ui`
 
@@ -161,12 +161,68 @@
 
 ---
 
-## 7. 群組通知建議文字
+## 7. IAP SKU 上架追蹤（#33 定案，2026-06-23）
+
+### 7A. IAP 商品清單與送審狀態
+
+> 每項 App 內數位商品須逐項建立 SKU 並送審，前端只對平台已通過審核的 SKU 開啟購買 CTA。
+
+| SKU ID | 商品名稱 | Apple 送審狀態 | Google 送審狀態 | 工程負責人 | PM 負責人 |
+|--------|---------|----------------|-----------------|------------|-----------|
+| `eco_pass_monthly` | 月度通行證 | ⏳ 待建立 | ⏳ 待建立 | — | — |
+| `sprint_pack_199` | 月底衝刺禮包 | ⏳ 待建立 | ⏳ 待建立 | — | — |
+| `rare_food_*` | 稀有食物（各款） | ⏳ 待 PM 確認清單 | ⏳ 待 PM 確認清單 | — | — |
+| `tool_bundle_*` | 道具禮包（各款） | ⏳ 待 PM 確認清單 | ⏳ 待 PM 確認清單 | — | — |
+| 裝扮各款 | — | ⏳ 待 28.3 分批排程 | ⏳ 待 28.3 分批排程 | — | — |
+
+### 7B. 工程前端任務（IAP）
+
+- [ ] **7B.1** 稀有食物商品卡讀取 `[IAP SKU: rare_food_*]` 平台本地化價格，不顯示 hardcode 金額
+- [ ] **7B.2** 道具禮包商品卡讀取 `[IAP SKU: tool_bundle_*]` 平台本地化價格
+- [ ] **7B.3** 確認商品 data `cashChannel` 正確標注（App 內數位商品 `'platform-iap'`，非 `'newebpay'`）
+- [ ] **7B.4** SKU 查詢失敗時商品 CTA disabled，不顯示任何 hardcode 備援金額
+
+### 7C. 工程後端任務（IAP）
+
+- [ ] **7C.1** 後端 entitlement 驗證涵蓋稀有食物與道具禮包的 IAP 交易
+- [ ] **7C.2** 訂單資料模型 `cashChannel` 欄位正確記錄 `'platform-iap'` vs `'newebpay'`，不混用
+- [ ] **7C.3** IAP SKU 清單由後台管理，前端 fetch 後顯示，不寫死商品清單
+
+---
+
+## 8. Phase 3 贈禮工程任務（#32 方向確認，Phase 3 才實作）
+
+> ⚠️ 以下任務 Phase 1 不開發，列出供架構規劃用，避免後續重工。
+
+### 8A. 後端（Phase 3）
+
+- [ ] **8A.1** 門號查詢 API：輸入手機門號，回傳是否已註冊（不暴露個人資料）
+- [ ] **8A.2** 原子庫存轉移 API：同一交易扣除送禮者 N 個並增加收禮者 N 個，失敗時雙方均不變
+- [ ] **8A.3** acquisition_source 欄位：區分 `self_recycle` 與 `gifted`，月底實體獎勵只計 `self_recycle`
+- [ ] **8A.4** 收禮通知：透過一般模式通知中心發送「OOO 送禮物給你囉，快來跟 Buddy 一起玩吧！」
+- [ ] **8A.5** 未註冊門號邀請：產生 SMS / LINE 邀請連結，不建立暫存禮物
+
+### 8B. 前端（Phase 3）
+
+- [ ] **8B.1** 贈禮入口 UI（品項選擇 → 門號輸入 → 確認頁）
+- [ ] **8B.2** 可贈送清單排除 IAP 商品、裝扮 entitlement
+- [ ] **8B.3** 收禮 Buddy 反應動畫（詳細動畫細節待 Phase 3 確認）
+- [ ] **8B.4** 收禮額外心情值讀取後台設定值，不寫死
+
+### 8C. Phase 3 待確認事項（不得自行設定數字）
+
+- [ ] 每日 / 每週贈送次數上限
+- [ ] 單次贈送數量上限
+- [ ] 收禮額外心情值
+
+---
+
+## 9. 群組通知建議文字
 
 大家好，ECO Buddy 的 hi-fi 與「動態數值不可 hardcode」規格已整理完成，目前可以進入前後端工程評估與實作拆工。
 
 我已整理一份交接任務文件：`docs/dev/FRONTEND_BACKEND_HANDOFF.md`。裡面已分成前端、後端、設計素材、PM / UI 確認事項，並標註每一項任務應該對照哪份規格文件。
 
-目前前端可以先依 `DESIGN_SYSTEM.md` + `UI_SPEC.md` 開始切版與 mock data 實作；後端請先確認 `GAME_MECHANICS.md` 與 `UI_SPEC.md` 動態數值規則中的 API 欄位。角色動畫、食物 / 玩具 / 今日陪伴 icon 會由設計端後續補正式素材，前端可先用固定尺寸 placeholder，避免卡住頁面開發。
+目前前端可以先依 `DESIGN_SYSTEM.md` + `UI_SPEC.md` 開始切版與 mock data 實作；後端請先確認 `GAME_MECHANICS.md` 與 `UI_SPEC.md` 動態數值規則中的 API 欄位。角色動畫、食物 / 玩具 icon 會由設計端後續補正式素材，前端可先用固定尺寸 placeholder，避免卡住頁面開發。P5 今日陪伴列表不需要專屬 icon，沿用既有食物縮圖即可。
 
 請大家先看交接文件確認自己的負責範圍，有規格衝突時以 `docs/decisions/CURRENT.md` 為最高優先。
