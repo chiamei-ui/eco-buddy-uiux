@@ -11,24 +11,26 @@ P4 商店 Tab Bar SHALL 包含一個 id 為 `package`、label 為「禮包」的
 - **WHEN** `items.package` 陣列非空
 - **THEN** 「禮包」tab 出現在 Tab Bar 中
 
-### Requirement: IAP 商品歸屬禮包 tab
-月底衝刺禮包與月度通行證 SHALL 僅出現在「禮包」tab 的 cash-strip，不出現在其他 tab；禮包 Tab 之 cash 商品 SHALL 走藍新 NewebPay 網頁付款（`cashChannel === 'newebpay'`），SHALL NOT 走平台 IAP（裝扮 Tab 路徑）。
+### Requirement: IAP 商品歸屬禮包 tab（更新 #26/#27/#33）
+月底衝刺禮包、月度通行證與道具禮包 SHALL 顯示於「禮包」tab；商品金流路徑 SHALL 依內容性質決定。App 內提供或消耗的數位內容 SHALL 使用 `cashChannel === 'platform-iap'`，不得一律指定藍新。
 
-#### Scenario: 食物 tab 不含 IAP 商品
+> ⚠️ **舊規則修正**：原「禮包 Tab cash 商品一律走藍新 NewebPay」已廢棄。藍新僅適用 ECOCO 點數儲值、補充站或 Web 非 App 內數位付款。
+
+#### Scenario: 食物 tab 不含一般禮包
 - **WHEN** 用戶切換至「食物」tab
-- **THEN** cash-strip SHALL NOT 顯示月底衝刺禮包或月度通行證
+- **THEN** cash-strip SHALL NOT 顯示月底衝刺禮包或月度通行證；可獨立販售的稀有食物依商品分類顯示
 
-#### Scenario: 禮包 tab 包含 IAP 商品
+#### Scenario: 禮包 tab 顯示方案商品
 - **WHEN** 用戶切換至「禮包」tab
-- **THEN** cash-strip SHALL 顯示月度通行證，月底期間額外顯示月底衝刺禮包
+- **THEN** 顯示月度通行證與道具禮包，月底期間額外顯示月底衝刺禮包
 
-#### Scenario: 禮包商品金流路徑
-- **WHEN** 禮包 Tab 任一 cash 商品被渲染
-- **THEN** 商品 data `cashChannel === 'newebpay'`；Phase 2 下購買流程跳轉藍新 NewebPay 網頁付款
+#### Scenario: App 內禮包金流路徑
+- **WHEN** 禮包內容為 App 內數位道具、食物、權益或裝扮
+- **THEN** 商品 data 使用 `cashChannel === 'platform-iap'` 並觸發 StoreKit 或 Play Billing
 
-#### Scenario: 禮包 tab 不含裝扮商品
+#### Scenario: 禮包 tab 不含單件裝扮
 - **WHEN** 用戶切換至「禮包」tab
-- **THEN** SHALL NOT 顯示永久穿戴裝扮款（裝扮歸屬 `shop-cosmetic-tab`）；通行證解鎖之稀有裝飾為通行證權益、不於本 Tab 單獨販售
+- **THEN** SHALL NOT 顯示單件永久穿戴裝扮；單件裝扮仍歸屬裝扮 Tab
 
 ### Requirement: 月底倒數 badge 顯示在禮包 tab chip
 於每月 22–28 日（原型以 tweaks.shopSprint 模擬），「禮包」tab chip SHALL 顯示黃色倒數天數 badge（格式：`N天`）。
