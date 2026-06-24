@@ -1606,37 +1606,143 @@ const PointsSourceSheet = ({ state, onClose }) => {
 };
 
 /* ═══════════════ P5 · Missions ═══════════════ */
+const CheckinCard = ({ scenario, onMakeupSuccess }) => {
+  const [madeup, setMadeup] = useState(false);
+
+  const sc = scenario || 'normal';
+  const isMakeup = sc === 'makeup';
+  const showMakeupBtn = isMakeup && !madeup;
+
+  let fillPct, subtitle, dayCount;
+  if (sc === 'normal') {
+    fillPct = 'calc(100% * 2 / 7)';
+    subtitle = '連續紀錄維持中！再登入 5 天即可觸發特殊狀態！';
+    dayCount = '2/7';
+  } else if (sc === 'streak7') {
+    fillPct = '100%';
+    subtitle = '恭喜你成功觸發特殊狀態！明天也要來見Buddy唷';
+    dayCount = '7/7';
+  } else if (sc === 'makeup') {
+    subtitle = '昨日未登入！趕緊補簽到才有機會獲得特殊狀態！';
+    dayCount = madeup ? '4/7' : '3/7';
+  } else {
+    fillPct = 'calc(100% * 1 / 7)';
+    subtitle = '全新的一輪陪伴！連續七天來找buddy會有小驚喜';
+    dayCount = '1/7';
+  }
+
+  const handleMakeup = () => {
+    setMadeup(true);
+    onMakeupSuccess?.();
+  };
+
+  const absBar = { position: 'absolute', top: 0, left: 0, height: '100%', borderRadius: 16 };
+
+  const renderBar = () => {
+    const trackStyle = { flex: 1, position: 'relative', height: 16, borderRadius: 16, overflow: 'hidden', minWidth: 0 };
+    if (isMakeup && !madeup) {
+      return (
+        <div style={trackStyle}>
+          <div style={{ ...absBar, background: '#f0f3f7', width: '100%' }} />
+          <div style={{ ...absBar, background: '#ffce00', width: 'calc(100% * 5 / 7)' }} />
+          <div style={{ ...absBar, background: '#f0f3f7', width: 'calc(100% * 4 / 7)' }} />
+          <div style={{ ...absBar, background: '#ffce00', width: 'calc(100% * 3 / 7)' }} />
+        </div>
+      );
+    }
+    const w = isMakeup && madeup ? 'calc(100% * 4 / 7)' : fillPct;
+    return (
+      <div style={trackStyle}>
+        <div style={{ ...absBar, background: '#f0f3f7', width: '100%' }} />
+        <div style={{ ...absBar, background: '#ffce00', width: w }} />
+      </div>
+    );
+  };
+
+  return (
+    <div style={{ position: 'relative', width: '100%' }}>
+      <img
+        src="assets/p5-card-bg.svg"
+        style={{ display: 'block', width: '100%', height: 'auto' }}
+        alt=""
+      />
+
+      {showMakeupBtn ? (
+        <button
+          className="makeup-btn"
+          onClick={handleMakeup}
+          style={{
+            position: 'absolute', top: 'calc(6 / 116 * 100%)', right: 'calc(8 / 370 * 100%)', zIndex: 2,
+            height: 24, background: '#ff5000', border: '1px solid rgba(255,255,255,0.75)', color: '#fff',
+            fontSize: 12, fontWeight: 500, padding: '0 10px', borderRadius: 14,
+          }}
+        >免費補簽到</button>
+      ) : (
+        <button
+          disabled
+          style={{
+            position: 'absolute', top: 'calc(6 / 116 * 100%)', right: 'calc(8 / 370 * 100%)', zIndex: 2,
+            height: 24, background: '#f7f9fc', border: '1px solid #ff5000', color: '#ff5000',
+            fontSize: 12, fontWeight: 500, padding: '0 10px', borderRadius: 14, cursor: 'default',
+          }}
+        >今日已簽到</button>
+      )}
+
+      {/* Content centered over SVG */}
+      <div style={{
+        position: 'absolute', inset: 0, zIndex: 1,
+        display: 'flex', flexDirection: 'column', justifyContent: 'center',
+        padding: '12px 20px',
+      }}>
+        <div style={{ color: '#fff', fontSize: 16, fontWeight: 700, marginBottom: 8 }}>7日覺醒任務</div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
+          {renderBar()}
+          <span style={{ color: '#fff', fontSize: 12, fontWeight: 700, whiteSpace: 'nowrap', flexShrink: 0 }}>{dayCount}</span>
+        </div>
+        <p style={{ color: '#f7f9fc', fontSize: 12, fontWeight: 500, letterSpacing: '0.48px', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+          {isMakeup && madeup ? '補簽成功！連續紀錄完美維持！' : subtitle}
+        </p>
+      </div>
+    </div>
+  );
+};
+
 const P5Missions = ({ setScreen, state, dispatch, tweaks }) => {
   const [tab, setTab] = useState('daily');
   const [toast, setToast] = useState(null);
   const [pulsing, setPulsing] = useState(false);
-  const isPhase2 = (tweaks?.shopPhase ?? 1) >= 2;
+  const [claimedIds, setClaimedIds] = useState([]);
+  const [bouncingId, setBouncingId] = useState(null);
+  const [showEvolve, setShowEvolve] = useState(false);
+
+  const scenario = tweaks?.checkinScenario ?? 'normal';
+
+  // streak7: show evolution overlay first
+  React.useEffect(() => {
+    if (scenario === 'streak7') setShowEvolve(true);
+    else setShowEvolve(false);
+  }, [scenario]);
+
   const tabs = [
     { id: 'daily',   label: '今日' },
-    ...(isPhase2 ? [
-      { id: 'week',    label: '這週' },
-      { id: 'month',   label: '這個月' },
-      { id: 'achieve', label: '成就' },
-    ] : []),
+    { id: 'week',    label: '本週' },
+    { id: 'month',   label: '本月' },
+    { id: 'achieve', label: '成就' },
   ];
 
   const missionData = [
-    { id: 'login',   title: '來看看 Buddy',      food: '蘋果',   progress: 1, total: 1, claimed: false },
-    { id: 'recycle', title: '帶禮物回家',         food: '胡蘿蔔', progress: 1, total: 1, claimed: true  },
-    { id: 'feed',    title: '為 Buddy 準備一餐',  food: '麵包',   progress: 2, total: 3, claimed: false },
-    { id: 'tap',     title: '摸摸 Buddy 5 次',    food: '香蕉',   progress: 5, total: 5, claimed: false },
-    { id: 'ad',      title: '看 Buddy 收禮物',    food: '葡萄',   progress: 0, total: 1, claimed: false },
+    { id: 'login',   title: '來看看 Buddy',              food: '蘋果', progress: 1, total: 1 },
+    { id: 'tap',     title: '摸摸 Buddy 5 次',           food: '香蕉', progress: 5, total: 5 },
+    { id: 'recycle', title: '到回收機為 Buddy 帶來禮物', food: '麵包', progress: 2, total: 3 },
+    { id: 'refill',  title: '到補充站為 Buddy 補充能量', food: '葡萄', progress: 0, total: 1 },
+    { id: 'feed',    title: '餵食 Buddy 2 次',           food: '香蕉', progress: 2, total: 2 },
   ];
-
-  const [claimedIds, setClaimedIds] = useState(() =>
-    missionData.filter(m => m.claimed).map(m => m.id)
-  );
 
   const sortedMissions = [...missionData].sort((a, b) => {
     const rank = (m) => {
-      if (claimedIds.includes(m.id)) return 2;   // 已領 → 最下
-      if (m.progress >= m.total) return 0;        // 待領取 → 最上
-      return 1;                                   // 進行中 → 中間
+      if (claimedIds.includes(m.id)) return 2;
+      if (m.progress >= m.total) return 0;
+      return 1;
     };
     return rank(a) - rank(b);
   });
@@ -1650,86 +1756,147 @@ const P5Missions = ({ setScreen, state, dispatch, tweaks }) => {
     return () => clearTimeout(t);
   }, [tab]);
 
+  React.useEffect(() => {
+    if (tab !== 'daily') return;
+    if (scenario === 'normal' || scenario === 'reset') {
+      setToast('今日登入成功，一起來玩吧！');
+    }
+  }, [scenario, tab]);
+
   const handleClaim = (m) => {
     setPulsing(false);
-    setClaimedIds(prev => [...prev, m.id]);
-    dispatch({ type: 'CLAIM_MISSION' });
-    setToast('一起做到！食物 ×1 ・ 心情 +3 ✨');
+    setBouncingId(m.id);
+    setTimeout(() => setBouncingId(null), 320);
+    setTimeout(() => {
+      setClaimedIds(prev => [...prev, m.id]);
+      dispatch({ type: 'CLAIM_MISSION' });
+      setToast('一起做到！食物 ×1 ・ 心情 +3 ✨');
+    }, 160);
   };
+
+  // Show evolution overlay for streak7 before revealing the screen
+  if (showEvolve) {
+    return <EvolveOverlay onDone={() => setShowEvolve(false)} />;
+  }
 
   return (
     <div className="screen p5">
-      <StatusBar light />
-      <div className="header">
-        <h2>今日陪伴</h2>
-        <div className="streak">
-          <span className="fire">🔥</span>
-          <span className="days">5</span>
-          <span className="label">天連續登入</span>
+      {/* ── STICKY TOP: everything above the mission list ── */}
+      <div className="p5-sticky-top">
+        <StatusBar light />
+        <div className="header" style={{ paddingBottom: 26 }}>
+          <h2>今日陪伴</h2>
         </div>
-        <div className="day-dots">
-          {['一', '二', '三', '四', '五', '六', '日'].map((d, i) =>
-            <div key={i} className={`day-dot ${i < 5 ? 'done' : i === 5 ? 'today' : ''}`}>
-              <span>{d}</span>
-              <div className="pill"></div>
-            </div>
-          )}
+
+        {/* Checkin card */}
+        <div style={{ padding: '8px 8px 0', marginBottom: 8 }}>
+          <CheckinCard
+            scenario={scenario}
+            onMakeupSuccess={() => setToast('補簽成功！連續紀錄完美維持！')}
+          />
         </div>
+
+        {/* Tab row — white, rounded top corners */}
+        <div style={{ background: '#fff', borderRadius: '20px 20px 0 0' }}>
+          <div style={{ display: 'flex', gap: 14, padding: '8px 14px', alignItems: 'center' }}>
+            {tabs.map((t) => (
+              <button
+                key={t.id}
+                onClick={() => setTab(t.id)}
+                style={{
+                  padding: '5px 14px', borderRadius: 20, fontSize: 14, fontWeight: 500,
+                  letterSpacing: '0.7px', border: 'none', whiteSpace: 'nowrap', flexShrink: 0,
+                  background: tab === t.id ? '#ff5000' : 'transparent',
+                  color: tab === t.id ? '#fff' : '#808080',
+                }}
+              >{t.label}</button>
+            ))}
+          </div>
+        </div>
+
+        {/* 2px separator (page bg shows through) */}
+        <div style={{ height: 2, background: '#f7f9fc' }} />
       </div>
-      <div className="tabs">
-        {tabs.map((t) =>
-          <button key={t.id} className={`tab ${tab === t.id ? 'active' : ''}`} onClick={() => setTab(t.id)}>
-            {t.label}
-          </button>
+
+      {/* ── SCROLLABLE CONTENT ── */}
+      <div className="p5-scroll">
+        {tab !== 'daily' ? (
+          <div style={{ padding: '40px 20px', textAlign: 'center', color: '#888' }}>
+            <h3 style={{ fontSize: 14, color: '#222', marginBottom: 4 }}>
+              {tab === 'week' ? '本週陪伴' : tab === 'month' ? '本月陪伴' : '成就'}
+            </h3>
+            <p style={{ fontSize: 12 }}>
+              {tab === 'week' ? 'Buddy 還在準備本週的陪伴清單～'
+                : tab === 'month' ? 'Buddy 還在規劃本月的長線陪伴～'
+                : 'Buddy 還在為你收集這份成就～'}
+            </p>
+          </div>
+        ) : (
+          <div style={{ padding: '16px 26px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+            {sortedMissions.map((m, i) => {
+              const isClaimed = claimedIds.includes(m.id);
+              const isLocked = m.progress < m.total;
+              const barFill = `${(m.progress / m.total) * 100}%`;
+              return (
+                <React.Fragment key={m.id}>
+                  {i > 0 && <div style={{ borderTop: '1px solid #e5e7eb' }} />}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    <h4 style={{ margin: 0, fontSize: 14, fontWeight: 700, color: '#222' }}>{m.title}</h4>
+
+                    {/* Progress bar + count */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <div style={{ flex: 1, position: 'relative', height: 16, background: '#f0f3f7', borderRadius: 16, overflow: 'hidden', minWidth: 0 }}>
+                        <div style={{
+                          position: 'absolute', top: 0, left: 0, height: '100%', borderRadius: 16,
+                          background: isClaimed ? '#e5e7eb' : '#ffce00',
+                          width: barFill,
+                        }} />
+                      </div>
+                      <span style={{ fontSize: 12, fontWeight: 700, color: '#888', whiteSpace: 'nowrap', flexShrink: 0 }}>
+                        {m.progress}/{m.total}
+                      </span>
+                    </div>
+
+                    {/* Reward + button */}
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                          <img src={`assets/food/ecobuddy-food___${m.food}.webp`} style={{ width: 18, height: 18, objectFit: 'contain' }} alt={m.food} />
+                          <span style={{ fontSize: 12, fontWeight: 500, color: '#888' }}>{m.food}</span>
+                          <span style={{ fontSize: 12, fontWeight: 700, color: '#888' }}>×1</span>
+                        </div>
+                        <span style={{ fontSize: 10, fontWeight: 700, color: '#888' }}>+</span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                          <img src="assets/icon-mood.svg" style={{ width: 18, height: 18 }} alt="心情" />
+                          <span style={{ fontSize: 12, fontWeight: 500, color: '#888' }}>心情</span>
+                          <span style={{ fontSize: 12, fontWeight: 700, color: '#888' }}>+3</span>
+                        </div>
+                      </div>
+                      <button
+                        className={bouncingId === m.id ? 'claim-bounce' : ''}
+                        onClick={!isClaimed && !isLocked ? () => handleClaim(m) : undefined}
+                        style={{
+                          height: 28, width: 64, borderRadius: 999, fontSize: 11, fontWeight: 700,
+                          flexShrink: 0, border: 'none',
+                          ...(isClaimed
+                            ? { background: '#e5e7eb', border: '1px solid #e5e7eb', color: '#808080' }
+                            : isLocked
+                              ? { background: '#fff', border: '1px solid #e5e7eb', color: '#ccc' }
+                              : { background: '#ff5000', color: '#fff' }),
+                        }}
+                      >
+                        {isClaimed ? '已完成' : isLocked ? '進行中' : '可領取'}
+                      </button>
+                    </div>
+                  </div>
+                </React.Fragment>
+              );
+            })}
+          </div>
         )}
       </div>
 
-      {tab !== 'daily' ? (
-        <div style={{ padding: '40px 20px', textAlign: 'center', color: '#888' }}>
-          <div style={{ fontSize: 48, opacity: .4, marginBottom: 10 }}>🌱</div>
-          <h3 style={{ fontSize: 14, color: '#222', marginBottom: 4 }}>
-            {tab === 'week' ? '這週陪伴' : tab === 'month' ? '這個月陪伴' : '成就'}
-          </h3>
-          <p style={{ fontSize: 12 }}>
-            {tab === 'week' ? 'Buddy 還在準備這週的陪伴清單～' : tab === 'month' ? 'Buddy 還在規劃這個月的長線陪伴～' : 'Buddy 還在為你收集這份成就～'}
-          </p>
-        </div>
-      ) : (
-        <div className="mission-list">
-          {sortedMissions.map((m) => {
-            const isClaimed = claimedIds.includes(m.id);
-            const isLocked = m.progress < m.total;
-            return (
-              <div key={m.id} className="mission-card">
-                <div className="mc-top">
-                  <h4>{m.title}</h4>
-                  {m.total > 1 && (
-                    <>
-                      <div className="progress"><div style={{ width: `${m.progress / m.total * 100}%` }}></div></div>
-                      <div className="progress-text">{m.progress}/{m.total}</div>
-                    </>
-                  )}
-                </div>
-                <div className="mc-bottom">
-                  <div className="mc-reward">
-                    <img src={`assets/food/ecobuddy-food___${m.food}.webp`} className="food-thumb" alt={m.food} />
-                    <span>×1</span>
-                    <img src="assets/icon-mood.svg" className="mood-icon" alt="心情" />
-                    <span>+3</span>
-                  </div>
-                  <button
-                    className={`claim ${isClaimed ? 'done' : isLocked ? 'locked' : pulsing ? 'pulse' : ''}`}
-                    onClick={!isClaimed && !isLocked ? () => handleClaim(m) : undefined}
-                  >
-                    {isClaimed ? '已完成' : isLocked ? '進行中' : '可領取'}
-                  </button>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
-
+      {/* Unified toast — fixed at bottom of screen like other screens */}
       {toast && <SystemToast text={toast} bottom icon={false} onClose={() => setToast(null)} duration={2200} />}
     </div>
   );
