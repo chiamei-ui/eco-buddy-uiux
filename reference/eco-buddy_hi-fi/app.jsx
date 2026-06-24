@@ -298,6 +298,7 @@ const PushDemo = ({ setScreen }) => {
 const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
   "viewportSize": "md",
   "shopPhase": 1,
+  "checkinScenario": "normal",
   "p2DemoType": "recycle",
   "p2ErrKind": null,
   "p2bQuotaFull": false,
@@ -513,6 +514,26 @@ const InlineTweaks = ({ tweaks, setTweak, setScreen, state, dispatch, screen }) 
           />
           <div style={{fontSize:10,color:'rgba(255,255,255,0.3)',marginTop:4,lineHeight:1.4}}>
             Phase 1：禮包/裝扮 Coming Soon，僅點數可購。Phase 2：開放金流。
+          </div>
+        </>
+      )}
+
+      {isP5 && (
+        <>
+          <TweakDivider />
+          <div style={tweakLabel}>簽到情境 (checkinScenario)</div>
+          <Segmented
+            value={tweaks.checkinScenario ?? 'normal'}
+            onChange={v => setTweak('checkinScenario', v)}
+            options={[
+              {v:'normal',  l:'一 正常'},
+              {v:'streak7', l:'二 滿7天'},
+              {v:'makeup',  l:'三 補簽'},
+              {v:'reset',   l:'四 重置'},
+            ]}
+          />
+          <div style={{fontSize:10,color:'rgba(255,255,255,0.3)',marginTop:4,lineHeight:1.4}}>
+            一：進行中（2/7）。二：連續滿7天。三：昨日漏登可補簽。四：重置（1/7）。
           </div>
         </>
       )}
