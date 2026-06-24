@@ -1621,11 +1621,11 @@ const P5Missions = ({ setScreen, state, dispatch, tweaks }) => {
   ];
 
   const missionData = [
-    { id: 'login',   icon: '📅', title: '來看看 Buddy',      reward: '食物 ×1 · 心情 +3', progress: 1, total: 1, claimed: false },
-    { id: 'recycle', icon: '♻️', title: '帶禮物回家',         reward: '食物 ×1 · 心情 +3', progress: 1, total: 1, claimed: true  },
-    { id: 'feed',    icon: '🍖', title: '為 Buddy 準備一餐',  reward: '食物 ×1 · 心情 +3', progress: 2, total: 3, claimed: false },
-    { id: 'tap',     icon: '👋', title: '摸摸 Buddy 5 次',    reward: '食物 ×1 · 心情 +3', progress: 5, total: 5, claimed: false },
-    { id: 'ad',      icon: '🎬', title: '看 Buddy 收禮物',    reward: '食物 ×1 · 心情 +3', progress: 0, total: 1, claimed: false },
+    { id: 'login',   title: '來看看 Buddy',      food: '蘋果',   progress: 1, total: 1, claimed: false },
+    { id: 'recycle', title: '帶禮物回家',         food: '胡蘿蔔', progress: 1, total: 1, claimed: true  },
+    { id: 'feed',    title: '為 Buddy 準備一餐',  food: '麵包',   progress: 2, total: 3, claimed: false },
+    { id: 'tap',     title: '摸摸 Buddy 5 次',    food: '香蕉',   progress: 5, total: 5, claimed: false },
+    { id: 'ad',      title: '看 Buddy 收禮物',    food: '葡萄',   progress: 0, total: 1, claimed: false },
   ];
 
   const [claimedIds, setClaimedIds] = useState(() =>
@@ -1701,19 +1701,29 @@ const P5Missions = ({ setScreen, state, dispatch, tweaks }) => {
             const isLocked = m.progress < m.total;
             return (
               <div key={m.id} className="mission-card">
-                <div className="icon">{m.icon}</div>
-                <div className="body">
+                <div className="mc-top">
                   <h4>{m.title}</h4>
-                  <div className="reward">獎勵：{m.reward}</div>
-                  <div className="progress"><div style={{ width: `${m.progress / m.total * 100}%` }}></div></div>
-                  <div className="progress-text">{m.progress}/{m.total}</div>
+                  {m.total > 1 && (
+                    <>
+                      <div className="progress"><div style={{ width: `${m.progress / m.total * 100}%` }}></div></div>
+                      <div className="progress-text">{m.progress}/{m.total}</div>
+                    </>
+                  )}
                 </div>
-                <button
-                  className={`claim ${isClaimed ? 'done' : isLocked ? 'locked' : pulsing ? 'pulse' : ''}`}
-                  onClick={!isClaimed && !isLocked ? () => handleClaim(m) : undefined}
-                >
-                  {isClaimed ? '已完成' : isLocked ? '進行中' : '可領取'}
-                </button>
+                <div className="mc-bottom">
+                  <div className="mc-reward">
+                    <img src={`assets/food/ecobuddy-food___${m.food}.webp`} className="food-thumb" alt={m.food} />
+                    <span>×1</span>
+                    <img src="assets/icon-mood.svg" className="mood-icon" alt="心情" />
+                    <span>+3</span>
+                  </div>
+                  <button
+                    className={`claim ${isClaimed ? 'done' : isLocked ? 'locked' : pulsing ? 'pulse' : ''}`}
+                    onClick={!isClaimed && !isLocked ? () => handleClaim(m) : undefined}
+                  >
+                    {isClaimed ? '已完成' : isLocked ? '進行中' : '可領取'}
+                  </button>
+                </div>
               </div>
             );
           })}
