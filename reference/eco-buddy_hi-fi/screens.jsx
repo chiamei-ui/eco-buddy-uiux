@@ -1683,20 +1683,17 @@ const CheckinCard = ({ scenario, onMakeupSuccess }) => {
   const isMakeup = sc === 'makeup';
   const showMakeupBtn = isMakeup && !madeup;
 
-  let fillPct, subtitle, dayCount;
+  let subtitle, dayCount;
   if (sc === 'normal') {
-    fillPct = 'calc(100% * 2 / 7)';
     subtitle = '連續紀錄維持中！再登入 5 天即可觸發特殊狀態！';
     dayCount = '2/7';
   } else if (sc === 'streak7') {
-    fillPct = '100%';
     subtitle = '恭喜你成功觸發特殊狀態！明天也要來見Buddy唷';
     dayCount = '7/7';
   } else if (sc === 'makeup') {
     subtitle = '昨日未登入！趕緊補簽到才有機會獲得特殊狀態！';
     dayCount = madeup ? '4/7' : '3/7';
   } else {
-    fillPct = 'calc(100% * 1 / 7)';
     subtitle = '全新的一輪陪伴！連續七天來找buddy會有小驚喜';
     dayCount = '1/7';
   }
@@ -1706,25 +1703,29 @@ const CheckinCard = ({ scenario, onMakeupSuccess }) => {
     onMakeupSuccess?.();
   };
 
-  const absBar = { position: 'absolute', top: 0, left: 0, height: '100%', borderRadius: 16 };
-
   const renderBar = () => {
-    const trackStyle = { flex: 1, position: 'relative', height: 16, borderRadius: 16, overflow: 'hidden', minWidth: 0 };
-    if (isMakeup && !madeup) {
-      return (
-        <div style={trackStyle}>
-          <div style={{ ...absBar, background: '#f0f3f7', width: '100%' }} />
-          <div style={{ ...absBar, background: '#ffce00', width: 'calc(100% * 5 / 7)' }} />
-          <div style={{ ...absBar, background: '#f0f3f7', width: 'calc(100% * 4 / 7)' }} />
-          <div style={{ ...absBar, background: '#ffce00', width: 'calc(100% * 3 / 7)' }} />
-        </div>
-      );
-    }
-    const w = isMakeup && madeup ? 'calc(100% * 4 / 7)' : fillPct;
+    // makeup: day1,2 filled; day3 missed (idx 2); day4 today filled (idx 3)
+    // after makeup: day3 also filled
+    const filledSet = new Set(
+      sc === 'normal'   ? [0,1] :
+      sc === 'streak7'  ? [0,1,2,3,4,5,6] :
+      sc === 'makeup'   ? (madeup ? [0,1,2,3] : [0,1,3]) :
+      [0]
+    );
+    const missedIdx = (sc === 'makeup' && !madeup) ? 2 : -1;
+
     return (
-      <div style={trackStyle}>
-        <div style={{ ...absBar, background: '#f0f3f7', width: '100%' }} />
-        <div style={{ ...absBar, background: '#ffce00', width: w }} />
+      <div style={{ flex: 1, display: 'flex', gap: 4, minWidth: 0 }}>
+        {Array.from({ length: 7 }, (_, i) => {
+          const isMissed = i === missedIdx;
+          const bg = isMissed ? 'rgba(255,255,255,0.25)' : filledSet.has(i) ? '#ffce00' : 'rgba(255,255,255,0.2)';
+          return (
+            <div key={i} style={{
+              flex: 1, height: 14, borderRadius: 4, background: bg,
+              border: isMissed ? '1.5px dashed rgba(255,255,255,0.5)' : 'none',
+            }} />
+          );
+        })}
       </div>
     );
   };
