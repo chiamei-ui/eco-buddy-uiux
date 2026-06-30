@@ -895,6 +895,20 @@ const SHOP_IAP_CONFIG = {
       { emoji: '🎬', name: '廣告道具加速', sub: '本月剩餘天數：每日上限 5→8 次' },
     ],
   },
+  changePack10: {
+    // TODO [上線版] price 讀取平台 SDK [IAP SKU: change_pack_10]，不 hardcode
+    id: 'change-pack-10', emoji: '🎫', name: '10 次｜偶爾想換一下', price: 99,
+    currency: 'cash', cashChannel: 'platform-iap', type: 'change-count',
+    qty: 10, desc: '想換掉日誌裡的 Buddy 時用', thumb: '🎫',
+    ribbon: null, featured: false,
+  },
+  changePack50: {
+    // TODO [上線版] price 讀取平台 SDK [IAP SKU: change_pack_50]，不 hardcode
+    id: 'change-pack-50', emoji: '🎫', name: '50 次｜換到滿意為止', price: 299,
+    currency: 'cash', cashChannel: 'platform-iap', type: 'change-count',
+    qty: 50, desc: '換到滿意為止', thumb: '🎫',
+    ribbon: '最划算', featured: true,
+  },
   monthlyPass: {
     id: 'monthly-pass', emoji: '🎫', name: '月度通行證', price: 149, currency: 'cash', cashChannel: 'platform-iap',
     desc: '整個月都是你和 Buddy 的專屬時光，每天都有小驚喜',
@@ -1073,6 +1087,12 @@ const P4Shop = ({ setScreen, state, dispatch, tweaks, payload }) => {
   const [cosmeticDetail, setCosmeticDetail] = useState(null);
   const isSprintPeriod = tweaks?.shopSprint ?? false;
   const isPhase2 = (tweaks?.shopPhase ?? 1) >= 2;
+  const changeSectionRef = useRef(null);
+  useEffect(() => {
+    if (payload?.focus === 'change-count-packs' && changeSectionRef.current) {
+      setTimeout(() => changeSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 120);
+    }
+  }, []);
 
   const cats = [
   { id: 'food', label: '食物' },
@@ -1092,6 +1112,8 @@ const P4Shop = ({ setScreen, state, dispatch, tweaks, payload }) => {
     package: [
     { ...SHOP_IAP_CONFIG.monthlyPass, price: tweaks?.passPrice ?? SHOP_IAP_CONFIG.monthlyPass.price },
     ...((!isPhase2 || isSprintPeriod) ? [{ ...SHOP_IAP_CONFIG.sprintPack, price: tweaks?.sprintPrice ?? SHOP_IAP_CONFIG.sprintPack.price, daysLeft: tweaks?.sprintDaysLeft ?? 6 }] : []),
+    { ...SHOP_IAP_CONFIG.changePack10 },
+    { ...SHOP_IAP_CONFIG.changePack50 },
     ],
 
     tool: [
@@ -1135,48 +1157,96 @@ const P4Shop = ({ setScreen, state, dispatch, tweaks, payload }) => {
       </div>
 
 
-{/* 禮包分頁 — 2-column grid */}
+{/* 禮包分頁 */}
       {(() => {
         if (tab !== 'package') return null;
-        const pkgItems = items['package'] || [];
-        if (!pkgItems.length) return null;
+        const allPkg = items['package'] || [];
+        const regularPkgs = allPkg.filter(it => it.type !== 'change-count');
+        const changePkgs  = allPkg.filter(it => it.type === 'change-count');
+        const isFocused   = payload?.focus === 'change-count-packs';
+
+        const renderPkgCard = (it) => {
+          const hasDetail = !!(it.contents || it.benefits);
+          const isBought = (it.id === 'sprint-pack' && state.sprintPurchased) ||
+                            (it.id === 'monthly-pass' && state.hasPass);
+          const canBuy = isPhase2 && !isBought;
+          return (
+            <div key={it.id} className={`shop-card${isBought ? ' purchased' : ''}`}
+              onClick={canBuy ? () => hasDetail ? setDetailItem(it) : setPurchasing(it) : undefined}
+              style={{ cursor: canBuy ? 'pointer' : 'default' }}>
+              <div className="thumb">{it.emoji}</div>
+              <h4>{it.name}</h4>
+              <div className="desc">{it.desc}</div>
+              <div className="price">
+                {isBought ? (
+                  <span style={{ fontWeight: 800, color: '#22A55C', fontSize: 12 }}>
+                    {it.id === 'monthly-pass' ? '✓ 啟用中' : '✓ 本月已領'}
+                  </span>
+                ) : (
+                  <>
+                    <b style={{ fontFamily: 'var(--font-en)', fontWeight: 900, color: '#060E9F', fontSize: 15 }}>NT$ {it.price}</b>
+                    <button className="buy-btn" disabled={!isPhase2}
+                      onClick={(e) => { e.stopPropagation(); if (isPhase2) { hasDetail ? setDetailItem(it) : setPurchasing(it); } }}
+                      style={!isPhase2 ? { opacity: 0.45, cursor: 'default' } : {}}>
+                      {!isPhase2 ? '即將開放' : hasDetail ? '查看' : '帶回家'}
+                    </button>
+                  </>
+                )}
+              </div>
+            </div>
+          );
+        };
+
         return (
           <div>
-            <div style={{ fontSize: 13, fontWeight: 800, color: '#888', letterSpacing: '.04em', padding: '10px 18px 4px' }}>現金商品</div>
-            <div className="shop-grid">
-              {pkgItems.map(it => {
-                const hasDetail = !!(it.contents || it.benefits);
-                const isBought = (it.id === 'sprint-pack' && state.sprintPurchased) ||
-                                  (it.id === 'monthly-pass' && state.hasPass);
-                const canBuy = isPhase2 && !isBought;
-                return (
-                  <div key={it.id} className={`shop-card${isBought ? ' purchased' : ''}`}
-                    onClick={canBuy ? () => hasDetail ? setDetailItem(it) : setPurchasing(it) : undefined}
-                    style={{ cursor: canBuy ? 'pointer' : 'default' }}>
-                    <div className="thumb">{it.emoji}</div>
-                    <h4>{it.name}</h4>
-                    <div className="desc">{it.desc}</div>
-                    <div className="price">
-                      {isBought ? (
-                        <span style={{ fontWeight: 800, color: '#22A55C', fontSize: 12 }}>
-                          {it.id === 'monthly-pass' ? '✓ 啟用中' : '✓ 本月已領'}
-                        </span>
-                      ) : (
-                        <>
-                          <b style={{ fontFamily: 'var(--font-en)', fontWeight: 900, color: '#060E9F', fontSize: 15 }}>NT$ {it.price}</b>
+            {/* 一般禮包：月度通行證 / 月底衝刺 — 有焦點時縮排顯示 */}
+            {regularPkgs.length > 0 && (
+              <div style={isFocused ? { opacity: 0.6 } : {}}>
+                <div style={{ fontSize: 13, fontWeight: 800, color: '#888', letterSpacing: '.04em', padding: '10px 18px 4px' }}>現金商品</div>
+                <div className="shop-grid">{regularPkgs.map(renderPkgCard)}</div>
+              </div>
+            )}
 
-                          <button className="buy-btn" disabled={!isPhase2}
-                            onClick={(e) => { e.stopPropagation(); if (isPhase2) { hasDetail ? setDetailItem(it) : setPurchasing(it); } }}
-                            style={!isPhase2 ? { opacity: 0.45, cursor: 'default' } : {}}>
-                            {!isPhase2 ? '即將開放' : hasDetail ? '查看' : '購買'}
-                          </button>
-                        </>
+            {/* 多一點選擇：更換次數包 */}
+            {changePkgs.length > 0 && (
+              <div ref={changeSectionRef} style={isFocused ? { scrollMarginTop: 80 } : {}}>
+                <div style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                  padding: '14px 18px 4px',
+                }}>
+                  <span style={{ fontSize: 13, fontWeight: 800, color: '#888', letterSpacing: '.04em' }}>更換次數包</span>
+                  <span style={{ fontSize: 11, color: '#AAA' }}>機會永遠有效</span>
+                </div>
+                <div className="shop-grid">{changePkgs.map(it => {
+                  const canBuy = isPhase2;
+                  return (
+                    <div key={it.id} className={`shop-card${it.featured ? ' featured-pack' : ''}`}
+                      onClick={canBuy ? () => setPurchasing(it) : undefined}
+                      style={{ cursor: canBuy ? 'pointer' : 'default', position: 'relative' }}>
+                      {it.ribbon && (
+                        <div style={{
+                          position: 'absolute', top: 0, right: 0,
+                          background: 'var(--ecoco-orange)', color: '#fff',
+                          fontSize: 10, fontWeight: 800, padding: '3px 8px',
+                          borderRadius: '0 12px 0 8px', zIndex: 1,
+                        }}>{it.ribbon}</div>
                       )}
+                      <div className="thumb">{it.emoji}</div>
+                      <h4>{it.name}</h4>
+                      <div className="desc">{it.desc}</div>
+                      <div className="price">
+                        <b style={{ fontFamily: 'var(--font-en)', fontWeight: 900, color: '#060E9F', fontSize: 15 }}>NT$ {it.price}</b>
+                        <button className="buy-btn" disabled={!isPhase2}
+                          onClick={(e) => { e.stopPropagation(); if (isPhase2) setPurchasing(it); }}
+                          style={!isPhase2 ? { opacity: 0.45, cursor: 'default' } : {}}>
+                          {!isPhase2 ? '即將開放' : '帶回家'}
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                );
-              })}
-            </div>
+                  );
+                })}</div>
+              </div>
+            )}
           </div>
         );
       })()}
@@ -1332,7 +1402,7 @@ const P4Shop = ({ setScreen, state, dispatch, tweaks, payload }) => {
             if (method === 'cash') {
               orderId = `ORD-${String(Date.now()).slice(-8)}`;
               const thumbMap = { '通行證': '🎫', '禮包': '🎁', '衝刺': '🎁' };
-              const thumb = Object.entries(thumbMap).find(([k]) => item.name.includes(k))?.[1] ?? '🛍️';
+              const thumb = item.thumb ?? Object.entries(thumbMap).find(([k]) => item.name.includes(k))?.[1] ?? '🛍️';
               const payMethod = item.cashChannel === 'platform-iap' ? 'Apple / Google Pay' : '藍新 NewebPay';
               dispatch({ type: 'PURCHASE_CASH', id: orderId, name: item.name, thumb, price: item.price, payMethod, date: new Date().toISOString().slice(0, 10) });
             } else {
@@ -2095,7 +2165,7 @@ const P7Dex = ({ setScreen, state, dispatch, onOpenPicker, tweaks }) => {
             <span className="alert-hint" onClick={() => onOpenPicker && onOpenPicker()} style={{ color: '#1A7A46' }}>已鎖入本月夥伴 · 還可更換 {state.swapLeft} 次 ›</span>
           )}
           {state.lockedMonthCode && state.swapLeft <= 0 && (
-            <span className="alert-hint" onClick={() => setScreen('p11')} style={{ color: '#999', cursor: 'pointer' }}>已達本月更換上限 · 購買更換次數包 ›</span>
+            <span className="alert-hint" onClick={() => setScreen('p4', { tab: 'package', focus: 'change-count-packs' })} style={{ color: '#999', cursor: 'pointer' }}>已達本月更換上限 · 多一點選擇 ›</span>
           )}
         </div>
       </div>
@@ -2497,11 +2567,11 @@ const P10Picker = ({ setScreen, state, dispatch, onClose }) => {
             <p style={{ fontSize: 12, color: capExceeded ? '#D9382A' : 'var(--ecoco-orange)', fontWeight: 700, margin: 0 }}>
               {capExceeded ? '已達本月更換上限' : isFirstLock ? '首次鎖入免費' : `還能換 ${state.swapLeft} 次`}
             </p>
-            <button onClick={() => { handleClose(); setScreen('p11'); }} style={{ fontSize: 11, fontWeight: 800, color: 'var(--ecoco-blue)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, textDecoration: 'underline' }}>多一點選擇 →</button>
+            <button onClick={() => { handleClose(); setScreen('p4', { tab: 'package', focus: 'change-count-packs' }); }} style={{ fontSize: 11, fontWeight: 800, color: 'var(--ecoco-blue)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, textDecoration: 'underline' }}>多一點選擇 →</button>
           </div>
           {capExceeded && (
             <div style={{ marginTop: 10, padding: '10px 12px', background: '#FFF3F0', borderRadius: 10, fontSize: 12, color: '#D9382A', lineHeight: 1.5 }}>
-              本月更換次數已用完。可購買「更換次數包」繼續調整，或等下個月重置。
+              本月更換次數已用完。可點上方「多一點選擇」前往商店補充，或等下個月重置。
             </div>
           )}
         </div>
@@ -2603,59 +2673,10 @@ const P11SuccessModal = ({ item, onClose }) => (
   </div>
 );
 
+/* P11Pack — legacy redirect to P4 package tab (change-count packs now live in P4) */
 const P11Pack = ({ setScreen }) => {
-  const [purchasing, setPurchasing] = useState(null);
-  const [successItem, setSuccessItem] = useState(null);
-
-  return (
-    <div className="screen p11">
-      <StatusBar />
-      <NavBack onClick={() => setScreen('p7')} light />
-      <div className="header">
-        <h2 style={{ marginTop: 8 }}>多一點選擇</h2>
-        <p>想換掉日誌裡的 Buddy 時用</p>
-      </div>
-      <div className="stash">
-        <span className="ticket">🎫</span>
-        <div>
-          <b>3</b><span style={{ fontSize: 11, color: '#666', marginLeft: 4, fontWeight: 700 }}>次</span>
-          <div className="label">你還有 3 次機會</div>
-        </div>
-      </div>
-      <div className="packs">
-        {SWAP_PACKS.map((pack) => (
-          <div key={pack.id} className={`pack-card ${pack.featured ? 'featured' : ''}`}>
-            {pack.featured && <div className="ribbon">最划算</div>}
-            <h3>{pack.name}</h3>
-            <div className="qty">{pack.qty}<span> 次</span></div>
-            <div className="desc">{pack.desc}</div>
-            <div className="price-row">
-              <b>NT$ {pack.price}</b>
-              <button className="buy" onClick={() => setPurchasing(pack)}>帶回家</button>
-            </div>
-          </div>
-        ))}
-      </div>
-      <div style={{ padding: '16px 18px 80px', fontSize: 11, color: '#888', lineHeight: 1.6 }}>
-        ※ 機會永遠有效。<br />
-        ※ 購買即扣款 · 不退費。
-      </div>
-
-      {purchasing && (
-        <P11PurchaseModal
-          item={purchasing}
-          onClose={() => setPurchasing(null)}
-          onConfirm={() => { setSuccessItem(purchasing); setPurchasing(null); }}
-        />
-      )}
-      {successItem && (
-        <P11SuccessModal
-          item={successItem}
-          onClose={() => setSuccessItem(null)}
-        />
-      )}
-    </div>
-  );
+  useEffect(() => { setScreen('p4', { tab: 'package', focus: 'change-count-packs' }); }, []);
+  return null;
 };
 
 

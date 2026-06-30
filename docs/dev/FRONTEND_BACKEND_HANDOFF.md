@@ -174,6 +174,8 @@
 | `rare_food_*` | 稀有食物（各款） | ⏳ 待 PM 確認清單 | ⏳ 待 PM 確認清單 | — | — |
 | `tool_bundle_*` | 道具禮包（各款） | ⏳ 待 PM 確認清單 | ⏳ 待 PM 確認清單 | — | — |
 | 裝扮各款 | — | ⏳ 待 28.3 分批排程 | ⏳ 待 28.3 分批排程 | — | — |
+| `[IAP SKU: change_pack_10]` | 更換次數包 10 次（偶爾想換一下） | ⏳ 待建立 | ⏳ 待建立 | — | — |
+| `[IAP SKU: change_pack_50]` | 更換次數包 50 次（換到滿意為止） | ⏳ 待建立 | ⏳ 待建立 | — | — |
 
 ### 7B. 工程前端任務（IAP）
 
@@ -181,12 +183,15 @@
 - [ ] **7B.2** 道具禮包商品卡讀取 `[IAP SKU: tool_bundle_*]` 平台本地化價格
 - [ ] **7B.3** 確認商品 data `cashChannel` 正確標注（App 內數位商品 `'platform-iap'`，非 `'newebpay'`）
 - [ ] **7B.4** SKU 查詢失敗時商品 CTA disabled，不顯示任何 hardcode 備援金額
+- [ ] **7B.5** 更換次數包商品卡讀取 `[IAP SKU: change_pack_10]` / `[IAP SKU: change_pack_50]` 平台本地化價格
 
 ### 7C. 工程後端任務（IAP）
 
 - [ ] **7C.1** 後端 entitlement 驗證涵蓋稀有食物與道具禮包的 IAP 交易
 - [ ] **7C.2** 訂單資料模型 `cashChannel` 欄位正確記錄 `'platform-iap'` vs `'newebpay'`，不混用
 - [ ] **7C.3** IAP SKU 清單由後台管理，前端 fetch 後顯示，不寫死商品清單
+- [ ] **7C.4** 更換次數包 IAP entitlement 驗證：`change_pack_10` 購買成功 → 永久增加 `swap_count` 餘額 10；`change_pack_50` → 增加 50；次數不過期、不受月底重置影響
+- [ ] **7C.5** 訂單歷史正確記錄更換次數包訂單（`cashChannel: 'platform-iap'`），可在 P4 購買紀錄「現金」Tab 查閱
 
 ---
 

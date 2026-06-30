@@ -26,6 +26,20 @@
 - `scripts/update-engineering-changelog.ps1`
 
 <!-- AUTO-ENTRIES -->
+<!-- engineering-change:cb55992205f3b6b1 -->
+## 2026-06-30 10:06:47 +08:00
+
+- Triggered scopes: design spec, engineering handoff, product flow, hi-fi reference
+- Files:
+  - `docs/design/COPY_DIFF_HIFI.md` (design spec)
+  - `docs/design/COPY_TABLE.md` (design spec)
+  - `docs/design/UI_SPEC.md` (design spec)
+  - `docs/dev/FRONTEND_BACKEND_HANDOFF.md` (engineering handoff)
+  - `docs/product/USER_FLOW.md` (product flow)
+  - `reference/eco-buddy_hi-fi/app.jsx` (hi-fi reference)
+  - `reference/eco-buddy_hi-fi/index.html` (hi-fi reference)
+  - `reference/eco-buddy_hi-fi/screens.jsx` (hi-fi reference)
+
 <!-- engineering-change:55c9274874e1e060 -->
 ## 2026-06-24 17:24:46 +08:00
 
@@ -277,6 +291,7 @@
   - `reference/eco-buddy_hi-fi/app.jsx` (hi-fi reference)
   - `reference/eco-buddy_hi-fi/styles.css` (hi-fi reference)
   - `scripts/update-engineering-changelog.ps1` (handoff automation)
+
 
 
 

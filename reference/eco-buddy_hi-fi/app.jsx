@@ -94,6 +94,7 @@ function stateReducer(state, action){
     case 'BUY':
       if (action.item.id === 'monthly-pass') return { ...state, hasPass: true };
       if (action.item.id === 'sprint-pack') return { ...state, sprintPurchased: true };
+      if (action.item.type === 'change-count') return { ...state, swapLeft: state.swapLeft + (action.item.qty || 0) };
       if (action.item.cashChannel === 'platform-iap') return { ...state, ownedCosmetics: [...(state.ownedCosmetics || []), action.item.id] };
       return {
         ...state,
@@ -240,7 +241,7 @@ const SCREENS = [
   { code:'P6', id:'p6',    label:'廣告 → 開箱', section:'道具' },
   { code:'P9', id:'p9',    label:'道具背包' },
   { code:'P10',id:'p10',   label:'月末選擇彈窗', section:'收藏' },
-  { code:'P11',id:'p11',   label:'更換次數包', phase:'partial' },
+  { code:'P11',id:'p11',   label:'更換次數包（→ P4 禮包）', phase:'retired' },
   { code:'P8', id:'p8',    label:'我的', section:'帳號' },
 ];
 

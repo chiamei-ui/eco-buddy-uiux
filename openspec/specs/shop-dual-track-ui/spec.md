@@ -13,7 +13,7 @@ P4 商店 SHALL 分為「ECOCO 點數消費區」與「真實金流 IAP 區」�
 
 #### Scenario: IAP 區商品內容（更新 #26/#27/#33）
 - **WHEN** 用戶查看真實金流 IAP 區
-- **THEN** 該區包含裝扮（永久穿戴）、月度通行證、**稀有食物**、**道具禮包**、月底衝刺禮包，以及 Phase 2 玩具現金商品；每項商品 data `currency` 為 `'cash'`
+- **THEN** 該區包含裝扮（永久穿戴）、月度通行證、**稀有食物**、**道具禮包**、**更換次數禮包**、月底衝刺禮包，以及 Phase 2 玩具現金商品；每項商品 data `currency` 為 `'cash'`
 - **AND** App 內數位商品 `cashChannel` SHALL 為 `'platform-iap'`；ECOCO 點數儲值等非 App 內數位服務 `cashChannel` 為 `'newebpay'`
 
 #### Scenario: 點數與現金不互換
