@@ -230,7 +230,7 @@ const P1Home = ({ state, dispatch, setScreen, dragManager, payload, showTutorial
       setTouchCount(c => c + 1);
       const rect = e?.currentTarget?.getBoundingClientRect();
       const pos = rect ? { x: rect.width * 0.55, y: rect.height * 0.25 } : null;
-      addRise('+1 心情', pos, '#FFB000');
+      addRise('+1', pos, '#FFB000', 'assets/icon-mood.svg');
     }
     const text = special === 'legendary' ? DIALOGUES.special.legendary
                : special === 'dying'     ? DIALOGUES.special.dying
@@ -272,7 +272,7 @@ const P1Home = ({ state, dispatch, setScreen, dragManager, payload, showTutorial
       // good drop → feeding mini animation in place
       setEating(true);
       dispatch({ type: 'FEED', food: payload.id, hpGain: 5 });
-      addRise('+5 體力', pos);
+      addRise('+5', pos, '#FF4D63', 'assets/icon-hp.svg');
       showBubble({ text: '好好吃！謝謝你～', error: false });
       setTimeout(() => {
         setEating(false);
@@ -293,12 +293,12 @@ const P1Home = ({ state, dispatch, setScreen, dragManager, payload, showTutorial
       setEating(true);
       dispatch({ type: 'USE_TOOL', tool });
       const gainSeq = {
-        feather: [{ txt: '+15 心情', color: '#FFB000' }],
-        brush:   [{ txt: '+15 潔淨', color: '#1F3DBF' }, { txt: '+10 心情', color: '#FFB000' }],
-        ball:    [{ txt: '+15 心情', color: '#FFB000' }],
-        snack:   [{ txt: '+15 體力', color: '#FF4D63' }, { txt: '+15 心情', color: '#FFB000' }],
+        feather: [{ txt: '+15', color: '#FFB000', icon: 'assets/icon-mood.svg' }],
+        brush:   [{ txt: '+15', color: '#1F3DBF', icon: 'assets/icon-clean.svg' }, { txt: '+10', color: '#FFB000', icon: 'assets/icon-mood.svg' }],
+        ball:    [{ txt: '+15', color: '#FFB000', icon: 'assets/icon-mood.svg' }],
+        snack:   [{ txt: '+15', color: '#FF4D63', icon: 'assets/icon-hp.svg' }, { txt: '+15', color: '#FFB000', icon: 'assets/icon-mood.svg' }],
       }[tool] || [{ txt: '+5', color: '#FFB000' }];
-      gainSeq.forEach((g, i) => setTimeout(() => addRise(g.txt, pos, g.color), i * 250));
+      gainSeq.forEach((g, i) => setTimeout(() => addRise(g.txt, pos, g.color, g.icon), i * 250));
       showBubble({ text: '好玩好玩！', error: false });
       setTimeout(() => setEating(false), 1500);
     } else if (payload.kind === 'locked') {
@@ -308,16 +308,17 @@ const P1Home = ({ state, dispatch, setScreen, dragManager, payload, showTutorial
     }
   };
 
-  const addRise = (txt, pos, color) => {
+  const addRise = (txt, pos, color, icon) => {
     const id = Math.random();
-    setValueRises((prev) => [...prev, { id, txt, top: pos?.y || 280, left: pos?.x || 180, color }]);
+    setValueRises((prev) => [...prev, { id, txt, top: pos?.y || 280, left: pos?.x || 180, color, icon }]);
     setTimeout(() => setValueRises((prev) => prev.filter((v) => v.id !== id)), 1400);
   };
 
   const wardrobeIsPhase2 = (tweaks?.shopPhase ?? 1) >= 2;
   const wardrobeOwnedItems = COSMETIC_CATALOG.filter(c => (state.ownedCosmetics || []).includes(c.id));
   const wardrobeHasItems = wardrobeIsPhase2 && wardrobeOwnedItems.length > 0;
-  const dockScrollable = (dockTab === 'wardrobe' && wardrobeHasItems) || (dockTab === 'tools' && state.tools.length > 4);
+  const dockScrollable = (dockTab === 'wardrobe' && wardrobeHasItems) || (dockTab === 'tools' && state.tools.length > 4) ||
+    (dockTab === 'food' && new Set(state.food.map(f => f.source || 'recycle')).size > 1);
 
   return (
     <div className="screen p1">
@@ -377,7 +378,7 @@ const P1Home = ({ state, dispatch, setScreen, dragManager, payload, showTutorial
             data-turtle="true" />
           
           {valueRises.map((v) =>
-          <div key={v.id} className="value-rise" style={{ top: v.top, left: v.left, color: v.color || '#FF4D63' }}>{v.txt}</div>
+          <ValueRise key={v.id} value={v.txt} icon={v.icon} color={v.color} top={v.top} left={v.left} />
           )}
         </div>
 
@@ -424,10 +425,21 @@ const P1Home = ({ state, dispatch, setScreen, dragManager, payload, showTutorial
             )}
           </div>
         {dockTab === 'food' ? <>
-          <div className="dock-grid">
-            {state.food.map((f, i) => <FoodCell key={f.id} food={f} dragManager={dragManager} onDrop={onDrop} index={i} showBubble={showBubble} pulsing={pulsingIds.has(f.id)} />
-            )}
-          </div>
+          {[
+            { source: 'recycle', label: '帶禮物回家' },
+            { source: 'shop',    label: '商店補給' },
+          ].map(({ source, label }) => {
+            const items = state.food.filter(f => (f.source || 'recycle') === source && (f.state === 'locked' || f.stock > 0));
+            if (!items.length) return null;
+            return (
+              <div key={source} style={{ marginBottom: 10 }}>
+                <div className="food-section-label">{label}</div>
+                <div className="dock-grid">
+                  {items.map(f => <FoodCell key={f.id} food={f} dragManager={dragManager} onDrop={onDrop} showBubble={showBubble} pulsing={pulsingIds.has(f.id)} />)}
+                </div>
+              </div>
+            );
+          })}
         </> : dockTab === 'tools' ? <>
           <div className="dock-grid">
             {state.tools.length ? state.tools.map((t, i) =>
@@ -594,7 +606,7 @@ const FoodCell = ({ food, dragManager, onDrop, showBubble, pulsing }) => {
     <div className="food-slot">
       <div ref={cellRef} className={`food-cell ${cls}${pulsing ? ' pulsing' : ''}`} onPointerDown={handlePointerDown}>
         {food.state === 'locked'
-          ? <span className="lock">🔒</span>
+          ? <span className="emoji food-preview-emoji">{food.emoji}</span>
           : isEmpty
             ? <span className="empty-plate" aria-hidden="true">🍽️</span>
           : <>
@@ -603,11 +615,9 @@ const FoodCell = ({ food, dragManager, onDrop, showBubble, pulsing }) => {
             </>
         }
       </div>
-      {food.state !== 'locked' && (
-        <div className="food-label">
-          <span className="name">{isEmpty ? '空餐盤' : food.name}</span>
-        </div>
-      )}
+      <div className="food-label">
+        <span className="name">{food.state === 'locked' ? '下週預告' : isEmpty ? '空餐盤' : food.name}</span>
+      </div>
     </div>);
 };
 

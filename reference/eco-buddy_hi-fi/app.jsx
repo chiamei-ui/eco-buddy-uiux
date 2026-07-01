@@ -14,10 +14,10 @@ const DEFAULT_STATE = {
   ownedCosmetics: [],
   equippedCosmetic: null,
   food: [
-    { id:'hotdog-w1', name:'熱狗堡', emoji:'🌭', stock:2, state:'has' },
-    { id:'hotdog-w2', name:'熱狗堡', emoji:'🌭', stock:12, state:'has' },
-    { id:'hotdog-w3', name:'熱狗堡', emoji:'🌭', stock:2, state:'low' },
-    { id:'hotdog-w4', name:'???',    emoji:'🌭', stock:0, state:'locked' },
+    { id:'hotdog-w1', name:'熱狗堡', emoji:'🌭', stock:2,  state:'has',    source:'recycle' },
+    { id:'hotdog-w3', name:'熱狗堡', emoji:'🌭', stock:2,  state:'low',    source:'recycle' },
+    { id:'hotdog-w2', name:'熱狗堡', emoji:'🌭', stock:12, state:'has',    source:'shop' },
+    { id:'hotdog-w4', name:'???',    emoji:'🌭', stock:0,  state:'locked', source:'recycle' },
   ],
   tools: [
     { id:'ball',    name:'小球',   emoji:'⚾', count:1, hoursLeft:72 },
@@ -87,7 +87,7 @@ function stateReducer(state, action){
           clean: Math.min(100, state.stats.clean + (action.cleanGain || 0)),
         },
         ...(!action.quotaFull && {
-          food: state.food.map((f,i) => i<3 ? {...f, stock:f.stock + (i===0?3:i===1?2:1)} : f),
+          food: state.food.map(f => f.source === 'recycle' ? {...f, stock: f.stock + 1} : f),
         }),
         points: state.points + (action.pointsGain || 0),
       };

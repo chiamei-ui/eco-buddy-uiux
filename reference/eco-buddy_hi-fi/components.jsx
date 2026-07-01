@@ -186,8 +186,11 @@ const AvatarButton = ({ onClick }) => (
 );
 
 /* ───────── Floating value-rise indicator (HP+5 etc) ───────── */
-const ValueRise = ({ value, color, top, left }) => (
-  <div className="value-rise" style={{top, left, color: color || '#FF4D63'}}>{value}</div>
+const ValueRise = ({ value, icon, color, top, left }) => (
+  <div className="value-rise" style={{top, left, color: color || '#FF4D63', display:'flex', alignItems:'center', gap:3}}>
+    <span>{value}</span>
+    {icon && <img src={icon} style={{width:20,height:20,filter:'drop-shadow(0 1px 3px rgba(255,255,255,0.9))'}} alt="" />}
+  </div>
 );
 
 /* ───────── Export to window ───────── */
