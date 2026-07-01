@@ -214,6 +214,9 @@ const P1Home = ({ state, dispatch, setScreen, dragManager, payload, showTutorial
         : DIALOGUES.err.toolStored.ad;
       setTimeout(() => showBubble({ text: msg, error: false }), 120);
     }
+    if (payload?.cleanGain) {
+      setTimeout(() => addRise(`+${payload.cleanGain}`, null, '#1F3DBF', 'assets/icon-clean.svg'), 300);
+    }
     const t = setTimeout(() => dismissAmbient(), 10000);
     return () => clearTimeout(t);
   }, []);
@@ -311,7 +314,7 @@ const P1Home = ({ state, dispatch, setScreen, dragManager, payload, showTutorial
   const addRise = (txt, pos, color, icon) => {
     const id = Math.random();
     setValueRises((prev) => [...prev, { id, txt, top: pos?.y || 280, left: pos?.x || 180, color, icon }]);
-    setTimeout(() => setValueRises((prev) => prev.filter((v) => v.id !== id)), 1400);
+    setTimeout(() => setValueRises((prev) => prev.filter((v) => v.id !== id)), 2000);
   };
 
   const wardrobeIsPhase2 = (tweaks?.shopPhase ?? 1) >= 2;
@@ -796,7 +799,7 @@ const P2bResult = ({ setScreen, dispatch, tweaks = {}, setTweak = () => {} }) =>
 
   const handleDone = () => {
     dispatch({ type: 'COLLECT_BATCH', quotaFull, hpGain: HP_GAIN, cleanGain: CLEAN_GAIN, pointsGain: POINTS_GAIN });
-    navigate(() => setScreen('p1', quotaFull ? {} : { foodStored: true }));
+    navigate(() => setScreen('p1', { ...(quotaFull ? {} : { foodStored: true }), cleanGain: CLEAN_GAIN }));
   };
 
   return (

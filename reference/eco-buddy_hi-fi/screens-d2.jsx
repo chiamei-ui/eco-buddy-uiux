@@ -96,7 +96,7 @@ const P12RefillResult = ({ setScreen, state, dispatch, payload, tweaks = {} }) =
           </div>
         </div>
         <div className="footer">
-          <button className="btn-primary" disabled={phase !== 'done'} onClick={() => setScreen('p1')}>
+          <button className="btn-primary" disabled={phase !== 'done'} onClick={() => setScreen('p1', { cleanGain: session.clean })}>
             {phase === 'done' ? '完成' : '計算中…'}
           </button>
         </div>
