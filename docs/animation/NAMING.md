@@ -1,7 +1,7 @@
 # ECO Buddy 命名手冊 Naming Manual
 
-**版本 / Version**: v1.0  
-**對應 xlsx**: `ecoco-private/naming/ECOCO_naming_manual_v1_0_bilingual.xlsx`  
+**版本 / Version**: v1.1  
+**對應 xlsx**: `ecoco-private/naming/ECOCO_naming_manual_v1_1_bilingual.xlsx`  
 **Owner**: 窗口設計師 @idahsueh-cmd（主寫）/ 前端工程師 @shangchian（技術格式確認）  
 **Commit prefix**: `[anim]`
 
@@ -62,6 +62,17 @@
 
 > 3×3×3 = 27 種基礎型態。後端串接與 Rive Runtime 呼叫由甲方工程師實作。
 
+### 架構鎖定項目（RFP §3.7）
+
+以下項目跨月度鎖定，月度合約不得更名、新增或移除：
+
+| 項目 | 說明 |
+|------|------|
+| `BuddyMachine` | State Machine 名稱固定，不得改名 |
+| `hp_level` / `clean_level` / `mood_level` | 三個必要 input 名稱固定，不得更名 |
+| `ev_*` trigger | 所有事件埋點名稱鎖定，不得新增或改名（見第三節） |
+| `morph_01`–`morph_27` | Rive SM 內部型態對應，**非**後端傳入的 input，不出現於後端 API |
+
 ---
 
 ## 二、Slot Booleans 配件插槽
@@ -101,6 +112,18 @@
 
 > 詳細連動規則及 #27→#36 切換例外見 [CHARACTER_TYPES.md §三](CHARACTER_TYPES.md)。
 
+#### §5.2 成就型插槽互斥規則（RFP §5.2）
+
+**互斥族群**：`has_overfed`（#28）、`has_laurel`（#29）、`has_frenzy`（#30）、`has_bottle`（#31）、`has_armor`（#32）、`has_dark`（#33）、`has_disco`（#34）、`has_golden`（#35）
+
+- 任一時刻至多 **1 個**互斥族群成員為 `true`；切換時 old→`false` 與 new→`true` 須於**同一 tick** 完成
+- **例外**：`has_halo`（S2）與 `has_cycle_crown`（S6）不在互斥族群，得同時與任一互斥成員並存
+
+**fail-safe 最高優先**：`has_dark=true`（S5 #33 壞滅核心）一經觸發：
+- 強制所有互斥族群成員為 `false`
+- 3.6 元素、S1–S10 插槽視覺、`has_halo`、`has_cycle_crown` 顯示一律強制為 `false`
+- 僅顯示 S5 暗黑核心取代視覺，且**鎖定至月底**（期間用戶養成數值後端正常累積，Rive 視覺強制顯示 #33）
+
 ---
 
 ## 三、Event Triggers 事件埋點
@@ -136,6 +159,47 @@
 
 ## 備注
 
-- **xlsx 正式版位置**：`ecoco-private/naming/ECOCO_naming_manual_v1_0_bilingual.xlsx`（對外發送用，合約驗收以此版本為準）
+- **xlsx 正式版位置**：`ecoco-private/naming/ECOCO_naming_manual_v1_1_bilingual.xlsx`（對外發送用，合約驗收以此版本為準）
 - **通知外包**：任何影響外包工作的命名異動，由**窗口設計師**以正式 email 通知 Anastasiia，等書面確認後方可進入正式建構
 - **準據語言**：中英雙語並列，以中文版為準
+
+---
+
+## 四、State-Specific Visual Elements 狀態專屬視覺元素
+
+> 對應 RFP §3.6 及 4.1 附表 B。命名格式：`state_<NN>_<type>_<descriptor>`；type 限 `prop` / `decor` / `decal` / `mark`。  
+> 元素由 Rive State Machine 依當前基礎狀態自動控制顯示／隱藏，**不使用 `has_*` Boolean，後端不傳值**。  
+> #14 為預設基準狀態，無 3.6 元素，不計入 26 個狀態項目。  
+> 主命名為 Phase 0B-2 對齊建議；最終命名須雙方書面確認。
+
+| # | 狀態標籤 ZH / EN | 主命名 element_naming | type | 骨架附著位置 | 備註 |
+|---|---|---|---|---|---|
+| #01 | 瀕危史萊姆 / Endangered Slime | `state_01_decal_slime_drip` | decal | body_edge（身體邊緣） | 與 FX2a 髒污粒子並存 |
+| #02 | 髒髒小可憐 / Dirty Pitiful | `state_02_mark_fly` | mark | head_top_or_side（頭部上方或側邊） | 海龜首版避開帽子位置；月度新角色依相同骨架下對應附著節點與身形比例決定位置 |
+| #03 | 樂觀泥巴球 / Optimistic Mudball | `state_03_decal_mud_splash` | decal | body_surface（身體表面） | 與 FX2a 髒污粒子、FX1 愛心粒子並存 |
+| #04 | 憂鬱紙片人 / Melancholy Paperman | `state_04_decal_paper_fold` | decal | body_surface（身體表面） | — |
+| #05 | 標準初生嬰 / Standard Newborn | `state_05_prop_bib` | prop | chest（胸前） | — |
+| #06 | 迷你啦啦隊 / Mini Cheerleader | `state_06_prop_pompom` | prop | hands_LR（雙手） | 左右手各一；子圖層命名：`state_06_prop_pompom_L`、`state_06_prop_pompom_R` |
+| #07 | 易碎玻璃心 / Fragile Glass Heart | `state_07_decor_cracked_heart` | decor | chest（胸前） | 與 FX3 發光光暈並存 |
+| #08 | 靜謐水晶 / Tranquil Crystal | `state_08_decor_crystal_facet` | decor | body_surface（身體表面） | 與 FX3 發光光暈並存 |
+| #09 | 閃耀精靈 / Sparkling Sprite | `state_09_decor_star` | decor | head_side（頭部側邊） | 海龜首版避開帽子中心；與 FX3 發光光暈、FX7 星燦粒子並存（FX7 取代 FX1） |
+| #10 | 暴躁泥獸 / Grumpy Mudbeast | `state_10_decor_anger` | decor | character_detail（角色細節） | 彈性全面表達；子圖層由乙方於 Phase 0B-2 時提交；子圖層命名：`state_10_decor_anger_<descriptor>` |
+| #11 | 迷茫拾荒者 / Lost Scavenger | `state_11_prop_salvage_bag` | prop | side（側邊） | 與 FX2a 髒污粒子並存 |
+| #12 | 樂天泥巴客 / Cheerful Mudfellow | `state_12_decor_scarf` | decor | neck（脖子） | 與 FX2a 髒污粒子、FX1 愛心粒子並存 |
+| #13 | 鬧脾氣市民 / Cranky Citizen | `state_13_decor_tie` | decor | neck_front_center（脖子前方中央） | — |
+| #14 | 環保初心 / Eco Initiate | — | — | — | 預設基準狀態，無 3.6 元素 |
+| #15 | 快樂小幫手 / Happy Helper | `state_15_prop_tool_kit` | prop | side_or_hands（側邊或雙手） | 工具包與手套擇一；工具包置側邊，手套置雙手 |
+| #16 | 傲嬌貴族 / Haughty Noble | `state_16_decor_bowtie` | decor | neck_front_center（脖子前方中央） | 位置與 #25 頸部環繞區隔 |
+| #17 | 優雅守護者 / Elegant Guardian | `state_17_decor_shield` | decor | chest（胸前） | 與 FX3 發光光暈並存；位置避免與 #06 雙手道具衝突 |
+| #18 | 科技大使 / Tech Ambassador | `state_18_decor_hologram` | decor | chest（胸前） | 與 FX3 發光光暈、FX1 愛心粒子並存；浮雕風格以區隔 #27 領袖徽章視覺 |
+| #19 | 臃腫污染源 / Bloated Polluter | `state_19_decal_pollution` | decal | body_surface（身體表面） | 彈性全面表達；子圖層由乙方於 Phase 0B-2 時提交；子圖層命名：`state_19_decal_pollution_<descriptor>` |
+| #20 | 遲緩巨漢 / Sluggish Giant | `state_20_prop_towel` | prop | shoulder_or_foot（肩膀或腳踝） | 毛巾與腳踝環擇一；毛巾置肩膀，腳踝環置腳踝 |
+| #21 | 樂天胖達 / Cheerful Chubby | `state_21_decor_belt` | decor | waist（腰部） | 與 FX2a 髒污粒子、FX5 汗珠粒子、FX1 愛心粒子並存 |
+| #22 | 悶悶不樂巨球 / Sulky Sphere | `state_22_decor_raincloud` | decor | head_top（頭部上方） | 海龜首版置於帽子上方；月度新角色依相同骨架下對應附著節點與身形比例決定位置 |
+| #23 | 溫和巨獸 / Gentle Behemoth | `state_23_decor_flower_bird` | decor | shoulder（肩膀） | — |
+| #24 | 彈力大福 / Bouncy Daifuku | `state_24_decal_sugar_dust` | decal | body_surface（身體表面） | 與 FX1 愛心粒子並存 |
+| #25 | 悲傷神獸 / Sorrowful Beast | `state_25_decor_neck_ornament` | decor | neck_around（脖子環繞） | 與 FX3 發光光暈、FX6 發光眼淚粒子並存 |
+| #26 | 沉睡巨像 / Sleeping Titan | `state_26_mark_z` | mark | head_top（頭部上方） | 海龜首版紅帽不取代，置於帽子上方；月度新角色依相同骨架下對應附著節點與身形比例決定位置 |
+| #27 | ECOCO 領袖 / ECOCO Leader | `state_27_decor_leader_badge` | decor | chest_or_sash（胸前或斜肩） | 徽章或斜肩帶擇一；與 FX1 愛心粒子並存；S2 彩虹光環依 9.1 規格取代 FX3 |
+
+> 最終命名須雙方書面確認後方可進入正式建構。視覺規格詳見 [CHARACTER_TYPES.md §五](CHARACTER_TYPES.md)。

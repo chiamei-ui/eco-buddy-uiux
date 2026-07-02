@@ -1,9 +1,9 @@
 # ECO Buddy 角色型態規格 Character Type Specifications
 
-**版本 / Version**：v1.1  
-**更新日期**：2026-06-24  
+**版本 / Version**：v1.2  
+**更新日期**：2026-07-02  
 **Owner**：窗口設計師 @idahsueh-cmd  
-**資料來源**：RFP v1.1（`ecoco-private/specs/ECOCO_RFP_EcoBuddy_v1_1_20260624.docx`）§4、§5  
+**資料來源**：RFP v1.2（`ecoco-private/specs/ECOCO_RFP_EcoBuddy_v1_2_20260702.docx`）§4、§5  
 **適用對象**：前端工程師（@shangchian）、外包動畫師（Anastasiia）
 
 > 本文件為 RFP §4 完整轉錄。型態 ID 以 `#NN` 格式標注，可直接 Ctrl+F 搜尋。
@@ -110,4 +110,76 @@
 
 ---
 
-*Based on RFP v1.1 — 2026-06-24。如 RFP 有修訂，本文件同步更新並記錄異動。*
+---
+
+## 五、§3.6 狀態專屬視覺元素規則 State-Specific Visual Element Rules
+
+> RFP §3.6 完整轉錄。命名清單見 [NAMING.md §四](NAMING.md)。
+
+**（a）定義**：基礎狀態（#01–#27）各含狀態專屬視覺元素，為該狀態之視覺身份記號；由 Rive State Machine 依 hp_level／clean_level／mood_level 解析後之當前基礎狀態控制顯示／隱藏。**不屬配件插槽（S1–S10）類別，不使用 `has_*` Boolean，後端不傳值。**
+
+**（b）跨月度沿用**：
+- **b-1 預設沿用**：視覺素材預設沿用首版美術（形狀、色彩、材質、細節）；月度設計師依當月角色身形比例與相同骨架下對應附著節點進行位置與縮放調整
+- **b-2 月度合約彈性**：若月度角色風格不適合直接沿用，得於月度合約附件另行約定局部重繪或替換；惟不得新增後端 input、不得變更 State Machine、不得改變 26 個狀態項目數量
+
+月度替換時，3.6 元素視覺應呈現「角色持有／穿戴／攜帶」之自然狀態。
+
+**（c）覆蓋優先序**：`has_dark=true`（#33 壞滅核心）啟用時，所有 3.6 元素強制隱藏；`has_halo`／`has_cycle_crown` 不影響 3.6 元素顯示。
+
+**（e）命名規範**：`state_<NN>_<type>_<descriptor>`；type 限 `prop` / `decor` / `decal` / `mark`。
+
+**（f）圖層拆分**：
+- d-1 類（需甲方確認）：須於 Phase 0B-2 前提交拆分計畫，由甲方書面確認
+- d-2 類（乙方自行處理）：外觀不影響驗收條件者，Contractor 可自行決定圖層細節
+
+**（g）動畫性質**：3.6 元素附著骨架律動（隨本體動作自然跟隨），**不得有獨立循環動畫**。
+
+---
+
+## 六、§3.7 月度替換架構鎖定規則 Monthly Replacement Architecture Lock
+
+月度替換僅得更換 Skin（視覺素材層），不得變更控制層邏輯。首版建立後鎖定項目：
+
+| 條 | 鎖定項目 | 規則 |
+|---|---|---|
+| a-1 | `BuddyMachine` | State Machine 名稱固定，不得改名 |
+| a-2 | `hp_level` / `clean_level` / `mood_level` | 三大核心 input，範圍 0–100，不得新增或改名 |
+| a-3 | `ev_*` trigger | 首版鎖定，月度不得新增或改名 |
+| a-4 | Timeline／Animation Node 骨幹 | 沿用首版，僅允許月度素材對應之葉層命名調整 |
+
+**（b）`morph_01`~`morph_27`**：Rive 內部視覺／Skin 對應命名，用於編輯階段辨識當前基礎狀態，**不是後端 input**；後端不傳送，狀態解析由 State Machine 依 hp_level／clean_level／mood_level 內部運算完成。
+
+**（c）Pivot／Bounds／Draw Order 安全範圍**：首版確立各狀態之 pivot 錨點、bounds 邊界與 draw order 為基準；月度替換不得：
+- c-1 造成 pivot 錨點跳動導致動作起訖位置錯位
+- c-2 造成 bounds 超出安全範圍，導致 App 端裁切或遮擋錯位
+- c-3 改變關鍵層 draw order（如 S5 暗黑核心遮擋鏡頭前元素）
+
+安全範圍以首版 Phase 0B-2 確認之 pivot／bounds／draw order 規格表為準。
+
+**（d）月度合約驗收繼受**：技術驗收須繼受 C-P2-2（骨架附著律動）、C-P2-3（狀態切換轉場）、C-P2-6（pivot／bounds／draw order 安全範圍）之檢核原則。各次月度合約得補充專屬驗收項目，但不得取消上述繼受項目。
+
+---
+
+## 七、§5.2 成就型特殊插槽互斥規則 Achievement-Type Special Slot Mutual Exclusivity
+
+**（a）互斥族群定義**：成就型特殊插槽（#28–#36 系列，實作於 S1–S6 相關插槽），除下列例外，任一時刻至多 **1 個** `has_*=true`。
+
+**（b）互斥族群成員**：
+
+`has_overfed`（#28）、`has_laurel`（#29）、`has_frenzy`（#30）、`has_bottle`（#31）、`has_armor`（#32）、`has_dark`（#33）、`has_disco`（#34）、`has_golden`（#35）
+
+同族群內任一 `has_*=true` 時，其他族群成員一律為 `false`。
+
+**（c）非互斥成員**：`has_halo`（隨 #27／#36）、`has_cycle_crown`（隨 #36）不受本規則約束，得同時與族群內任一 `has_*=true` 並存；並存時之 3.6 元素覆蓋規則依 §3.6(c) 辦理。
+
+**（d）狀態更新時序**：由 has_A→`false` 切換為 has_B→`true` 時，須於**同一 tick** 完成，避免中間態產生兩個 `has_*=true` 之非法組合。
+
+**（e）fail-safe 最高優先** — `has_dark=true`（#33 壞滅核心）觸發後：
+- 強制所有互斥族群成員為 `false`
+- 3.6 元素、S1–S10 插槽視覺、`has_halo`、`has_cycle_crown` 顯示一律強制為 `false`
+- 僅顯示 S5 暗黑核心取代視覺
+- `has_dark=true` **鎖定至月底**；期間用戶養成數值後端正常累積，Rive 視覺強制顯示 #33
+
+---
+
+*Based on RFP v1.2 — 2026-07-02。如 RFP 有修訂，本文件同步更新並記錄異動。*
