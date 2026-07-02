@@ -2184,7 +2184,7 @@ const P7Dex = ({ setScreen, state, dispatch, onOpenPicker, tweaks }) => {
           {!state.lockedMonthCode ? (
             <button onClick={() => onOpenPicker && onOpenPicker()} style={{ background: 'var(--ecoco-orange)', color: '#fff', border: 'none', borderRadius: 999, padding: '5px 14px', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>收錄本月最佳</button>
           ) : (
-            <button onClick={() => setScreen('p4', { tab: 'package', focus: 'change-count-packs' })} style={{ background: '#F4F4F4', color: '#1A1A1A', border: 'none', borderRadius: 999, padding: '5px 14px', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>更改本月最佳</button>
+            <button onClick={() => setScreen('p4', { tab: 'package', focus: 'change-count-packs' })} style={{ background: 'var(--ecoco-orange)', color: '#fff', border: 'none', borderRadius: 999, padding: '5px 14px', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>更改本月最佳</button>
           )}
         </div>
       </div>
@@ -2622,7 +2622,7 @@ const P10Picker = ({ setScreen, state, dispatch, onClose }) => {
         </div>
       </div>
       {confirmCode && ReactDOM.createPortal(
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 }}>
+        <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 }}>
           <div style={{ background: '#fff', borderRadius: 20, padding: '28px 24px', width: 280, textAlign: 'center' }}>
             <p style={{ fontWeight: 700, fontSize: 16, marginBottom: 8, lineHeight: 1.4, color: '#1A1A1A' }}>確定把這個 Buddy 收進日誌？</p>
             <p style={{ fontSize: 13, color: '#666', marginBottom: 24, lineHeight: 1.6 }}>本月只有一次免費機會，收錄後若要更改需要更換次數。</p>
@@ -2632,7 +2632,7 @@ const P10Picker = ({ setScreen, state, dispatch, onClose }) => {
             </div>
           </div>
         </div>,
-        document.body
+        document.querySelector('.iphone-screen')
       )}
     </div>);
 
