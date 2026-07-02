@@ -215,7 +215,11 @@ const P1Home = ({ state, dispatch, setScreen, dragManager, payload, showTutorial
       setTimeout(() => showBubble({ text: msg, error: false }), 120);
     }
     if (payload?.cleanGain) {
-      setTimeout(() => addRise(`+${payload.cleanGain}`, null, '#1F3DBF', 'assets/icon-clean.svg'), 300);
+      setTimeout(() => {
+        const wrap = turtleWrapRef.current;
+        const pos = wrap ? { x: wrap.offsetWidth * 0.55, y: wrap.offsetHeight * 0.25 } : null;
+        addRise(`+${payload.cleanGain}`, pos, '#1F3DBF', 'assets/icon-clean.svg');
+      }, 300);
     }
     const t = setTimeout(() => dismissAmbient(), 10000);
     return () => clearTimeout(t);
