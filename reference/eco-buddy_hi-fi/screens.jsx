@@ -11,7 +11,7 @@ const OB_STEPS = [
   { refKey: 'scanBtnRef',    pad: 8,  radius: 24, textRight: true,
     title: '帶禮物回家 📦',         text: '投瓶後對準機台螢幕條碼，就有機會換到食物哦！' },
   { refKey: 'adsBtnRef',     pad: 8,  radius: 24, textRight: true,
-    title: '免費道具 🎁',           text: '看廣告領道具，每天最多 5 次' },
+    title: '免費玩具 🎁',           text: '看廣告領玩具，每天最多 5 次' },
   { refKey: 'dockTabsRef',   pad: 6,  radius: 16,
     title: 'Buddy 的餐袋、玩具箱、換衣間', text: '切換查看食物、道具和裝扮，拖到夥伴身上使用' },
   { refKey: 'tabbarRef',     pad: 4,  radius: 12,
@@ -517,7 +517,7 @@ const P1Home = ({ state, dispatch, setScreen, dragManager, payload, showTutorial
         <div className="sheet-backdrop" onClick={() => setP6SheetOpen(false)}>
           <div className="sheet-panel" onClick={e => e.stopPropagation()}>
             <div className="sheet-grip" />
-            <h3 style={{ fontSize: 18, fontWeight: 900, textAlign: 'center', marginBottom: 6 }}>免費道具</h3>
+            <h3 style={{ fontSize: 18, fontWeight: 900, textAlign: 'center', marginBottom: 6 }}>免費玩具</h3>
             <div style={{ textAlign: 'center', color: 'var(--gray-text)', fontSize: 13, marginBottom: 12 }}>
               {state.adRemaining > 0
                 ? `今日剩 ${state.adRemaining} 次 · 觀看 30 秒影片即可獲得`
@@ -656,7 +656,7 @@ const ToolCell = ({ tool, dragManager, onDrop, showBubble, dispatch, pulsing }) 
   return (
     <div className="food-slot">
       <div
-        className={`food-cell has-stock${tool.isNew ? ' tool-new' : ''}${pulsing ? ' pulsing' : ''}`}
+        className={`food-cell has-stock${pulsing ? ' pulsing' : ''}`}
         onPointerDown={handlePointerDown}
         style={{ position:'relative', opacity: expired ? 0.4 : 1, cursor: expired ? 'default' : 'grab' }}
       >
@@ -2034,7 +2034,7 @@ const P6Ads = ({ setScreen, state, dispatch }) => {
       <div className="ad-screen">
           <div className="ad-label">一段小廣告（讓 Buddy 開心）</div>
           <div className={`skip ${adTime <= 0 ? 'ready' : ''}`} onClick={adTime <= 0 ? skipAd : undefined}>
-            {adTime > 0 ? `${adTime}s` : '領道具 ›'}
+            {adTime > 0 ? `${adTime}s` : '領玩具 ›'}
           </div>
           <div className="ad-mock">
             <div className="play">▶</div>
@@ -2047,7 +2047,7 @@ const P6Ads = ({ setScreen, state, dispatch }) => {
       <div className="step">
           <h2>恭喜獲得！</h2>
           {/* TODO [上線版] 「24 小時」須改為讀取 [API: tool_free_expire_hours]，不寫死 */}
-          <div className="sub">道具已加入背包，請於 24 小時內使用</div>
+          <div className="sub">玩具已加入背包，請於 24 小時內使用</div>
           <div className="box">
             <div className="reward-card">
               <div className="emoji">{reward.emoji}</div>
@@ -2484,7 +2484,7 @@ const P9Bag = ({ setScreen, state, dispatch }) => {
         <div className="sheet-backdrop" onClick={() => setP6SheetOpen(false)}>
           <div className="sheet-panel" onClick={e => e.stopPropagation()}>
             <div className="sheet-grip" />
-            <h3 style={{ fontSize: 18, fontWeight: 900, textAlign: 'center', marginBottom: 6 }}>免費道具</h3>
+            <h3 style={{ fontSize: 18, fontWeight: 900, textAlign: 'center', marginBottom: 6 }}>免費玩具</h3>
             <div style={{ textAlign: 'center', color: 'var(--gray-text)', fontSize: 13, marginBottom: 12 }}>
               {state.adRemaining > 0
                 ? `今日剩 ${state.adRemaining} 次 · 觀看 30 秒影片即可獲得`

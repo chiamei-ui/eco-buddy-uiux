@@ -144,12 +144,18 @@ const PushToast = ({ title, msg, onClose }) => {
   );
 };
 
-/* ───────── Side action icons — 掍描條碼（收瓶機 / 補充站共用）+ 免費道具 ───────── */
+/* ───────── Side action icons — 掃描條碼（收瓶機 / 補充站共用）+ 免費玩具 ───────── */
 const ScanBtnIcon = () => (
-  <img src="assets/btn/scan.svg" alt="掃描條碼" width="64" draggable="false" style={{filter:'drop-shadow(0 6px 12px rgba(0,0,0,0.15))'}} />
+  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+    <img src="assets/btn/scan.svg" alt="掃描條碼" width="64" draggable="false" style={{filter:'drop-shadow(0 6px 12px rgba(0,0,0,0.15))'}} />
+    <span style={{ fontSize: 11, fontWeight: 700, color: '#1a1a1a', letterSpacing: 0.5 }}>掃描條碼</span>
+  </div>
 );
 const AdsBtnIcon = () => (
-  <img src="assets/btn/ads.svg" alt="免費道具" width="64" draggable="false" style={{filter:'drop-shadow(0 6px 12px rgba(0,0,0,0.15))'}} />
+  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+    <img src="assets/btn/ads.svg" alt="免費玩具" width="64" draggable="false" style={{filter:'drop-shadow(0 6px 12px rgba(0,0,0,0.15))'}} />
+    <span style={{ fontSize: 11, fontWeight: 700, color: '#1a1a1a', letterSpacing: 0.5 }}>免費玩具</span>
+  </div>
 );
 
 /* ───────── Mode chip — uses default-mode / game-mode asset ───────── */
