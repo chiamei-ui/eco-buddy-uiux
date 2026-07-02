@@ -1449,7 +1449,9 @@ const P4Shop = ({ setScreen, state, dispatch, tweaks, payload }) => {
             setSuccessItem(null);
             const isFood = item && ['hotdog-pack','salad','berry','fish'].includes(item.id);
             const isTool = item && !isFood && item.currency !== 'cash';
-            if (isTool) {
+            if (item && item.type === 'change-count') {
+              setScreen('p10');
+            } else if (isTool) {
               setScreen('p1', { toolStored: { ids: [item.id], source: 'shop' } });
             } else if (isFood) {
               setScreen('p1', { foodStored: true });
@@ -1566,7 +1568,8 @@ const ShopPurchaseModal = ({ item, state, onClose, onConfirm }) => {
 /* ----- P4 helper: 購買成功 Modal ----- */
 const ShopSuccessModal = ({ item, state, onClose, onGoToBag, onGoToWardrobe, onGoToManage, setScreen }) => {
   const isCash = item.paidWith === 'cash';
-  const isCosmetic = item.cashChannel === 'platform-iap' && item.category !== 'tool';
+  const isChangeCount = item.type === 'change-count';
+  const isCosmetic = item.cashChannel === 'platform-iap' && item.category !== 'tool' && !isChangeCount;
   const orderId = item.orderId ?? null;
   return (
     <div className="modal-backdrop" onClick={onClose}>
@@ -1602,6 +1605,12 @@ const ShopSuccessModal = ({ item, state, onClose, onGoToBag, onGoToWardrobe, onG
               </span>
             </div>
           )}
+          {isChangeCount && (
+            <div style={{ display: 'flex', justifyContent: 'space-between', color: '#555' }}>
+              <span>可用更換次數</span>
+              <span style={{ fontWeight: 800, color: 'var(--ecoco-orange)' }}>{state.swapLeft} 次</span>
+            </div>
+          )}
           {orderId && (
             <div style={{ display: 'flex', justifyContent: 'space-between', color: '#555' }}>
               <span>訂單編號</span>
@@ -1628,6 +1637,19 @@ const ShopSuccessModal = ({ item, state, onClose, onGoToBag, onGoToWardrobe, onG
                 border: 'none', borderRadius: 999, padding: '13px 0',
                 fontWeight: 800, fontSize: 14, cursor: 'pointer',
               }}>管理裝扮</button>
+            </>
+          ) : isChangeCount ? (
+            <>
+              <button onClick={onGoToBag} style={{
+                flex: 1, background: 'var(--ecoco-orange)', color: '#fff',
+                border: 'none', borderRadius: 999, padding: '13px 0',
+                fontWeight: 800, fontSize: 14, cursor: 'pointer',
+              }}>去換 Buddy ›</button>
+              <button onClick={onClose} style={{
+                flex: 1, background: 'var(--gray-light)', color: '#555',
+                border: 'none', borderRadius: 999, padding: '13px 0',
+                fontWeight: 700, fontSize: 14, cursor: 'pointer',
+              }}>繼續逛</button>
             </>
           ) : (
             <>
@@ -2184,7 +2206,7 @@ const P7Dex = ({ setScreen, state, dispatch, onOpenPicker, tweaks }) => {
           {!state.lockedMonthCode ? (
             <button onClick={() => onOpenPicker && onOpenPicker()} style={{ background: 'var(--ecoco-orange)', color: '#fff', border: 'none', borderRadius: 999, padding: '5px 14px', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>收錄本月最佳</button>
           ) : (
-            <button onClick={() => setScreen('p4', { tab: 'package', focus: 'change-count-packs' })} style={{ background: 'var(--ecoco-orange)', color: '#fff', border: 'none', borderRadius: 999, padding: '5px 14px', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>更改本月最佳</button>
+            <button onClick={() => state.swapLeft > 0 ? (onOpenPicker && onOpenPicker()) : setScreen('p4', { tab: 'package', focus: 'change-count-packs' })} style={{ background: 'var(--ecoco-orange)', color: '#fff', border: 'none', borderRadius: 999, padding: '5px 14px', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>更改本月最佳</button>
           )}
         </div>
       </div>
@@ -2624,11 +2646,11 @@ const P10Picker = ({ setScreen, state, dispatch, onClose }) => {
       {confirmCode && ReactDOM.createPortal(
         <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 }}>
           <div style={{ background: '#fff', borderRadius: 20, padding: '28px 24px', width: 280, textAlign: 'center' }}>
-            <p style={{ fontWeight: 700, fontSize: 16, marginBottom: 8, lineHeight: 1.4, color: '#1A1A1A' }}>確定把這個 Buddy 收進日誌？</p>
-            <p style={{ fontSize: 13, color: '#666', marginBottom: 24, lineHeight: 1.6 }}>本月只有一次免費機會，收錄後若要更改需要更換次數。</p>
+            <p style={{ fontWeight: 700, fontSize: 16, marginBottom: 8, lineHeight: 1.4, color: '#1A1A1A' }}>{isFirstLock ? '確定把這個 Buddy 收進日誌？' : '確定更換本月 Buddy？'}</p>
+            <p style={{ fontSize: 13, color: '#666', marginBottom: 24, lineHeight: 1.6 }}>{isFirstLock ? '本月只有一次免費機會，收錄後若要更改需要更換次數。' : `將消耗 1 次更換次數（更換後剩 ${state.swapLeft - 1} 次）。`}</p>
             <div style={{ display: 'flex', gap: 10 }}>
               <button onClick={() => setConfirmCode(null)} style={{ flex: 1, padding: '10px 0', border: '1.5px solid #E0E0E0', borderRadius: 999, background: '#fff', color: '#1A1A1A', fontWeight: 700, fontSize: 14, cursor: 'pointer' }}>再想想</button>
-              <button onClick={handleConfirm} style={{ flex: 1, padding: '10px 0', border: 'none', borderRadius: 999, background: 'var(--ecoco-orange)', color: '#fff', fontWeight: 700, fontSize: 14, cursor: 'pointer' }}>收進日誌</button>
+              <button onClick={handleConfirm} style={{ flex: 1, padding: '10px 0', border: 'none', borderRadius: 999, background: 'var(--ecoco-orange)', color: '#fff', fontWeight: 700, fontSize: 14, cursor: 'pointer' }}>{isFirstLock ? '收進日誌' : '確認更換'}</button>
             </div>
           </div>
         </div>,

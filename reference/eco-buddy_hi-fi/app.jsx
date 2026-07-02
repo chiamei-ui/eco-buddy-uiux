@@ -120,6 +120,10 @@ function stateReducer(state, action){
         lockedMonthCode: action.code,
         swapLeft: state.lockedMonthCode ? Math.max(0, state.swapLeft - 1) : state.swapLeft,
       };
+    case 'SET_SWAP_LEFT':
+      return { ...state, swapLeft: action.value };
+    case 'CLEAR_DEX_LOCK':
+      return { ...state, lockedMonthCode: null };
     case 'EQUIP_COSMETIC':
       return { ...state, equippedCosmetic: action.id };
     case 'RESET_STATS': return {...state, stats:action.stats};
@@ -549,17 +553,48 @@ const InlineTweaks = ({ tweaks, setTweak, setScreen, state, dispatch, screen }) 
 
       {/* P7 專屬 */}
       {isP7 && (
-        <div style={{marginTop:10,paddingTop:10,borderTop:'1px solid rgba(255,255,255,0.08)'}}>
-          <div style={tweakLabel}>上線階段 (shopPhase)</div>
-          <Segmented
-            value={tweaks.shopPhase === 2 ? '2' : '1'}
-            onChange={v => setTweak('shopPhase', Number(v))}
-            options={[{v:'1',l:'Phase 1 封測'},{v:'2',l:'Phase 2 正式'}]}
-          />
-          <div style={{fontSize:10,color:'rgba(255,255,255,0.3)',marginTop:4,lineHeight:1.4}}>
-            Phase 1：夥伴日誌只顯示小海龜。Phase 2：開放北極熊、海豹、亮寶多角色。
+        <>
+          <div style={{marginTop:10,paddingTop:10,borderTop:'1px solid rgba(255,255,255,0.08)'}}>
+            <div style={tweakLabel}>上線階段 (shopPhase)</div>
+            <Segmented
+              value={tweaks.shopPhase === 2 ? '2' : '1'}
+              onChange={v => setTweak('shopPhase', Number(v))}
+              options={[{v:'1',l:'Phase 1 封測'},{v:'2',l:'Phase 2 正式'}]}
+            />
+            <div style={{fontSize:10,color:'rgba(255,255,255,0.3)',marginTop:4,lineHeight:1.4}}>
+              Phase 1：夥伴日誌只顯示小海龜。Phase 2：開放北極熊、海豹、亮寶多角色。
+            </div>
           </div>
-        </div>
+          <div style={{marginTop:10,paddingTop:10,borderTop:'1px solid rgba(255,255,255,0.08)'}}>
+            <div style={tweakLabel}>更換次數 (swapLeft = {state.swapLeft})</div>
+            <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr 1fr',gap:6}}>
+              <button onClick={()=>dispatch({type:'SET_SWAP_LEFT',value:0})} style={{...tweakBtn,background:state.swapLeft===0?'rgba(255,80,0,0.35)':undefined}}>0 次</button>
+              <button onClick={()=>dispatch({type:'SET_SWAP_LEFT',value:1})} style={{...tweakBtn,background:state.swapLeft===1?'rgba(255,80,0,0.35)':undefined}}>1 次</button>
+              <button onClick={()=>dispatch({type:'SET_SWAP_LEFT',value:10})} style={{...tweakBtn,background:state.swapLeft===10?'rgba(255,80,0,0.35)':undefined}}>10 次</button>
+              <button onClick={()=>dispatch({type:'SET_SWAP_LEFT',value:50})} style={{...tweakBtn,background:state.swapLeft===50?'rgba(255,80,0,0.35)':undefined}}>50 次</button>
+            </div>
+            <div style={{fontSize:10,color:'rgba(255,255,255,0.3)',marginTop:4,lineHeight:1.4}}>
+              0 次 → P10 鎖入按鈕停用並顯示紅色提示。
+            </div>
+          </div>
+          <div style={{marginTop:10,paddingTop:10,borderTop:'1px solid rgba(255,255,255,0.08)'}}>
+            <div style={tweakLabel}>本月鎖入狀態 ({state.lockedMonthCode ? `已鎖入 #${state.lockedMonthCode}` : '未鎖入'})</div>
+            <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:6}}>
+              <button onClick={()=>dispatch({type:'LOCK_DEX',code:'07'})} style={{...tweakBtn,background:state.lockedMonthCode?'rgba(255,80,0,0.35)':undefined}}>模擬鎖入 #07</button>
+              <button onClick={()=>dispatch({type:'CLEAR_DEX_LOCK'})} style={{...tweakBtn,background:!state.lockedMonthCode?'rgba(255,255,255,0.14)':undefined}}>清除鎖入</button>
+            </div>
+            <div style={{fontSize:10,color:'rgba(255,255,255,0.3)',marginTop:4,lineHeight:1.4}}>
+              未鎖入 → 頂部「收錄本月最佳」；已鎖入 → 「更改本月最佳」。
+            </div>
+          </div>
+          <div style={{marginTop:10,paddingTop:10,borderTop:'1px solid rgba(255,255,255,0.08)'}}>
+            <div style={tweakLabel}>快速跳轉</div>
+            <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:6}}>
+              <button onClick={()=>setScreen('p10')} style={tweakBtn}>▶ 月末選擇</button>
+              <button onClick={()=>setScreen('p4',{tab:'package',focus:'change-count-packs'})} style={tweakBtn}>▶ 換次數包</button>
+            </div>
+          </div>
+        </>
       )}
 
       {/* P1 專屬 */}
