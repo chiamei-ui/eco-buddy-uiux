@@ -147,7 +147,9 @@ const OnboardingSpotlight = ({ step, refs, onNext, onSkip }) => {
 
 /* ═══════════════ P1 · Buddy Home ═══════════════ */
 const P1Home = ({ state, dispatch, setScreen, dragManager, payload, showTutorial, onTutorialDone, tweaks = {} }) => {
-  const [dockTab, setDockTab] = useState('food'); // food | tools | wardrobe
+  const [dockTab, setDockTab] = useState(
+    payload?.toolStored ? 'tools' : payload?.openWardrobe ? 'wardrobe' : 'food'
+  ); // food | tools | wardrobe
   const [touched, setTouched] = useState(false);
   const [eating, setEating] = useState(false);
   const [bubble, setBubble] = useState(null); // {text, error}
@@ -157,7 +159,9 @@ const P1Home = ({ state, dispatch, setScreen, dragManager, payload, showTutorial
   const [ambientVisible, setAmbientVisible] = useState(true);
   const [ambientDismissing, setAmbientDismissing] = useState(false);
   const [pulsingIds, setPulsingIds] = useState(new Set());
-  const [toolPulsingIds, setToolPulsingIds] = useState(new Set());
+  const [toolPulsingIds, setToolPulsingIds] = useState(
+    () => payload?.toolStored ? new Set(payload.toolStored.ids || []) : new Set()
+  );
   const [tutorialStep, setTutorialStep] = useState(showTutorial ? 0 : -1);
   const turtleRef = useRef(null);
   const turtleWrapRef = useRef(null);
@@ -206,8 +210,6 @@ const P1Home = ({ state, dispatch, setScreen, dragManager, payload, showTutorial
       setTimeout(() => showBubble({ text: DIALOGUES.err.foodStored, error: false }), 120);
     }
     if (payload?.toolStored) {
-      setDockTab('tools');
-      setToolPulsingIds(new Set(payload.toolStored.ids || []));
       setTimeout(() => setToolPulsingIds(new Set()), 2500);
       const msg = payload.toolStored.source === 'shop'
         ? DIALOGUES.err.toolStored.shop
@@ -449,14 +451,17 @@ const P1Home = ({ state, dispatch, setScreen, dragManager, payload, showTutorial
           })}
         </> : dockTab === 'tools' ? <>
           <div className="dock-grid">
-            {state.tools.length ? state.tools.map((t, i) =>
-            <ToolCell key={t.id} tool={t} dragManager={dragManager} onDrop={onDrop} showBubble={showBubble} dispatch={dispatch} pulsing={toolPulsingIds.has(t.id)} />
-            ) :
-            <div style={{ gridColumn: '1/-1', padding: '18px', textAlign: 'center', color: '#888', fontSize: 13 }}>
-                還沒有道具～<br />
-                <button onClick={() => setP6SheetOpen(true)} style={{ marginTop: 8, background: 'var(--ecoco-orange)', color: '#fff', padding: '8px 18px', borderRadius: 999, fontWeight: 700, fontSize: 12 }}>看廣告領取</button>
-              </div>
-            }
+            {(() => {
+              const activeTools = state.tools.filter(t => !(t.hoursLeft != null && t.hoursLeft <= 0));
+              return activeTools.length ? activeTools.map((t) =>
+                <ToolCell key={t.id} tool={t} dragManager={dragManager} onDrop={onDrop} showBubble={showBubble} dispatch={dispatch} pulsing={toolPulsingIds.has(t.id)} />
+              ) : (
+                <div style={{ gridColumn: '1/-1', padding: '18px', textAlign: 'center', color: '#888', fontSize: 13 }}>
+                  還沒有道具～<br />
+                  <button onClick={() => setP6SheetOpen(true)} style={{ marginTop: 8, background: 'var(--ecoco-orange)', color: '#fff', padding: '8px 18px', borderRadius: 999, fontWeight: 700, fontSize: 12 }}>看廣告領取</button>
+                </div>
+              );
+            })()}
           </div>
         </> : (() => {
           const equipped = state.equippedCosmetic;
@@ -2176,14 +2181,10 @@ const P7Dex = ({ setScreen, state, dispatch, onOpenPicker, tweaks }) => {
       <div className="section-h">
         <div className="section-h-row">
           <span>今年的 Buddy 們</span>
-          {!state.lockedMonthCode && (
-            <span className="alert-hint" onClick={() => onOpenPicker && onOpenPicker()}>6 月的 Buddy 還沒選進日誌 ›</span>
-          )}
-          {state.lockedMonthCode && state.swapLeft > 0 && (
-            <span className="alert-hint" onClick={() => onOpenPicker && onOpenPicker()} style={{ color: '#1A7A46' }}>已鎖入本月夥伴 · 還可更換 {state.swapLeft} 次 ›</span>
-          )}
-          {state.lockedMonthCode && state.swapLeft <= 0 && (
-            <span className="alert-hint" onClick={() => setScreen('p4', { tab: 'package', focus: 'change-count-packs' })} style={{ color: '#999', cursor: 'pointer' }}>已達本月更換上限 · 多一點選擇 ›</span>
+          {!state.lockedMonthCode ? (
+            <button onClick={() => onOpenPicker && onOpenPicker()} style={{ background: 'var(--ecoco-orange)', color: '#fff', border: 'none', borderRadius: 999, padding: '5px 14px', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>收錄本月最佳</button>
+          ) : (
+            <button onClick={() => setScreen('p4', { tab: 'package', focus: 'change-count-packs' })} style={{ background: '#F4F4F4', color: '#1A1A1A', border: 'none', borderRadius: 999, padding: '5px 14px', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>更改本月最佳</button>
           )}
         </div>
       </div>
@@ -2566,6 +2567,7 @@ const WardrobeManage = ({ setScreen, state }) => {
 /* ═══════════════ P10 · Month picker (overlay on P7) ═══════════════ */
 const P10Picker = ({ setScreen, state, dispatch, onClose }) => {
   const [selected, setSelected] = useState(null);
+  const [confirmCode, setConfirmCode] = useState(null);
   const states = state.dexStates;
   const isFirstLock = !state.lockedMonthCode;
   const capExceeded = !isFirstLock && state.swapLeft <= 0;
@@ -2573,6 +2575,11 @@ const P10Picker = ({ setScreen, state, dispatch, onClose }) => {
   const handleClose = () => {
     if (onClose) onClose();
     else setScreen('p7');
+  };
+
+  const handleConfirm = () => {
+    dispatch({ type: 'LOCK_DEX', code: confirmCode });
+    handleClose();
   };
 
   return (
@@ -2611,9 +2618,22 @@ const P10Picker = ({ setScreen, state, dispatch, onClose }) => {
         </div>
         <div className="actions">
           <button className="later" onClick={handleClose}>等等再說</button>
-          <button className="confirm" disabled={!selected || capExceeded} onClick={() => {dispatch({ type: 'LOCK_DEX', code: selected });handleClose();}}>{capExceeded ? '次數已用完' : '收進日誌'}</button>
+          <button className="confirm" disabled={!selected || capExceeded} onClick={() => setConfirmCode(selected)}>{capExceeded ? '次數已用完' : '收進日誌'}</button>
         </div>
       </div>
+      {confirmCode && ReactDOM.createPortal(
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 }}>
+          <div style={{ background: '#fff', borderRadius: 20, padding: '28px 24px', width: 280, textAlign: 'center' }}>
+            <p style={{ fontWeight: 700, fontSize: 16, marginBottom: 8, lineHeight: 1.4, color: '#1A1A1A' }}>確定把這個 Buddy 收進日誌？</p>
+            <p style={{ fontSize: 13, color: '#666', marginBottom: 24, lineHeight: 1.6 }}>本月只有一次免費機會，收錄後若要更改需要更換次數。</p>
+            <div style={{ display: 'flex', gap: 10 }}>
+              <button onClick={() => setConfirmCode(null)} style={{ flex: 1, padding: '10px 0', border: '1.5px solid #E0E0E0', borderRadius: 999, background: '#fff', color: '#1A1A1A', fontWeight: 700, fontSize: 14, cursor: 'pointer' }}>再想想</button>
+              <button onClick={handleConfirm} style={{ flex: 1, padding: '10px 0', border: 'none', borderRadius: 999, background: 'var(--ecoco-orange)', color: '#fff', fontWeight: 700, fontSize: 14, cursor: 'pointer' }}>收進日誌</button>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
     </div>);
 
 };
