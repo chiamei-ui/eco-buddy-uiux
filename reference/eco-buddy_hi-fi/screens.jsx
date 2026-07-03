@@ -2093,19 +2093,22 @@ const P6Ads = ({ setScreen, state, dispatch }) => {
         <div className="p6-reward-screen">
           <div className="p6-burst-bg" />
           <div className="p6-reward-content">
-            <div className="p6-reward-title">
-              <span className="p6-star">✦</span> 獲得玩具囉 <span className="p6-star">✦</span>
+            <div className="p6-title-group">
+              <img src="assets/p6/title-group.svg" className="p6-title-stars" alt="" />
+              <img src="assets/p6/title-text.svg" className="p6-title-text" alt="獲得玩具囉" />
             </div>
-            <div className="p6-toy-emoji">{reward.emoji}</div>
+            <img src="assets/p6/toy1.png" className="p6-toy-img" alt={reward.name} />
             <div className="p6-reward-bottom">
               <div className="p6-effect-row">
                 <div className="p6-effect-inner">
-                  <span className="p6-effect-label">和 Buddy 玩</span>
+                  <span className="p6-effect-label">和buddy玩</span>
                   <span className="p6-effect-plus">+</span>
-                  <span className="p6-effect-icon">{(TOOL_PRIMARY[reward.id] || TOOL_PRIMARY.feather).icon}</span>
+                  <img src="assets/p6/icon-mood.svg" className="p6-mood-icon" alt="" />
                   <span className="p6-effect-val">{(TOOL_PRIMARY[reward.id] || TOOL_PRIMARY.feather).val}</span>
                 </div>
-                <button className="p6-info-btn" onClick={() => setShowInfo(true)}>ⓘ</button>
+                <button className="p6-info-btn" onClick={() => setShowInfo(true)}>
+                  <img src="assets/p6/btn-info.svg" alt="說明" />
+                </button>
               </div>
               <button className="p6-cta-btn" onClick={() => {
                 dispatch({ type: 'ADD_TOOL', tool: reward });
