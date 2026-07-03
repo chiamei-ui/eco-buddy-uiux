@@ -1680,9 +1680,9 @@ const ShopSuccessModal = ({ item, state, onClose, onGoToBag, onGoToWardrobe, onG
 /* ----- P4 helper: 點數來源 sheet ----- */
 const PointsSourceSheet = ({ state, onClose }) => {
   const sources = [
-    { kind: 'recycle', icon: '♻️', name: '帶禮物回家累積', sub: '本月 12 次 · 累計 238 次', value: 216 },
-    { kind: 'refill', icon: '💧', name: '補充站消費累積', sub: '本月 3 次 消費回饋', value: 124 },
-    { kind: 'mission', icon: '✅', name: '今日陪伴累積', sub: '本月完成 18 項', value: 42 },
+    { kind: 'recycle', icon: 'assets/icon-src-recycle.svg', name: '帶禮物回家累積', sub: '本月 12 次 · 累計 238 次', value: 216 },
+    { kind: 'refill', icon: 'assets/icon-src-refill.svg', name: '補充站消費累積', sub: '本月 3 次 消費回饋', value: 124 },
+    { kind: 'mission', icon: 'assets/icon-src-mission.svg', name: '今日陪伴累積', sub: '本月完成 18 項', value: 42 },
   ];
   const monthTotal = sources.reduce((a, b) => a + b.value, 0);
   return (
@@ -1701,7 +1701,7 @@ const PointsSourceSheet = ({ state, onClose }) => {
         <div className="src-list">
           {sources.map((s) => (
             <div key={s.kind} className={`src ${s.kind}`}>
-              <div className="icon">{s.icon}</div>
+              <div className="icon"><img src={s.icon} alt="" width="36" height="36" /></div>
               <div className="body">
                 <div className="n">{s.name}</div>
                 <div className="s">{s.sub}</div>
@@ -2017,12 +2017,27 @@ const P5Missions = ({ setScreen, state, dispatch, tweaks }) => {
   );
 };
 
+/* ─── P6 玩具效果常數（資料來源：CURRENT.md #3 道具效果） ─── */
+const TOOL_PRIMARY = {
+  feather: { icon: '😊', val: 15 },
+  ball:    { icon: '😊', val: 15 },
+  brush:   { icon: '🫧', val: 15 },
+  snack:   { icon: '💪', val: 15 },
+};
+const TOOL_INFO = [
+  { id: 'feather', emoji: '🪶', name: '逗貓棒', effects: '心情 +15' },
+  { id: 'ball',    emoji: '⚾', name: '小球',   effects: '心情 +15' },
+  { id: 'brush',   emoji: '🪮', name: '梳子',   effects: '潔淨 +15・心情 +10' },
+  { id: 'snack',   emoji: '🍪', name: '零食',   effects: '體力 +15・心情 +15' },
+];
+
 /* ═══════════════ P6 · Ads → box ═══════════════ */
 const P6Ads = ({ setScreen, state, dispatch }) => {
   const [step, setStep] = useState(1); // 1 ad, 2 reward (confirm handled by sheet at each entry point)
   const [adTime, setAdTime] = useState(15);
   const [pity, setPity] = useState(state.pity || 0);
   const [reward, setReward] = useState(null);
+  const [showInfo, setShowInfo] = useState(false);
 
   useEffect(() => {
     if (step !== 1) return;
@@ -2059,7 +2074,7 @@ const P6Ads = ({ setScreen, state, dispatch }) => {
   return (
     <div className="screen p6">
       <StatusBar light />
-      <NavBack onClick={() => setScreen('p1')} light />
+      {step === 1 && <NavBack onClick={() => setScreen('p1')} light />}
 
       {step === 1 &&
       <div className="ad-screen">
@@ -2074,26 +2089,49 @@ const P6Ads = ({ setScreen, state, dispatch }) => {
           </div>
         </div>
       }
-      {step === 2 &&
-      <div className="step">
-          <h2>恭喜獲得！</h2>
-          {/* TODO [上線版] 「24 小時」須改為讀取 [API: tool_free_expire_hours]，不寫死 */}
-          <div className="sub">玩具已加入背包，請於 24 小時內使用</div>
-          <div className="box">
-            <div className="reward-card">
-              <div className="emoji">{reward.emoji}</div>
-              <h3>{reward.name}</h3>
-              <p>{reward.id === 'snack' ? '拖到夥伴身上 體力 +15、心情 +15' : reward.id === 'brush' ? '拖到夥伴身上 潔淨 +15、心情 +10' : '拖到夥伴身上 心情 +15'}</p>
+      {step === 2 && (
+        <div className="p6-reward-screen">
+          <div className="p6-burst-bg" />
+          <div className="p6-reward-content">
+            <div className="p6-reward-title">
+              <span className="p6-star">✦</span> 獲得玩具囉 <span className="p6-star">✦</span>
+            </div>
+            <div className="p6-toy-emoji">{reward.emoji}</div>
+            <div className="p6-reward-bottom">
+              <div className="p6-effect-row">
+                <div className="p6-effect-inner">
+                  <span className="p6-effect-label">和 Buddy 玩</span>
+                  <span className="p6-effect-plus">+</span>
+                  <span className="p6-effect-icon">{(TOOL_PRIMARY[reward.id] || TOOL_PRIMARY.feather).icon}</span>
+                  <span className="p6-effect-val">{(TOOL_PRIMARY[reward.id] || TOOL_PRIMARY.feather).val}</span>
+                </div>
+                <button className="p6-info-btn" onClick={() => setShowInfo(true)}>ⓘ</button>
+              </div>
+              <button className="p6-cta-btn" onClick={() => {
+                dispatch({ type: 'ADD_TOOL', tool: reward });
+                setScreen('p1', { toolStored: { ids: [reward.id], source: 'ad' } });
+              }}>存進玩具箱</button>
             </div>
           </div>
-          <div className="reward-actions">
-            <button className="btn-primary" onClick={() => {
-              dispatch({ type: 'ADD_TOOL', tool: reward });
-              setScreen('p1', { toolStored: { ids: [reward.id], source: 'ad' } });
-            }}>放入背包</button>
-          </div>
+          {showInfo && (
+            <div className="sheet-backdrop" onClick={() => setShowInfo(false)}>
+              <div className="sheet-panel" onClick={e => e.stopPropagation()}>
+                <div className="sheet-grip" />
+                <h3 style={{ fontSize: 17, fontWeight: 900, marginBottom: 4, textAlign: 'center' }}>玩具效果說明</h3>
+                <p style={{ fontSize: 12, color: '#888', textAlign: 'center', marginBottom: 16 }}>使用後即時生效（數值由後台設定）</p>
+                {TOOL_INFO.map(t => (
+                  <div key={t.id} className="p6-info-row">
+                    <span className="p6-info-emoji">{t.emoji}</span>
+                    <span className="p6-info-name">{t.name}</span>
+                    <span className="p6-info-effects">{t.effects}</span>
+                  </div>
+                ))}
+                <button className="btn-ghost" style={{ width: '100%', marginTop: 16 }} onClick={() => setShowInfo(false)}>關閉</button>
+              </div>
+            </div>
+          )}
         </div>
-      }
+      )}
     </div>);
 
 };

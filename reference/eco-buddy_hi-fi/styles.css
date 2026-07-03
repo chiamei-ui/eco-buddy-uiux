@@ -733,22 +733,8 @@ img,svg{display:block;}
 @keyframes makeupEntry{0%{transform:scale(0.75);opacity:0;box-shadow:0 0 0 transparent;}60%{transform:scale(1.06);opacity:1;box-shadow:0 0 18px #ffce00,0 0 32px rgba(255,206,0,0.5);}100%{transform:scale(1);box-shadow:0 0 5px #ffce00;}}
 .makeup-btn{animation:makeupEntry 0.7s ease-out forwards, pulse-glow 1.5s ease-in-out 0.7s infinite;}
 
-/* ───── P6 ad → box ───── */
-.p6{background:#0E1530;color:#fff;}
-.p6 .step{position:absolute;inset:0;padding:80px 20px 30px;display:flex;flex-direction:column;}
-.p6 .step h2{font-size:22px;font-weight:900;text-align:center;margin-bottom:6px;}
-.p6 .step .sub{text-align:center;color:rgba(255,255,255,0.7);font-size:13px;margin-bottom:24px;}
-.p6 .box{
-  flex:1;display:flex;align-items:center;justify-content:center;
-  position:relative;
-}
-.p6 .box .glow{
-  position:absolute;width:220px;height:220px;border-radius:50%;
-  background:radial-gradient(circle, rgba(255,206,0,0.45), transparent 70%);
-  animation:pulse 2s ease-in-out infinite;
-}
-@keyframes pulse{0%,100%{transform:scale(1);opacity:.6;}50%{transform:scale(1.15);opacity:1;}}
-.p6 .box .chest{font-size:120px;filter:drop-shadow(0 12px 30px rgba(0,0,0,0.4));animation:wobble 3s ease-in-out infinite;}
+/* ───── P6 ad → reward ───── */
+.p6{background:#000;color:#fff;}
 @keyframes wobble{0%,100%{transform:rotate(-2deg);}50%{transform:rotate(2deg);}}
 .p6 .countdown{position:absolute;top:80px;right:20px;background:rgba(255,255,255,0.12);padding:6px 12px;border-radius:999px;font-size:13px;font-weight:700;font-family:var(--font-en);}
 .p6 .ad-screen{position:absolute;inset:0;background:#000;display:flex;align-items:center;justify-content:center;}
@@ -762,19 +748,56 @@ img,svg{display:block;}
   color:#fff;font-weight:900;text-align:center;padding:24px;gap:8px;
 }
 .p6 .ad-mock .play{font-size:48px;}
-.p6 .reward-card{
-  background:linear-gradient(180deg, #FFE0A8, #FFCE00);
-  color:#333;border-radius:20px;padding:24px;text-align:center;
-  margin:auto;width:100%;max-width:280px;
-  animation:bubble-pop .5s cubic-bezier(.34,1.56,.64,1);
-}
-.p6 .reward-card .emoji{font-size:72px;line-height:1;margin-bottom:8px;}
-.p6 .reward-card h3{font-size:18px;font-weight:900;color:#1a1a1a;}
-.p6 .reward-card p{font-size:13px;color:#665;margin-top:4px;}
-.p6 .reward-actions{display:flex;flex-direction:column;gap:8px;margin-top:14px;}
 .p6 .pity-bar{display:flex;gap:4px;justify-content:center;margin-top:18px;}
 .p6 .pity-bar .seg{width:30px;height:5px;border-radius:3px;background:rgba(255,255,255,0.2);}
 .p6 .pity-bar .seg.fill{background:var(--ecoco-yellow);}
+/* step 2：收到禮物（Figma 設計） */
+.p6-reward-screen{position:absolute;inset:0;display:flex;flex-direction:column;}
+.p6-burst-bg{
+  position:absolute;inset:0;
+  background:
+    radial-gradient(ellipse 65% 45% at 50% 38%, rgba(255,220,100,0.28) 0%, transparent 65%),
+    repeating-conic-gradient(from 0deg at 50% 38%, rgba(255,255,255,0.07) 0deg 5deg, transparent 5deg 12deg),
+    #000;
+}
+.p6-reward-content{
+  position:relative;z-index:1;flex:1;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:20px;padding:0 20px 40px;
+}
+.p6-reward-title{
+  font-size:38px;font-weight:900;color:#FFCE00;text-align:center;letter-spacing:2px;
+  text-shadow:3px 3px 0 #FF5000, 0 0 28px rgba(255,206,0,0.55);
+  -webkit-text-stroke:1.5px #FF5000;
+}
+.p6-star{font-size:22px;vertical-align:middle;display:inline-block;animation:spin-star 4s linear infinite;}
+@keyframes spin-star{0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}}
+.p6-toy-emoji{
+  font-size:110px;line-height:1;
+  filter:drop-shadow(0 0 24px rgba(255,206,0,0.5)) drop-shadow(0 12px 32px rgba(0,0,0,0.6));
+  animation:wobble 3s ease-in-out infinite;
+}
+.p6-reward-bottom{display:flex;flex-direction:column;align-items:center;gap:12px;width:100%;}
+.p6-effect-row{
+  display:flex;align-items:center;justify-content:center;gap:12px;
+  border:1px solid #FAE0B8;border-radius:20px;height:58px;width:341px;max-width:100%;
+}
+.p6-effect-inner{display:flex;align-items:center;gap:10px;}
+.p6-effect-label{font-size:16px;font-weight:500;color:#fff;letter-spacing:.8px;}
+.p6-effect-plus{font-size:28px;font-weight:900;color:#FFCE00;line-height:1;}
+.p6-effect-icon{font-size:30px;line-height:1;}
+.p6-effect-val{font-size:38px;font-weight:900;color:#FFCE00;line-height:1;}
+.p6-info-btn{background:none;border:none;color:rgba(255,255,255,0.65);font-size:19px;cursor:pointer;padding:4px;line-height:1;display:flex;align-items:center;}
+.p6-cta-btn{
+  background:#FF5000;color:#fff;border:none;border-radius:20px;
+  height:58px;width:340px;max-width:100%;font-size:16px;font-weight:500;
+  font-family:inherit;letter-spacing:.8px;cursor:pointer;
+}
+.p6-info-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #f0f0f0;}
+.p6-info-row:last-child{border-bottom:none;}
+.p6-info-emoji{font-size:24px;width:32px;text-align:center;}
+.p6-info-name{font-size:15px;font-weight:700;color:#1a1a1a;flex:0 0 60px;}
+.p6-info-effects{font-size:14px;color:#555;flex:1;text-align:right;}
 
 /* ───── P7 dex ───── */
 .p7{background:#EEF0FF;color:var(--core-black);}
@@ -1046,12 +1069,9 @@ img,svg{display:block;}
   display:flex;align-items:center;gap:12px;
 }
 .points-source-sheet .src .icon{
-  width:38px;height:38px;border-radius:10px;
-  display:flex;align-items:center;justify-content:center;font-size:20px;flex:0 0 auto;
+  width:50px;height:50px;
+  display:flex;align-items:center;justify-content:center;flex:0 0 auto;
 }
-.points-source-sheet .src.recycle .icon{background:#FFE6D9;color:var(--ecoco-orange);}
-.points-source-sheet .src.refill .icon{background:#DCEEF6;color:var(--ecoco-dark-cyan);}
-.points-source-sheet .src.mission .icon{background:#FFF3CC;color:#B57F00;}
 .points-source-sheet .src .body{flex:1;}
 .points-source-sheet .src .n{font-size:13px;font-weight:800;color:#222;}
 .points-source-sheet .src .s{font-size:11px;color:#888;margin-top:1px;}
