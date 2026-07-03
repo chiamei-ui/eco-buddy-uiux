@@ -511,8 +511,8 @@ const P1Home = ({ state, dispatch, setScreen, dragManager, payload, showTutorial
               <div style={{ fontSize:13, color:'#444', lineHeight:1.7, marginBottom:12 }}>
                 <div>• 拖曳道具到 Buddy 身上即可使用</div>
                 <div>• 免費道具（看廣告領取）有效期 24h</div>
-                <div>• 購買道具有效期 7 日</div>
-                <div>• ⏰ 代表剩餘 ≤ 24h，記得今天用掉</div>
+                <div>• 購買道具永久持有，不會過期</div>
+                <div>• ⏰ 代表剩餘 ≤ 6h，快給 Buddy 玩掉！</div>
                 <div>• 過期道具無法使用，24h 後自動移除</div>
               </div>
               <div style={{ background:'#FFF3E0', borderRadius:12, padding:'10px 14px', fontSize:12, color:'#7A4800' }}>
@@ -563,14 +563,14 @@ const P1Home = ({ state, dispatch, setScreen, dragManager, payload, showTutorial
 
 };
 
-// TODO [上線版] 以下效果值為 hi-fi 原型佔位數字，正式版須從 API response 讀取：
+// TODO [上線版] 以下效果區間為 hi-fi 原型佔位文案（#39），正式版由後端回傳實際值：
 // feather: tool_cat_wand_mood_effect / brush: tool_brush_clean_effect + tool_brush_mood_effect
 // ball: tool_ball_mood_effect / snack: tool_snack_hp_effect + tool_snack_mood_effect
 const toolEffectMap = {
-  feather: { label: '心情 +15' },
-  brush:   { label: '潔淨 +15・心情 +10' },
-  ball:    { label: '心情 +15' },
-  snack:   { label: '體力 +15・心情 +15' },
+  feather: { label: '心情 +8~15' },
+  brush:   { label: '潔淨 +10~15・心情 +8~12' },
+  ball:    { label: '心情 +8~15' },
+  snack:   { label: '體力 +10~15・心情 +10~15' },
 };
 
 /* ── 食物/道具 ℹ️ Bottom Sheet ── */
@@ -635,7 +635,7 @@ const FoodCell = ({ food, dragManager, onDrop, showBubble, pulsing }) => {
 
 const ToolCell = ({ tool, dragManager, onDrop, showBubble, dispatch, pulsing }) => {
   const expired = tool.hoursLeft != null && tool.hoursLeft <= 0;
-  const warn    = !expired && tool.hoursLeft != null && tool.hoursLeft <= 24;
+  const warn    = !expired && tool.hoursLeft != null && tool.hoursLeft <= 6;
 
   const clearNew = () => tool.isNew && dispatch?.({ type: 'CLEAR_NEW_TOOL', id: tool.id });
 
@@ -1139,10 +1139,10 @@ const P4Shop = ({ setScreen, state, dispatch, tweaks, payload }) => {
     ],
 
     tool: [
-    { id: 'feather', emoji: '🪶', name: '逗貓棒', desc: '心情 +15', price: 30, currency: 'heart' },
-    { id: 'brush', emoji: '🪮', name: '梳子', desc: '潔淨 +15、心情 +10', price: 35, currency: 'heart' },
-    { id: 'ball', emoji: '⚾', name: '小球', desc: '心情 +15', price: 25, currency: 'heart' },
-    { id: 'snack', emoji: '🍪', name: '零食', desc: '體力 +15、心情 +15', price: 20, currency: 'heart' },
+    { id: 'feather', emoji: '🪶', name: '逗貓棒', desc: '心情 +8~15', price: 30, currency: 'heart' },
+    { id: 'brush', emoji: '🪮', name: '梳子', desc: '潔淨 +10~15・心情 +8~12', price: 35, currency: 'heart' },
+    { id: 'ball', emoji: '⚾', name: '小球', desc: '心情 +8~15', price: 25, currency: 'heart' },
+    { id: 'snack', emoji: '🍪', name: '零食', desc: '體力 +10~15・心情 +10~15', price: 20, currency: 'heart' },
     ...(isPhase2 ? [
       { id: 'feather-deluxe', emoji: '🪶', name: '限定逗貓棒禮盒', desc: '心情 +30 · 限定', price: 99, currency: 'cash', cashChannel: 'platform-iap', category: 'tool' },
       { id: 'brush-deluxe', emoji: '🪮', name: '豪華梳子組', desc: '潔淨 +30、心情 +20 · 限定', price: 149, currency: 'cash', cashChannel: 'platform-iap', category: 'tool' },
@@ -2017,18 +2017,18 @@ const P5Missions = ({ setScreen, state, dispatch, tweaks }) => {
   );
 };
 
-/* ─── P6 玩具效果常數（資料來源：CURRENT.md #3 道具效果） ─── */
+/* ─── P6 玩具效果常數（資料來源：CURRENT.md #39 效果值 random） ─── */
 const TOOL_PRIMARY = {
-  feather: { icon: '😊', val: 15 },
-  ball:    { icon: '😊', val: 15 },
-  brush:   { icon: '🫧', val: 15 },
-  snack:   { icon: '💪', val: 15 },
+  feather: { icon: '😊', val: '8~15' },
+  ball:    { icon: '😊', val: '8~15' },
+  brush:   { icon: '🫧', val: '10~15' },
+  snack:   { icon: '💪', val: '10~15' },
 };
 const TOOL_INFO = [
-  { id: 'feather', emoji: '🪶', name: '逗貓棒', effects: '心情 +15' },
-  { id: 'ball',    emoji: '⚾', name: '小球',   effects: '心情 +15' },
-  { id: 'brush',   emoji: '🪮', name: '梳子',   effects: '潔淨 +15・心情 +10' },
-  { id: 'snack',   emoji: '🍪', name: '零食',   effects: '體力 +15・心情 +15' },
+  { id: 'feather', emoji: '🪶', name: '逗貓棒', effects: '心情 +8~15' },
+  { id: 'ball',    emoji: '⚾', name: '小球',   effects: '心情 +8~15' },
+  { id: 'brush',   emoji: '🪮', name: '梳子',   effects: '潔淨 +10~15・心情 +8~12' },
+  { id: 'snack',   emoji: '🍪', name: '零食',   effects: '體力 +10~15・心情 +10~15' },
 ];
 
 /* ═══════════════ P6 · Ads → box ═══════════════ */
@@ -2110,6 +2110,7 @@ const P6Ads = ({ setScreen, state, dispatch }) => {
                   <img src="assets/p6/btn-info.svg" alt="說明" />
                 </button>
               </div>
+              <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.7)', textAlign: 'center', marginBottom: 8 }}>免費玩具 24 小時內使用喔</div>
               <button className="p6-cta-btn" onClick={() => {
                 dispatch({ type: 'ADD_TOOL', tool: reward });
                 setScreen('p1', { toolStored: { ids: [reward.id], source: 'ad' } });
@@ -2121,7 +2122,7 @@ const P6Ads = ({ setScreen, state, dispatch }) => {
               <div className="sheet-panel" onClick={e => e.stopPropagation()}>
                 <div className="sheet-grip" />
                 <h3 style={{ fontSize: 17, fontWeight: 900, marginBottom: 4, textAlign: 'center' }}>玩具效果說明</h3>
-                <p style={{ fontSize: 12, color: '#888', textAlign: 'center', marginBottom: 16 }}>使用後即時生效（數值由後台設定）</p>
+                <p style={{ fontSize: 12, color: '#888', textAlign: 'center', marginBottom: 16 }}>每次效果為隨機值，使用時後端即時回傳</p>
                 {TOOL_INFO.map(t => (
                   <div key={t.id} className="p6-info-row">
                     <span className="p6-info-emoji">{t.emoji}</span>
@@ -2129,6 +2130,11 @@ const P6Ads = ({ setScreen, state, dispatch }) => {
                     <span className="p6-info-effects">{t.effects}</span>
                   </div>
                 ))}
+                <div style={{ fontSize: 12, color: '#888', marginTop: 12, paddingTop: 12, borderTop: '1px solid #eee', lineHeight: 1.8 }}>
+                  <div>・免費玩具（廣告）24 小時後過期</div>
+                  <div>・購買玩具永久持有，不會過期</div>
+                  <div>・⏰ 剩餘 ≤ 6 小時開始顯示警告</div>
+                </div>
                 <button className="btn-ghost" style={{ width: '100%', marginTop: 16 }} onClick={() => setShowInfo(false)}>關閉</button>
               </div>
             </div>
@@ -2800,7 +2806,7 @@ const FAQ_DATA = [
       { q: '食物和道具有什麼差別？', a: '食物補充體力，每週能帶回家；道具有特定效果（提升潔淨、心情等），效果更強但數量有限，用完可在商店補充。' },
       { q: '為什麼食物有「這週」配額？', a: '每種食物每週上限 5 個，週三中午 12:00 重置。週日中午 12:00 起會預告下週 Buddy 想吃什麼，可以提前期待。配額用完後繼續帶東西回家，潔淨仍然正常計算，只是不會再多一個食物格了。補充站消費不會產生食物，食物只在帶東西回家時才有。' },
       { q: '食物有什麼效果？', a: '食物只補充體力，不影響潔淨和心情。每次餵食都是小驚喜，補充多少由 Buddy 當下狀態決定。想提升潔淨可以帶東西回家或去補充站消費；心情要靠玩玩具或摸摸 Buddy 喔。' },
-      { q: '道具會過期嗎？', a: '看來源而定。Buddy 的小驚喜（看廣告獲得）24 小時後消失；商店購買的消耗道具有 7 天有效期，可帶到下個月；裝扮與音樂盒類道具則永久綁定帳號，不會消失。剩餘時間會顯示在道具背包的卡片上，快過期時 Buddy 也會提醒你！' },
+      { q: '道具會過期嗎？', a: '看來源而定。Buddy 的小驚喜（看廣告獲得）24 小時後消失，剩餘 6 小時時會出現倒數警告；商店購買的玩具永久持有，不會過期；裝扮與音樂盒類道具同樣永久綁定帳號，不會消失。剩餘時間會顯示在道具背包的卡片上。' },
       { q: '道具可以一次用很多個嗎？', a: '每次只能用一個道具，但效果可以累積。依序對 Buddy 使用即可。' },
       { q: '一天可以看幾次廣告領道具？', a: '每天最多 5 次。連續 3 次沒抽到零食，第 4 次會保底給你一個。' },
       { q: '道具背包有容量上限嗎？', a: '目前道具背包沒有容量上限，盡情收集！' },
