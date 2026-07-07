@@ -2525,6 +2525,15 @@ const P9Bag = ({ setScreen, state, dispatch }) => {
         </div>
       }
       {filtered.length === 0 ?
+      (tab === 'paid' ?
+      <div className="empty-bag">
+          <div className="icon">🎁</div>
+          <h3>還沒有收藏品</h3>
+          <p>到商店買玩具，就會收進這裡永久保存</p>
+          <div className="empty-actions">
+            <button className="btn-primary" style={{ padding: '10px 20px', fontSize: 13 }} onClick={() => setScreen('p4', { tab: 'tool' })}>去商店</button>
+          </div>
+        </div> :
       <div className="empty-bag">
           <div className="icon">🎒</div>
           <h3>{DIALOGUES.err.bagEmpty}</h3>
@@ -2533,7 +2542,7 @@ const P9Bag = ({ setScreen, state, dispatch }) => {
             <button className="btn-primary" style={{ padding: '10px 20px', fontSize: 13 }} onClick={() => setP6SheetOpen(true)}>看廣告</button>
             <button className="btn-ghost" style={{ padding: '10px 20px', fontSize: 13 }} onClick={() => setScreen('p4', { tab: 'tool' })}>去商店</button>
           </div>
-        </div> :
+        </div>) :
 
       <div className="bag-grid">
           {filtered.map((t) =>
