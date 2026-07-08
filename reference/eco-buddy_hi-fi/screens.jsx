@@ -502,7 +502,7 @@ const P1Home = ({ state, dispatch, setScreen, dragManager, payload, showTutorial
                 <div>• 數量 ≤ 2 時卡片變淡，提醒快用完</div>
               </div>
               <div style={{ background:'#FFF3E0', borderRadius:12, padding:'10px 14px', fontSize:12, color:'#7A4800' }}>
-                💡 帶禮物回家可補充餐袋，配額用完後當週不再增加
+                帶禮物回家可補充餐袋，配額用完後當週不再增加
               </div>
             </div>
           ) : (
@@ -512,11 +512,11 @@ const P1Home = ({ state, dispatch, setScreen, dragManager, payload, showTutorial
                 <div>• 拖曳道具到 Buddy 身上即可使用</div>
                 <div>• 免費道具（看廣告領取）有效期 24h</div>
                 <div>• 購買道具永久持有，不會過期</div>
-                <div>• ⏰ 代表剩餘 ≤ 6h，快給 Buddy 玩掉！</div>
+                <div>• 剩餘 ≤ 6h 時卡片會變橘色提醒，快給 Buddy 玩掉！</div>
                 <div>• 過期道具無法使用，24h 後自動移除</div>
               </div>
               <div style={{ background:'#FFF3E0', borderRadius:12, padding:'10px 14px', fontSize:12, color:'#7A4800' }}>
-                💡 點擊「管理 ›」可進入完整道具背包
+                點擊「管理 ›」可進入完整道具背包
               </div>
             </div>
           )}
@@ -2520,14 +2520,12 @@ const P9Bag = ({ setScreen, state, dispatch }) => {
       </div>
       {tab === 'free' && tools.some((t) => !t.permanent && t.hoursLeft <= 6) &&
       <div className="expire-banner">
-          <span>⚠️</span>
           <span>{DIALOGUES.err.toolExpire}</span>
         </div>
       }
       {filtered.length === 0 ?
       (tab === 'paid' ?
       <div className="empty-bag">
-          <div className="icon">🎁</div>
           <h3>還沒有收藏品</h3>
           <p>到商店買玩具，就會收進這裡永久保存</p>
           <div className="empty-actions">
@@ -2535,7 +2533,6 @@ const P9Bag = ({ setScreen, state, dispatch }) => {
           </div>
         </div> :
       <div className="empty-bag">
-          <div className="icon">🎒</div>
           <h3>{DIALOGUES.err.bagEmpty}</h3>
           <p>看廣告抽道具，或到商店逛逛</p>
           <div className="empty-actions">
@@ -2613,7 +2610,6 @@ const WardrobeManage = ({ setScreen, state }) => {
       </div>
       {ownedItems.length === 0 ? (
         <div className="empty-bag">
-          <div className="icon">🎀</div>
           <h3>還沒有裝扮</h3>
           <p>去商店幫 Buddy 找件喜歡的衣服</p>
           <div className="empty-actions">
