@@ -14,15 +14,15 @@ const DEFAULT_STATE = {
   ownedCosmetics: [],
   equippedCosmetic: null,
   food: [
-    { id:'hotdog-w1', name:'熱狗堡', emoji:'🌭', stock:2,  state:'has',    source:'recycle' },
-    { id:'hotdog-w3', name:'熱狗堡', emoji:'🌭', stock:2,  state:'low',    source:'recycle' },
-    { id:'hotdog-w2', name:'熱狗堡', emoji:'🌭', stock:12, state:'has',    source:'shop' },
-    { id:'hotdog-w4', name:'???',    emoji:'🌭', stock:0,  state:'locked', source:'recycle' },
+    { id:'hotdog-w1', name:'漢堡', emoji:'assets/food/ecobuddy-food___漢堡.webp', stock:2,  state:'has',    source:'recycle' },
+    { id:'hotdog-w3', name:'漢堡', emoji:'assets/food/ecobuddy-food___漢堡.webp', stock:2,  state:'low',    source:'recycle' },
+    { id:'hotdog-w2', name:'漢堡', emoji:'assets/food/ecobuddy-food___漢堡.webp', stock:12, state:'has',    source:'shop' },
+    { id:'hotdog-w4', name:'???',  emoji:'assets/food/ecobuddy-food___漢堡.webp', stock:0,  state:'locked', source:'recycle' },
   ],
   tools: [
-    { id:'ball',    name:'小球',   emoji:'⚾', count:1, hoursLeft:72 },
-    { id:'feather', name:'逗貓棒', emoji:'🪶', count:2, hoursLeft:18 },
-    { id:'brush',   name:'梳子',   emoji:'🪮', count:1, hoursLeft:0  },
+    { id:'ball',    name:'小球',   emoji:'assets/toy/ecobuddy-toy____皮球.webp', count:1, hoursLeft:72 },
+    { id:'feather', name:'逗貓棒', emoji:'assets/toy/ecobuddy-toy____逗貓棒.webp', count:2, hoursLeft:18 },
+    { id:'brush',   name:'梳子',   emoji:'assets/toy/ecobuddy-toy____梳子.webp', count:1, hoursLeft:0  },
   ],
   orderHistory: [
     { id: 'ORD-20260501', name: '月度通行證',   thumb: '🎫', price: 149, payMethod: 'Apple Pay',        date: '2026-05-01', status: 'success' },
@@ -30,8 +30,8 @@ const DEFAULT_STATE = {
     { id: 'ORD-20260520', name: '五月衝刺禮包', thumb: '🎁', price: 199, payMethod: '信用卡',           date: '2026-05-20', status: 'failed', failReason: '信用卡授權失敗，請確認卡片額度是否充足' },
   ],
   pointsOrderHistory: [
-    { id: 'PTS-20260601', name: '基礎食物補給包', thumb: '🌭', pointsCost: 80,  date: '2026-06-01 10:23' },
-    { id: 'PTS-20260605', name: '逗貓棒',         thumb: '🪶', pointsCost: 120, date: '2026-06-05 15:47' },
+    { id: 'PTS-20260601', name: '基礎食物補給包', thumb: 'assets/food/ecobuddy-food___漢堡.webp', pointsCost: 80,  date: '2026-06-01 10:23' },
+    { id: 'PTS-20260605', name: '逗貓棒',         thumb: 'assets/toy/ecobuddy-toy____逗貓棒.webp', pointsCost: 120, date: '2026-06-05 15:47' },
   ],
   dexStates: [
     { code:'01', name:'瀕死邊緣', unlocked:true,  tint:'grayscale(0.5) brightness(0.7)' },
@@ -131,12 +131,12 @@ function stateReducer(state, action){
     case 'SET_STOCK': return {...state, food: state.food.map((f,i)=>({...f, stock:action.stocks[i] ?? f.stock, state:action.stocks[i]===0?(f.state==='locked'?'locked':'low'):f.state}))};
     case 'CLEAR_BAG': return {...state, tools:[]};
     case 'FILL_TOOLS': return {...state, tools:[
-      { id:'toy-d1', name:'小球',   emoji:'⚾', count:1, hoursLeft:72 },
-      { id:'toy-d2', name:'逗貓棒', emoji:'🪶', count:2, hoursLeft:18 },
-      { id:'toy-d3', name:'魚玩具', emoji:'🐟', count:1, hoursLeft:48 },
-      { id:'toy-d4', name:'毛線球', emoji:'🧶', count:1, hoursLeft:36 },
-      { id:'toy-d5', name:'雷射筆', emoji:'🔦', count:1, hoursLeft:24 },
-      { id:'toy-d6', name:'貓薄荷', emoji:'🌿', count:1, hoursLeft:12 },
+      { id:'toy-d1', name:'小球',     emoji:'assets/toy/ecobuddy-toy____皮球.webp', count:1, hoursLeft:72 },
+      { id:'toy-d2', name:'逗貓棒',   emoji:'assets/toy/ecobuddy-toy____逗貓棒.webp', count:2, hoursLeft:18 },
+      { id:'toy-d3', name:'魚玩具',   emoji:'assets/toy/ecobuddy-toy____魚骨娃娃.webp', count:1, hoursLeft:48 },
+      { id:'toy-d4', name:'毛線球',   emoji:'assets/toy/ecobuddy-toy____毛線球.webp', count:1, hoursLeft:36 },
+      { id:'toy-d5', name:'玩具車',   emoji:'assets/toy/ecobuddy-toy____玩具車.webp', count:1, hoursLeft:24 },
+      { id:'toy-d6', name:'網球',     emoji:'assets/toy/ecobuddy-toy____網球.webp', count:1, hoursLeft:12 },
     ]};
     case 'TOUCH':
       // #2 觸碰角色：心情 +1，每日上限由 caller (P1Home) 自行追蹤
@@ -225,7 +225,9 @@ const DragGhost = ({ drag, hover }) => {
   if (!drag) return null;
   return (
     <div className={`drag-ghost ${hover?'over-target':''}`} style={{left:drag.x, top:drag.y}}>
-      {drag.payload.emoji || '?'}
+      {typeof drag.payload.emoji === 'string' && drag.payload.emoji.indexOf('/') !== -1
+        ? <img src={drag.payload.emoji} className="glyph-img" alt="" />
+        : (drag.payload.emoji || '?')}
     </div>
   );
 };

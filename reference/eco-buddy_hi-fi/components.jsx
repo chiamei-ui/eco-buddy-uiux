@@ -199,10 +199,20 @@ const ValueRise = ({ value, icon, color, top, left }) => (
   </div>
 );
 
+/* ───────── 物品縮圖 Glyph ─────────
+   值含 '/'（素材路徑，如 assets/food/*.webp）→ 渲染 <img>；否則當 emoji 文字。
+   食物/玩具用素材圖，裝扮／通行證／禮包等仍傳 emoji 走文字分支，可共用同一渲染點。 */
+const Glyph = ({ value, alt = '', className = '' }) => {
+  if (typeof value === 'string' && value.indexOf('/') !== -1) {
+    return <img src={value} alt={alt} className={`glyph-img${className ? ' ' + className : ''}`} />;
+  }
+  return <span className={className}>{value}</span>;
+};
+
 /* ───────── Export to window ───────── */
 Object.assign(window, {
   StatusBar, StatPip, TurtleImg, TabBar,
   SpeechBubble, PushToast, ScanBtnIcon, AdsBtnIcon,
   SystemToast, SystemAlert,
-  ModeToggle, ModeChip, AvatarButton, ValueRise,
+  ModeToggle, ModeChip, AvatarButton, ValueRise, Glyph,
 });

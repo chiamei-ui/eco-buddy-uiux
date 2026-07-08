@@ -618,11 +618,11 @@ const FoodCell = ({ food, dragManager, onDrop, showBubble, pulsing }) => {
     <div className="food-slot">
       <div ref={cellRef} className={`food-cell ${cls}${pulsing ? ' pulsing' : ''}`} onPointerDown={handlePointerDown}>
         {food.state === 'locked'
-          ? <span className="emoji food-preview-emoji">{food.emoji}</span>
+          ? <Glyph value={food.emoji} alt={food.name} className="emoji food-preview-emoji" />
           : isEmpty
             ? <span className="empty-plate" aria-hidden="true">🍽️</span>
           : <>
-              <span className="emoji">{food.emoji}</span>
+              <Glyph value={food.emoji} alt={food.name} className="emoji" />
               {food.stock > 0 && <span className="badge">{food.stock}</span>}
             </>
         }
@@ -642,7 +642,7 @@ const ToolCell = ({ tool, dragManager, onDrop, showBubble, dispatch, pulsing }) 
   const handlePointerDown = (e) => {
     clearNew();
     if (expired) {
-      showBubble?.({ text: '嗚… 這個不見了 😔' });
+      showBubble?.({ text: '嗚… 這個不見了' });
       return;
     }
     const startX = e.clientX, startY = e.clientY;
@@ -656,7 +656,7 @@ const ToolCell = ({ tool, dragManager, onDrop, showBubble, dispatch, pulsing }) 
     const onUp = () => {
       window.removeEventListener('pointermove', onMove);
       window.removeEventListener('pointerup', onUp);
-      showBubble?.({ text: warn ? '這個快消失了！今天要用掉喔 ⏰' : '拖到我身上，記得今天就用掉喔！' });
+      showBubble?.({ text: warn ? '這個快消失了！今天要用掉喔' : '拖到我身上，記得今天就用掉喔！' });
     };
     window.addEventListener('pointermove', onMove);
     window.addEventListener('pointerup', onUp);
@@ -669,7 +669,7 @@ const ToolCell = ({ tool, dragManager, onDrop, showBubble, dispatch, pulsing }) 
         onPointerDown={handlePointerDown}
         style={{ position:'relative', opacity: expired ? 0.4 : 1, cursor: expired ? 'default' : 'grab' }}
       >
-        <span className="emoji">{tool.emoji}</span>
+        <Glyph value={tool.emoji} alt={tool.name} className="emoji" />
         {tool.count > 1 && <span className="badge">{tool.count}</span>}
         {expired && (
           <span style={{ position:'absolute', top:3, right:4, fontSize:13, lineHeight:1, color:'#666', pointerEvents:'none', fontWeight:700 }}>✕</span>
@@ -777,7 +777,7 @@ const EvolveOverlay = ({ onDone, newFormName = '夏日龜 ☀️' }) => {
           style={{ width: 190, opacity: phase === 'flash' ? 0 : 1, transition: 'opacity 0.1s' }}
         />
         {phase === 'hold' && (
-          <SpeechBubble text="我有新的樣子了！✨" style={{ top: -68, right: -54 }} />
+          <SpeechBubble text="我有新的樣子了！" style={{ top: -68, right: -54 }} />
         )}
       </div>
       <div className="evolve-text" style={{ opacity: phase === 'flash' ? 0 : 1 }}>
@@ -910,9 +910,9 @@ const SHOP_IAP_CONFIG = {
     desc: '幫 Buddy 在月底衝到最佳狀態，選出最美的夥伴日誌',
     activeWindow: '每月 22–28 日',
     contents: [
-      { emoji: '🍔', name: '月份限定食物 ×10', sub: '不佔週配額，直接存入餐袋' },
-      { emoji: '🪮', name: '精華梳 ×3', sub: '潔淨 +30 · 心情 +20' },
-      { emoji: '🍪', name: '豪華零食 ×3', sub: '體力 +30 · 心情 +25' },
+      { emoji: 'assets/food/ecobuddy-food___漢堡.webp', name: '月份限定食物 ×10', sub: '不佔週配額，直接存入餐袋' },
+      { emoji: 'assets/toy/ecobuddy-toy____梳子.webp', name: '精華梳 ×3', sub: '潔淨 +30 · 心情 +20' },
+      { emoji: 'assets/food/ecobuddy-food___洋芋片.webp', name: '豪華零食 ×3', sub: '體力 +30 · 心情 +25' },
       { emoji: '🎀', name: '月份限定裝扮 ×1', sub: '永久穿戴，當月主題' },
       { emoji: '🎬', name: '廣告道具加速', sub: '本月剩餘天數：每日上限 5→8 次' },
     ],
@@ -938,7 +938,7 @@ const SHOP_IAP_CONFIG = {
     benefits: [
       { emoji: '📅', name: '每日通行禮', sub: '登入領月份限定食物 ×1（不佔週配額）' },
       { emoji: '🎬', name: '廣告道具加碼', sub: '每日上限 5→8 次' },
-      { emoji: '🍔', name: '週配額加量', sub: '每種食物每週 5→8 個' },
+      { emoji: 'assets/food/ecobuddy-food___漢堡.webp', name: '週配額加量', sub: '每種食物每週 5→8 個' },
       { emoji: '🏅', name: '通行者稱號', sub: 'P8 個人頁金邊框 + 通行者稱號' },
       { emoji: '📖', name: '夥伴日誌禮遇', sub: '月底可選 2 個狀態收入日誌' },
     ],
@@ -1007,7 +1007,7 @@ const CosmeticDetailSheet = ({ item, isPhase2, isOwned, onClose, onBuy }) => {
         {/* 商品資訊 */}
         <div style={{ padding: '16px 20px 20px' }}>
           <div className="product-detail-head" style={{ marginBottom: 12 }}>
-            <div className="d-icon">{item.emoji}</div>
+            <div className="d-icon"><Glyph value={item.emoji} alt={item.name} /></div>
             <div>
               <h3>{item.name}</h3>
               <div className="d-sub">{item.desc}</div>
@@ -1044,7 +1044,7 @@ const ProductDetailSheet = ({ item, onClose, onBuy }) => {
       <div className="sheet-panel scrollable product-detail-inner" onClick={e => e.stopPropagation()}>
         <div className="sheet-grip" />
         <div className="product-detail-head">
-          <div className="d-icon">{item.emoji}</div>
+          <div className="d-icon"><Glyph value={item.emoji} alt={item.name} /></div>
           <div>
             <h3>{item.name}</h3>
             <div className="d-sub">{item.desc}</div>
@@ -1054,7 +1054,7 @@ const ProductDetailSheet = ({ item, onClose, onBuy }) => {
           <div className="product-detail-section-title">{sectionTitle}</div>
           {rows.map((row, i) => (
             <div key={i} className="detail-item-row">
-              <div className="di-icon">{row.emoji}</div>
+              <div className="di-icon"><Glyph value={row.emoji} alt={row.name} /></div>
               <div className="di-body">
                 <div className="di-name">{row.name}</div>
                 <div className="di-sub">{row.sub}</div>
@@ -1125,10 +1125,10 @@ const P4Shop = ({ setScreen, state, dispatch, tweaks, payload }) => {
 
   const items = {
     food: [
-    { id: 'hotdog-pack', emoji: '🌭', name: '熱狗堡 ×5', desc: '+5 體力/個', price: 50, ribbon: '熱賣', currency: 'heart' },
-    { id: 'salad', emoji: '🥬', name: '蔬菜 ×5', desc: '+5 體力/個', price: 60, currency: 'heart' },
-    { id: 'berry', emoji: '🍓', name: '莓果 ×3', desc: '+5 體力/個', price: 80, soldOut: true, currency: 'heart' },
-    { id: 'fish', emoji: '🐟', name: '小魚 ×5', desc: '+5 體力/個', price: 90, currency: 'heart' },
+    { id: 'hotdog-pack', emoji: 'assets/food/ecobuddy-food___漢堡.webp', name: '漢堡 ×5', desc: '+5 體力/個', price: 50, ribbon: '熱賣', currency: 'heart' },
+    { id: 'salad', emoji: 'assets/food/ecobuddy-food___高麗菜.webp', name: '蔬菜 ×5', desc: '+5 體力/個', price: 60, currency: 'heart' },
+    { id: 'berry', emoji: 'assets/food/ecobuddy-food___葡萄.webp', name: '葡萄 ×3', desc: '+5 體力/個', price: 80, soldOut: true, currency: 'heart' },
+    { id: 'fish', emoji: 'assets/food/ecobuddy-food___鮭魚.webp', name: '鮭魚 ×5', desc: '+5 體力/個', price: 90, currency: 'heart' },
     ],
 
     package: [
@@ -1139,13 +1139,13 @@ const P4Shop = ({ setScreen, state, dispatch, tweaks, payload }) => {
     ],
 
     tool: [
-    { id: 'feather', emoji: '🪶', name: '逗貓棒', desc: '心情 +8~15', price: 30, currency: 'heart' },
-    { id: 'brush', emoji: '🪮', name: '梳子', desc: '潔淨 +10~15・心情 +8~12', price: 35, currency: 'heart' },
-    { id: 'ball', emoji: '⚾', name: '小球', desc: '心情 +8~15', price: 25, currency: 'heart' },
-    { id: 'snack', emoji: '🍪', name: '零食', desc: '體力 +10~15・心情 +10~15', price: 20, currency: 'heart' },
+    { id: 'feather', emoji: 'assets/toy/ecobuddy-toy____逗貓棒.webp', name: '逗貓棒', desc: '心情 +8~15', price: 30, currency: 'heart' },
+    { id: 'brush', emoji: 'assets/toy/ecobuddy-toy____梳子.webp', name: '梳子', desc: '潔淨 +10~15・心情 +8~12', price: 35, currency: 'heart' },
+    { id: 'ball', emoji: 'assets/toy/ecobuddy-toy____皮球.webp', name: '小球', desc: '心情 +8~15', price: 25, currency: 'heart' },
+    { id: 'snack', emoji: 'assets/food/ecobuddy-food___洋芋片.webp', name: '零食', desc: '體力 +10~15・心情 +10~15', price: 20, currency: 'heart' },
     ...(isPhase2 ? [
-      { id: 'feather-deluxe', emoji: '🪶', name: '限定逗貓棒禮盒', desc: '心情 +30 · 限定', price: 99, currency: 'cash', cashChannel: 'platform-iap', category: 'tool' },
-      { id: 'brush-deluxe', emoji: '🪮', name: '豪華梳子組', desc: '潔淨 +30、心情 +20 · 限定', price: 149, currency: 'cash', cashChannel: 'platform-iap', category: 'tool' },
+      { id: 'feather-deluxe', emoji: 'assets/toy/ecobuddy-toy____逗貓棒.webp', name: '限定逗貓棒禮盒', desc: '心情 +30 · 限定', price: 99, currency: 'cash', cashChannel: 'platform-iap', category: 'tool' },
+      { id: 'brush-deluxe', emoji: 'assets/toy/ecobuddy-toy____梳子.webp', name: '豪華梳子組', desc: '潔淨 +30、心情 +20 · 限定', price: 149, currency: 'cash', cashChannel: 'platform-iap', category: 'tool' },
     ] : [])],
 
     cosmetic: COSMETIC_CATALOG.map(c => ({ ...c, currency: 'cash', cashChannel: 'platform-iap' })),
@@ -1196,7 +1196,7 @@ const P4Shop = ({ setScreen, state, dispatch, tweaks, payload }) => {
             <div key={it.id} className={`shop-card${isBought ? ' purchased' : ''}`}
               onClick={canBuy ? () => hasDetail ? setDetailItem(it) : setPurchasing(it) : undefined}
               style={{ cursor: canBuy ? 'pointer' : 'default' }}>
-              <div className="thumb">{it.emoji}</div>
+              <div className="thumb"><Glyph value={it.emoji} alt={it.name} /></div>
               <h4>{it.name}</h4>
               <div className="desc">{it.desc}</div>
               <div className="price">
@@ -1253,7 +1253,7 @@ const P4Shop = ({ setScreen, state, dispatch, tweaks, payload }) => {
                           borderRadius: '0 12px 0 8px', zIndex: 1,
                         }}>{it.ribbon}</div>
                       )}
-                      <div className="thumb">{it.emoji}</div>
+                      <div className="thumb"><Glyph value={it.emoji} alt={it.name} /></div>
                       <h4>{it.name}</h4>
                       <div className="desc">{it.desc}</div>
                       <div className="price">
@@ -1294,7 +1294,7 @@ const P4Shop = ({ setScreen, state, dispatch, tweaks, payload }) => {
                   <div key={it.id} className={`shop-card${isBought ? ' purchased' : ''}`}
                     onClick={() => setCosmeticDetail(it)}
                     style={{ cursor: 'pointer' }}>
-                    <div className="thumb">{it.emoji}</div>
+                    <div className="thumb"><Glyph value={it.emoji} alt={it.name} /></div>
                     <h4>{it.name}</h4>
                     <div className="desc">{it.desc}</div>
                     <div className="price">
@@ -1339,7 +1339,7 @@ const P4Shop = ({ setScreen, state, dispatch, tweaks, payload }) => {
                       className={`cash-card${isBought ? ' purchased' : ''}`}
                       onClick={isBought ? undefined : () => hasDetail ? setDetailItem(it) : setPurchasing(it)}
                       style={isBought ? { cursor: 'default' } : {}}>
-                      <div className="cash-thumb">{it.emoji}</div>
+                      <div className="cash-thumb"><Glyph value={it.emoji} alt={it.name} /></div>
                       <div className="cash-info">
                         <h4>{it.name}</h4>
                         <div className="desc">{it.desc}</div>
@@ -1376,7 +1376,7 @@ const P4Shop = ({ setScreen, state, dispatch, tweaks, payload }) => {
             <div className="shop-grid">
               {heartItems.map(it => (
                 <div key={it.id} className={`shop-card ${it.soldOut ? 'sold-out' : ''}`}>
-                  <div className="thumb">{it.emoji}</div>
+                  <div className="thumb"><Glyph value={it.emoji} alt={it.name} /></div>
                   <h4>{it.name}</h4>
                   <div className="desc">{it.desc}</div>
                   <div className="price">
@@ -1503,7 +1503,7 @@ const ShopPurchaseModal = ({ item, state, onClose, onConfirm }) => {
   return (
     <div className="modal-backdrop" onClick={onClose}>
       <div className="modal" onClick={(e) => e.stopPropagation()}>
-        <div className="preview">{item.emoji}</div>
+        <div className="preview"><Glyph value={item.emoji} alt={item.name} /></div>
         <h3>{item.name}</h3>
         <p>{item.desc}</p>
 
@@ -1575,7 +1575,7 @@ const ShopSuccessModal = ({ item, state, onClose, onGoToBag, onGoToWardrobe, onG
     <div className="modal-backdrop" onClick={onClose}>
       <div className="modal" onClick={(e) => e.stopPropagation()} style={{ textAlign: 'center', position: 'relative' }}>
         <button onClick={onClose} style={{ position:'absolute', top:12, left:12, background:'none', border:'none', padding:'4px 8px', cursor:'pointer', fontSize:13, fontWeight:700, color:'#555', lineHeight:1, display:'flex', alignItems:'center', gap:2 }}>‹ 返回</button>
-        <div style={{ fontSize: 56, marginBottom: 4, lineHeight: 1 }}>{item.emoji}</div>
+        <div style={{ fontSize: 56, marginBottom: 4, lineHeight: 1 }}><Glyph value={item.emoji} alt={item.name} /></div>
         <div style={{
           display: 'inline-flex', alignItems: 'center', gap: 4,
           background: '#E8F9EE', color: '#1A7A46', borderRadius: 999,
@@ -2025,10 +2025,10 @@ const TOOL_PRIMARY = {
   snack:   { icon: '💪', val: '10~15' },
 };
 const TOOL_INFO = [
-  { id: 'feather', emoji: '🪶', name: '逗貓棒', effects: '心情 +8~15' },
-  { id: 'ball',    emoji: '⚾', name: '小球',   effects: '心情 +8~15' },
-  { id: 'brush',   emoji: '🪮', name: '梳子',   effects: '潔淨 +10~15・心情 +8~12' },
-  { id: 'snack',   emoji: '🍪', name: '零食',   effects: '體力 +10~15・心情 +10~15' },
+  { id: 'feather', emoji: 'assets/toy/ecobuddy-toy____逗貓棒.webp', name: '逗貓棒', effects: '心情 +8~15' },
+  { id: 'ball',    emoji: 'assets/toy/ecobuddy-toy____皮球.webp', name: '小球',   effects: '心情 +8~15' },
+  { id: 'brush',   emoji: 'assets/toy/ecobuddy-toy____梳子.webp', name: '梳子',   effects: '潔淨 +10~15・心情 +8~12' },
+  { id: 'snack',   emoji: 'assets/food/ecobuddy-food___洋芋片.webp', name: '零食',   effects: '體力 +10~15・心情 +10~15' },
 ];
 
 /* ═══════════════ P6 · Ads → box ═══════════════ */
@@ -2052,10 +2052,10 @@ const P6Ads = ({ setScreen, state, dispatch }) => {
     // 2. 後端執行掉落抽取（含保底計數），回傳道具 ID
     // 3. 前端依 id 顯示動畫，不在前端持有機率數字或保底計數
     const rolls = [
-    { id: 'feather', emoji: '🪶', name: '逗貓棒', prob: 40 },
-    { id: 'brush', emoji: '🪮', name: '梳子', prob: 30 },
-    { id: 'ball', emoji: '⚾', name: '小球', prob: 20 },
-    { id: 'snack', emoji: '🍪', name: '零食', prob: 10 }];
+    { id: 'feather', emoji: 'assets/toy/ecobuddy-toy____逗貓棒.webp', name: '逗貓棒', prob: 40 },
+    { id: 'brush', emoji: 'assets/toy/ecobuddy-toy____梳子.webp', name: '梳子', prob: 30 },
+    { id: 'ball', emoji: 'assets/toy/ecobuddy-toy____皮球.webp', name: '小球', prob: 20 },
+    { id: 'snack', emoji: 'assets/food/ecobuddy-food___洋芋片.webp', name: '零食', prob: 10 }];
 
     let result;
     if (pity >= 3) {
@@ -2097,7 +2097,7 @@ const P6Ads = ({ setScreen, state, dispatch }) => {
               <img src="assets/p6/title-group.svg" className="p6-title-stars" alt="" />
               <img src="assets/p6/title-text.svg" className="p6-title-text" alt="獲得玩具囉" />
             </div>
-            <img src="assets/p6/toy1.png" className="p6-toy-img" alt={reward.name} />
+            <img src={reward.emoji} className="p6-toy-img" alt={reward.name} />
             <div className="p6-reward-bottom">
               <div className="p6-effect-row">
                 <div className="p6-effect-inner">
@@ -2125,7 +2125,7 @@ const P6Ads = ({ setScreen, state, dispatch }) => {
                 <p style={{ fontSize: 12, color: '#888', textAlign: 'center', marginBottom: 16 }}>每次效果為隨機值，使用時後端即時回傳</p>
                 {TOOL_INFO.map(t => (
                   <div key={t.id} className="p6-info-row">
-                    <span className="p6-info-emoji">{t.emoji}</span>
+                    <Glyph value={t.emoji} alt={t.name} className="p6-info-emoji" />
                     <span className="p6-info-name">{t.name}</span>
                     <span className="p6-info-effects">{t.effects}</span>
                   </div>
@@ -2548,7 +2548,7 @@ const P9Bag = ({ setScreen, state, dispatch }) => {
           {filtered.map((t) =>
         <div key={t.id} className={`bag-cell${t.isNew ? ' new' : ''}`} onClick={() => { if (t.isNew) dispatch({ type: 'CLEAR_NEW_TOOL', id: t.id }); showSnack(); }} style={{ cursor: 'pointer' }}>
               {t.permanent && <div className="perm">永久</div>}
-              <div className="emoji">{t.emoji}</div>
+              <div className="emoji"><Glyph value={t.emoji} alt={t.name} /></div>
               <div className="name">{t.name}</div>
               {!t.permanent &&
           <div className={`timer ${t.hoursLeft <= 6 ? 'warn' : ''}`}>
@@ -2628,7 +2628,7 @@ const WardrobeManage = ({ setScreen, state }) => {
               <div key={item.id} className="bag-cell" style={{ cursor: 'pointer' }}
                 onClick={() => setSnackText('回夥伴首頁，在換衣間幫 Buddy 穿上')}>
                 {isEquipped && <div className="perm" style={{ background: 'var(--ecoco-orange)' }}>穿著中</div>}
-                <div className="emoji">{item.emoji}</div>
+                <div className="emoji"><Glyph value={item.emoji} alt={item.name} /></div>
                 <div className="name">{item.name}</div>
                 <div style={{ fontSize: 11, color: '#888', marginTop: 2 }}>{item.desc}</div>
               </div>
@@ -3000,7 +3000,7 @@ const P4Orders = ({ setScreen, state, payload, tweaks }) => {
               {pointsOrders.map((order) => (
                 <div key={order.id} className="order-card">
                   <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                    <div className="order-thumb">{order.thumb ?? '🛍️'}</div>
+                    <div className="order-thumb"><Glyph value={order.thumb ?? '🛍️'} /></div>
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ fontWeight: 800, fontSize: 15, color: '#222', marginBottom: 4 }}>{order.name}</div>
                       <div style={{ fontSize: 12, color: '#aaa' }}>{order.date}</div>
@@ -3041,7 +3041,7 @@ const P4Orders = ({ setScreen, state, payload, tweaks }) => {
                   return (
                     <div key={order.id} className={`order-card${isFailed ? ' order-card-failed' : ''}`}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
-                        <div className="order-thumb">{order.thumb ?? '🛍️'}</div>
+                        <div className="order-thumb"><Glyph value={order.thumb ?? '🛍️'} /></div>
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <div style={{ fontWeight: 800, fontSize: 15, color: '#222', marginBottom: 2 }}>{order.name}</div>
                           <span className={sc.cls}>{sc.label}</span>
@@ -3077,7 +3077,7 @@ const P4Orders = ({ setScreen, state, payload, tweaks }) => {
                         <div className="order-detail-panel">
                           {pkgDetail.items.map((item, i) => (
                             <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 6 }}>
-                              <span>{item.emoji}</span>
+                              <Glyph value={item.emoji} alt={item.name} />
                               <div>
                                 <div style={{ fontWeight: 700, color: '#333' }}>{item.name}</div>
                                 {item.sub && <div style={{ color: '#888' }}>{item.sub}</div>}
