@@ -2279,7 +2279,7 @@ const P7Dex = ({ setScreen, state, dispatch, onOpenPicker, tweaks }) => {
               <div className="year-detail-code">#{detailMo.code}</div>
               <div className="year-detail-name">{charState?.name || '???'}</div>
               <div className="year-detail-month">{String(detailMo.m).padStart(2, '0')} 月 · 2026 年度</div>
-              {charState?.legendary && <div className="year-detail-rarity">✦ 傳說</div>}
+              {charState?.legendary && <div className="year-detail-rarity">傳說</div>}
             </div>
           </P7DetailOverlay>
         );
@@ -2322,7 +2322,7 @@ const P7Dex = ({ setScreen, state, dispatch, onOpenPicker, tweaks }) => {
             {s.unlocked ? <>
               <img className="turtle" src="assets/sea-turtle.svg" alt="" style={{ filter: s.tint || 'none' }} />
               <span className="name">{s.name}</span>
-              {s.legendary && <span className="rarity">✦ 傳說</span>}
+              {s.legendary && <span className="rarity">傳說</span>}
             </> : (charId === 'turtle' ? <>
               <img className="turtle" src="assets/sea-turtle.svg" alt="" />
               <span className="name">??? ???</span>
@@ -2356,7 +2356,7 @@ const P7Dex = ({ setScreen, state, dispatch, onOpenPicker, tweaks }) => {
             <div className="year-detail-code">#{detailState.code}</div>
             <div className="year-detail-name">{detailState.unlocked ? detailState.name : '??? ???'}</div>
             <div className="year-detail-month">本月 6 月 · {detailState.character?.name || '小海龜'}</div>
-            {detailState.legendary && detailState.unlocked && <div className="year-detail-rarity">✦ 傳說</div>}
+            {detailState.legendary && detailState.unlocked && <div className="year-detail-rarity">傳說</div>}
           </div>
         </P7DetailOverlay>
       )}
@@ -2683,7 +2683,7 @@ const P10Picker = ({ setScreen, state, dispatch, onClose }) => {
               <img className="turtle" src="assets/sea-turtle.svg" alt="" style={{ filter: s.tint || 'none' }} />
               {s.unlocked ? <>
                 <span className="name">{s.name}</span>
-                {s.legendary && <span className="rarity">✦ 傳說</span>}
+                {s.legendary && <span className="rarity">傳說</span>}
               </> : <>
                 <span className="lock" style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)' }}>🔒</span>
               </>}
