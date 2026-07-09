@@ -2087,6 +2087,12 @@ const P6Ads = ({ setScreen, state, dispatch }) => {
             <div style={{ fontSize: 18 }}>廣告播放中</div>
             <div style={{ fontSize: 12, fontWeight: 500, opacity: .85 }}>{adTime > 0 ? `${adTime} 秒` : '廣告結束'}</div>
           </div>
+          {/* DEV ONLY：略過廣告等待，正式版移除 */}
+          {adTime > 0 && (
+            <button className="dev-skip-ad" onClick={() => setAdTime(0)}>
+              ⏩ DEV 跳過等待
+            </button>
+          )}
         </div>
       }
       {step === 2 && (

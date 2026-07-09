@@ -751,6 +751,9 @@ img,svg{display:block;}
   color:#fff;font-weight:900;text-align:center;padding:24px;gap:8px;
 }
 .p6 .ad-mock .play{font-size:48px;}
+/* DEV ONLY：略過廣告等待按鈕，正式版移除 */
+.p6 .ad-screen .dev-skip-ad{position:absolute;bottom:32px;left:50%;transform:translateX(-50%);background:rgba(255,255,255,0.14);border:1px dashed rgba(255,255,255,0.5);color:#fff;padding:8px 16px;border-radius:999px;font-size:12px;font-weight:700;letter-spacing:.03em;cursor:pointer;}
+.p6 .ad-screen .dev-skip-ad:hover{background:rgba(255,255,255,0.24);}
 .p6 .pity-bar{display:flex;gap:4px;justify-content:center;margin-top:18px;}
 .p6 .pity-bar .seg{width:30px;height:5px;border-radius:3px;background:rgba(255,255,255,0.2);}
 .p6 .pity-bar .seg.fill{background:var(--ecoco-yellow);}
