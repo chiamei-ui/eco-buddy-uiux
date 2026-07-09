@@ -41,7 +41,7 @@
 | #23 | 高-中-中 / H-M-M | 溫和巨獸 / Gentle Giant | 體積龐大穩定 / Massive and stable | 乾淨亮面品牌色 / Clean glossy brand color | 沉穩深呼吸，點頭 / Steady deep breathing, nodding |
 | #24 | 高-中-高 / H-M-H | 彈力大福 / Bouncy Mochi | 極度圓潤麻糬 / Extremely round, mochi-like | 乾淨彈性光澤 / Clean elastic sheen | 開心彈跳，Q 彈震動 / Happy bouncing, jelly-like trembling |
 | #25 | 高-高-低 / H-H-L | 悲傷神獸 / Sorrowing Divine Beast | 巨大且莊嚴 / Massive and majestic | 發光光暈（白色）/ Glowing halo (white) | 眉頭深鎖，低頭，發光眼淚（FX6）/ Furrowed brow, head down, FX6 glowing tears |
-| #26 | 高-高-中 / H-H-M | 沉睡巨像 / Slumbering Colossus | 雄偉穩如泰山 / Majestic and immovable | 完美珍珠光澤 / Perfect pearl luster | 規律眨眼，偶爾回頭張望 / Regular blinking, occasional glance back |
+| #26 | 高-高-中 / H-H-M | 沉睡巨像 / Slumbering Colossus | 雄偉穩如泰山 / Majestic and immovable | 完美珍珠光澤 / Perfect pearl luster | 半瞇瞌睡眼，緩慢深沉呼吸 / Drowsy half-closed eyes, slow deep breathing |
 | #27 | 高-高-高 / H-H-H | **【頂規】ECOCO 領袖 / [Peak] ECOCO Leader** | 飽滿圓潤完美 / Full, round, perfect | 散發彩虹漸層全息光芒；自動開啟 S2（has_halo）/ Rainbow gradient holographic glow; auto-enables S2 (has_halo) | 耀眼自信，華麗登場 / Dazzling confidence, grand entrance |
 
 > **#27 觸發條件**：三維度需同時在高階（66–100）才觸發。後端確認累計滿值天數 ≥ 7 天後方切換至 #36「循環之神」。
