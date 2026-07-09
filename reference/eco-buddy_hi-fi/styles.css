@@ -772,55 +772,10 @@ img,svg{display:block;}
   align-items:center;justify-content:center;
   gap:0;padding-bottom:40px;
 }
-/* 標題後方光芒比照 P2b/P12，只存在標題圖區內，不鋪滿整頁。 */
-.p6-title-group{
-  position:relative;width:323px;height:319px;flex-shrink:0;
-}
-.p6-title-group::before{
-  content:"";position:absolute;inset:0;
-  background:
-    radial-gradient(circle at 50% 50%, rgba(255,248,180,.34) 0%, rgba(255,248,180,.12) 30%, transparent 58%),
-    repeating-conic-gradient(from 0deg at 50% 50%, rgba(255,248,210,.28) 0deg 7deg, transparent 7deg 18deg);
-  opacity:.9;
-  -webkit-mask-image:radial-gradient(circle at 50% 50%, #000 0%, #000 58%, transparent 76%);
-  mask-image:radial-gradient(circle at 50% 50%, #000 0%, #000 58%, transparent 76%);
-  animation:p6-title-rays-spin 1.15s cubic-bezier(.16,1,.3,1) both;
-}
-.p6-title-stars,
-.p6-title-text{
-  position:absolute;z-index:1;
-  left:6px;top:104px;
-  width:311px;height:112px;object-fit:contain;
-}
-.p6-title-stars{
-  transform-origin:50% 50%;
-  animation:p6-stars-pop .62s .18s cubic-bezier(.2,.9,.25,1.25) both;
-}
-.p6-title-text{
-  z-index:2;
-  left:16px;top:109px;
-  width:290px;height:102px;
-  transform-origin:50% 50%;
-  animation:p6-title-pop .72s .28s cubic-bezier(.2,.9,.25,1.2) both;
-}
-.p6-title-img{
-  width:311px;height:112px;object-fit:contain;
-}
-@keyframes p6-title-rays-spin{
-  0%{opacity:0;transform:rotate(-18deg) scale(.72);}
-  55%{opacity:1;transform:rotate(10deg) scale(1.05);}
-  100%{opacity:.9;transform:rotate(0deg) scale(1);}
-}
-@keyframes p6-stars-pop{
-  0%{opacity:0;transform:scale(.62);}
-  70%{opacity:1;transform:scale(1.12);}
-  100%{opacity:1;transform:scale(1);}
-}
-@keyframes p6-title-pop{
-  0%  {opacity:0;transform:translateY(-18px) scale(.78);}
-  65% {opacity:1;transform:translateY(5px) scale(1.05);}
-  83% {transform:translateY(-2px) scale(.98);}
-  100%{opacity:1;transform:translateY(0) scale(1);}
+/* P6 標題改為單一內嵌 keyframe 動畫 SVG（光暈/光芒/星/字四層），
+   機制與時間曲線比照 P2b/P12（resultGlowIn/RaysIn/TitleIn/StarIn，內嵌於 p6-title.svg）。 */
+.p6-title{
+  width:323px;height:319px;flex-shrink:0;
 }
 .p6-toy-img{
   width:200px;height:200px;object-fit:contain;

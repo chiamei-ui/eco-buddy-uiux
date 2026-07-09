@@ -2099,10 +2099,7 @@ const P6Ads = ({ setScreen, state, dispatch }) => {
         <div className="p6-reward-screen">
           <div className="p6-burst-bg" />
           <div className="p6-reward-content">
-            <div className="p6-title-group">
-              <img src="assets/p6/title-group.svg" className="p6-title-stars" alt="" />
-              <img src="assets/p6/title-text.svg" className="p6-title-text" alt="獲得玩具囉" />
-            </div>
+            <img src="assets/p6/p6-title.svg" className="p6-title" alt="獲得玩具囉" />
             <img src={reward.emoji} className="p6-toy-img" alt={reward.name} />
             <div className="p6-reward-bottom">
               <div className="p6-effect-row">
