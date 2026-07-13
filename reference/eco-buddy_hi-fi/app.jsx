@@ -20,9 +20,9 @@ const DEFAULT_STATE = {
     { id:'hotdog-w4', name:'???',  emoji:'assets/food/ecobuddy-food___漢堡.webp', stock:0,  state:'locked', source:'recycle' },
   ],
   tools: [
-    { id:'ball',    name:'小球',   emoji:'assets/toy/ecobuddy-toy____皮球.webp', count:1, hoursLeft:72 },
-    { id:'feather', name:'逗貓棒', emoji:'assets/toy/ecobuddy-toy____逗貓棒.webp', count:2, hoursLeft:18 },
-    { id:'brush',   name:'梳子',   emoji:'assets/toy/ecobuddy-toy____梳子.webp', count:1, hoursLeft:0  },
+    { id:'ball',    name:'小球',   emoji:'assets/toy/ecobuddy-toy____皮球.webp', count:1, hoursLeft:24 },
+    { id:'feather', name:'逗貓棒', emoji:'assets/toy/ecobuddy-toy____逗貓棒.webp', count:2, hoursLeft:12 },
+    { id:'brush',   name:'梳子',   emoji:'assets/toy/ecobuddy-toy____梳子.webp', count:1, hoursLeft:null },
   ],
   orderHistory: [
     { id: 'ORD-20260501', name: '月度通行證',   thumb: '🎫', price: 149, payMethod: 'Apple Pay',        date: '2026-05-01', status: 'success' },
@@ -57,9 +57,9 @@ function stateReducer(state, action){
     case 'USE_TOOL': {
       const effects = {
         feather: [{key:'mood',v:15}],
-        brush:   [{key:'clean',v:15},{key:'mood',v:10}],
+        brush:   [{key:'mood',v:10}],
         ball:    [{key:'mood',v:15}],
-        snack:   [{key:'hp',v:15},{key:'mood',v:15}],
+        snack:   [{key:'mood',v:15}],
       };
       const eff = effects[action.tool] || [{key:'mood',v:5}];
       let stats = {...state.stats};
@@ -101,7 +101,7 @@ function stateReducer(state, action){
         points: Math.max(0, state.points - action.item.price),
         tools: action.item.id.startsWith('food') || ['hotdog-pack','salad','berry','fish'].includes(action.item.id)
           ? state.tools
-          : [...state.tools.filter(t=>t.id!==action.item.id), {id:action.item.id, name:action.item.name.split(' ')[0], emoji:action.item.emoji, count:(state.tools.find(t=>t.id===action.item.id)?.count||0)+1, hoursLeft:24*7}],
+          : [...state.tools.filter(t=>t.id!==action.item.id), {id:action.item.id, name:action.item.name.split(' ')[0], emoji:action.item.emoji, count:(state.tools.find(t=>t.id===action.item.id)?.count||0)+1, hoursLeft:null}],
       };
     case 'REFILL_RESULT':
       // 補充站掃碼只寫入現實購買的 體力 / 潔淨 回饋；App 不收取任何點數或現金
@@ -131,12 +131,12 @@ function stateReducer(state, action){
     case 'SET_STOCK': return {...state, food: state.food.map((f,i)=>({...f, stock:action.stocks[i] ?? f.stock, state:action.stocks[i]===0?(f.state==='locked'?'locked':'low'):f.state}))};
     case 'CLEAR_BAG': return {...state, tools:[]};
     case 'FILL_TOOLS': return {...state, tools:[
-      { id:'toy-d1', name:'小球',     emoji:'assets/toy/ecobuddy-toy____皮球.webp', count:1, hoursLeft:72 },
-      { id:'toy-d2', name:'逗貓棒',   emoji:'assets/toy/ecobuddy-toy____逗貓棒.webp', count:2, hoursLeft:18 },
-      { id:'toy-d3', name:'魚玩具',   emoji:'assets/toy/ecobuddy-toy____魚骨娃娃.webp', count:1, hoursLeft:48 },
-      { id:'toy-d4', name:'毛線球',   emoji:'assets/toy/ecobuddy-toy____毛線球.webp', count:1, hoursLeft:36 },
+      { id:'toy-d1', name:'小球',     emoji:'assets/toy/ecobuddy-toy____皮球.webp', count:1, hoursLeft:24 },
+      { id:'toy-d2', name:'逗貓棒',   emoji:'assets/toy/ecobuddy-toy____逗貓棒.webp', count:2, hoursLeft:12 },
+      { id:'toy-d3', name:'魚玩具',   emoji:'assets/toy/ecobuddy-toy____魚骨娃娃.webp', count:1, hoursLeft:null },
+      { id:'toy-d4', name:'毛線球',   emoji:'assets/toy/ecobuddy-toy____毛線球.webp', count:1, hoursLeft:null },
       { id:'toy-d5', name:'玩具車',   emoji:'assets/toy/ecobuddy-toy____玩具車.webp', count:1, hoursLeft:24 },
-      { id:'toy-d6', name:'網球',     emoji:'assets/toy/ecobuddy-toy____網球.webp', count:1, hoursLeft:12 },
+      { id:'toy-d6', name:'網球',     emoji:'assets/toy/ecobuddy-toy____網球.webp', count:1, hoursLeft:6 },
     ]};
     case 'TOUCH':
       // #2 觸碰角色：心情 +1，每日上限由 caller (P1Home) 自行追蹤
