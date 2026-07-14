@@ -2413,7 +2413,6 @@ const P8Profile = ({ setScreen, state, tweaks }) => {
         <div className="stats-row">
           <div className="stat-card"><b>238</b><div className="label">次相遇</div></div>
           <div className="stat-card"><b>156</b><div className="label">次餵食</div></div>
-          <div className="stat-card"><b>4.2 <span style={{ fontSize: 11 }}>kg</span></b><div className="label">為地球做的事</div></div>
         </div>
 
         {state.hasPass && (
