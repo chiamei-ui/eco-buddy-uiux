@@ -1670,7 +1670,6 @@ const PointsSourceSheet = ({ state, onClose }) => {
   const sources = [
     { kind: 'recycle', icon: 'assets/icon-src-recycle.svg', name: '帶禮物回家累積', sub: '本月 12 次 · 累計 238 次', value: 216 },
     { kind: 'refill', icon: 'assets/icon-src-refill.svg', name: '補充站消費累積', sub: '本月 3 次 消費回饋', value: 124 },
-    { kind: 'mission', icon: 'assets/icon-src-mission.svg', name: '今日陪伴累積', sub: '本月完成 18 項', value: 42 },
   ];
   const monthTotal = sources.reduce((a, b) => a + b.value, 0);
   return (
@@ -2810,7 +2809,7 @@ const FAQ_DATA = [
   {
     cat: '點數與商店', id: 'points',
     items: [
-      { q: '怎麼取得 ECOCO 點數？', a: '帶禮物回家給 Buddy、在補充站消費、完成今日陪伴，都能獲得 ECOCO 點數。' },
+      { q: '怎麼取得 ECOCO 點數？', a: '帶禮物回家給 Buddy、在補充站消費，都能獲得 ECOCO 點數。' },
       { q: 'ECOCO 點數會過期嗎？', a: '詳細內容請至 ECOCO 官網常見問題查看。' },
       { q: '商店可以買什麼？', a: '商店分為食物、玩具、裝扮、禮包四個分類。食物與玩具用 ECOCO 點數購買；裝扮與禮包（月底衝刺禮包、月度通行證等）用現金購買。點數與現金不互換、不互買，每張卡片都會標示「點數」或「NT$」。' },
       { q: '月底衝刺禮包是什麼？', a: '每月 22–28 日上架，幫 Buddy 在月底前衝一波狀態與日誌收藏的限時禮包，商店頁會置頂顯示倒數天數。' },
