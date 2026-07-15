@@ -2359,14 +2359,14 @@ const P8Profile = ({ setScreen, state, tweaks }) => {
             <div style={{ flex: 1 }}>
               <h2>可可粉</h2>
               <div className="id">ID · ECOCO_9999</div>
-              <div style={{ fontSize: 11, marginTop: 4, opacity: .85 }}>Lv.12｜和 Buddy 已經 5 天</div>
+              <div style={{ fontSize: 11, marginTop: 4, opacity: .85 }}>和 Buddy 已連續陪伴 5 天</div>
             </div>
           </div>
         </div>
 
         <div className="stats-row">
-          <div className="stat-card"><b>238</b><div className="label">次相遇</div></div>
-          <div className="stat-card"><b>156</b><div className="label">次餵食</div></div>
+          <div className="stat-card"><b>238</b><div className="label">次帶禮物回家</div></div>
+          <div className="stat-card"><b>156</b><div className="label">次餵食 Buddy</div></div>
         </div>
 
         {state.hasPass && (
