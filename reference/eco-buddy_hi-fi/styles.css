@@ -1078,41 +1078,6 @@ img,svg{display:block;}
   letter-spacing:.04em;
 }
 
-/* ───── P4 商店：點數來源 sheet ───── */
-.points-pill.tappable{cursor:pointer;transition:transform .15s;}
-.points-pill.tappable:active{transform:scale(0.96);}
-.points-pill.tappable::after{
-  content:"›";margin-left:4px;color:#999;font-weight:700;
-}
-.points-source-sheet h3{font-size:17px;font-weight:900;color:#222;text-align:center;margin-bottom:4px;}
-.points-source-sheet .total-row{
-  text-align:center;margin-bottom:18px;
-  font-family:var(--font-en);
-}
-.points-source-sheet .total-row b{
-  font-size:32px;font-weight:900;color:var(--ecoco-orange);
-  display:inline-flex;align-items:center;gap:6px;
-}
-.points-source-sheet .total-row .lbl{display:block;font-size:11px;color:#888;font-weight:700;letter-spacing:.06em;margin-bottom:4px;}
-.points-source-sheet .src-list{display:flex;flex-direction:column;gap:8px;margin-bottom:14px;}
-.points-source-sheet .src{
-  background:var(--gray-bg);border-radius:14px;padding:12px 14px;
-  display:flex;align-items:center;gap:12px;
-}
-.points-source-sheet .src .icon{
-  width:50px;height:50px;
-  display:flex;align-items:center;justify-content:center;flex:0 0 auto;
-}
-.points-source-sheet .src .body{flex:1;}
-.points-source-sheet .src .n{font-size:13px;font-weight:800;color:#222;}
-.points-source-sheet .src .s{font-size:11px;color:#888;margin-top:1px;}
-.points-source-sheet .src .v{font-family:var(--font-en);font-weight:900;color:var(--ecoco-orange);font-size:18px;}
-.points-source-sheet .src .v small{font-size:11px;color:#888;font-weight:700;margin-left:2px;}
-.points-source-sheet .close-btn{
-  width:100%;background:var(--gray-light);color:#666;
-  padding:13px;border-radius:999px;font-weight:800;font-size:14px;
-}
-
 /* ───── P4 商店 · 售罄不足提示 ───── */
 
 /* shop card 售罄 / 已購 */

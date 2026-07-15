@@ -1092,7 +1092,6 @@ const P4Shop = ({ setScreen, state, dispatch, tweaks, payload }) => {
   const [tab, setTab] = useState(payload?.tab ?? 'food');
   const [purchasing, setPurchasing] = useState(null);
   const [successItem, setSuccessItem] = useState(null);
-  const [showPointSrc, setShowPointSrc] = useState(false);
   const [detailItem, setDetailItem] = useState(null);
   const [cosmeticDetail, setCosmeticDetail] = useState(null);
   const isSprintPeriod = tweaks?.shopSprint ?? false;
@@ -1149,10 +1148,10 @@ const P4Shop = ({ setScreen, state, dispatch, tweaks, payload }) => {
       <div className="p4-sticky-top">
         <div className="header">
           <h2>商店</h2>
-          <button className="points-pill tappable" onClick={() => setShowPointSrc(true)} aria-label="ECOCO 點數來源">
+          <div className="points-pill" aria-label="ECOCO 點數">
             <img src="assets/icon-ecoco-point.svg" alt="" width="18" height="18" />
             <span>{state.points.toLocaleString()}</span>
-          </button>
+          </div>
         </div>
         <div className="tabs">
           {visibleCats.map((c) =>
@@ -1452,8 +1451,6 @@ const P4Shop = ({ setScreen, state, dispatch, tweaks, payload }) => {
           setScreen={setScreen}
         />
       }
-
-      {showPointSrc && <PointsSourceSheet state={state} onClose={() => setShowPointSrc(false)} />}
     </div>);
 
 };
@@ -1660,47 +1657,6 @@ const ShopSuccessModal = ({ item, state, onClose, onGoToBag, onGoToWardrobe, onG
             style={{ marginTop: 10, background: 'none', border: 'none', color: '#888', fontSize: 13, cursor: 'pointer', textDecoration: 'underline' }}
           >查看訂單 ›</button>
         )}
-      </div>
-    </div>
-  );
-};
-
-/* ----- P4 helper: 點數來源 sheet ----- */
-const PointsSourceSheet = ({ state, onClose }) => {
-  const sources = [
-    { kind: 'recycle', icon: 'assets/icon-src-recycle.svg', name: '帶禮物回家累積', sub: '本月 12 次 · 累計 238 次', value: 216 },
-    { kind: 'refill', icon: 'assets/icon-src-refill.svg', name: '補充站消費累積', sub: '本月 3 次 消費回饋', value: 124 },
-  ];
-  const monthTotal = sources.reduce((a, b) => a + b.value, 0);
-  return (
-    <div className="sheet-backdrop" onClick={onClose}>
-      <div className="sheet-panel points-source-sheet" onClick={(e) => e.stopPropagation()}>
-        <div className="sheet-grip"></div>
-        <h3>ECOCO 點數來源</h3>
-        <div className="total-row">
-          <span className="lbl">目前 ECOCO 點數</span>
-          <b>
-            <img src="assets/icon-ecoco-point.svg" alt="" width="24" height="24" />
-            {state.points.toLocaleString()}
-          </b>
-        </div>
-        <div style={{ fontSize: 11, fontWeight: 800, color: '#888', letterSpacing: '.06em', marginBottom: 8 }}>本月累計 · +{monthTotal} pt</div>
-        <div className="src-list">
-          {sources.map((s) => (
-            <div key={s.kind} className={`src ${s.kind}`}>
-              <div className="icon"><img src={s.icon} alt="" width="36" height="36" /></div>
-              <div className="body">
-                <div className="n">{s.name}</div>
-                <div className="s">{s.sub}</div>
-              </div>
-              <div className="v">+{s.value}<small>pt</small></div>
-            </div>
-          ))}
-        </div>
-        <div style={{ fontSize: 11, color: '#aaa', textAlign: 'center', margin: '12px 0 12px' }}>
-          詳細點數紀錄，請至一般模式 &gt; 點數歷程查看。
-        </div>
-        <button className="close-btn" onClick={onClose}>關閉</button>
       </div>
     </div>
   );
@@ -2351,7 +2307,6 @@ const P7Dex = ({ setScreen, state, dispatch, onOpenPicker, tweaks }) => {
 
 /* ═══════════════ P8 · Profile (Me · 我的) ═══════════════ */
 const P8Profile = ({ setScreen, state, tweaks }) => {
-  const [showPointSrc, setShowPointSrc] = useState(false);
   const isPhase2 = (tweaks?.shopPhase ?? 1) >= 2;
   const ownedCount = (state.ownedCosmetics || []).length;
   const equippedName = state.equippedCosmetic
@@ -2380,7 +2335,6 @@ const P8Profile = ({ setScreen, state, tweaks }) => {
         { icon: '✅', label: '今日陪伴', sub: '還有 3 件事可以做', go: 'p5' },
         { icon: '🛒', label: '商店',     sub: `點數 ${state.points.toLocaleString()}`, go: 'p4' },
         { icon: '🧾', label: '購買紀錄', sub: (state.pointsOrderHistory && state.pointsOrderHistory.length > 0) ? state.pointsOrderHistory[0].name : (state.orderHistory && state.orderHistory.length > 0 ? state.orderHistory[0].name : '尚無購買紀錄'), go: 'p4-orders' },
-        { icon: 'pt', label: '點數明細', sub: '本月 +382 · 帶禮物回家 12 次', action: () => setShowPointSrc(true) },
       ],
     },
     {
@@ -2475,7 +2429,6 @@ const P8Profile = ({ setScreen, state, tweaks }) => {
         </div>
 
       </div>
-      {showPointSrc && <PointsSourceSheet state={state} onClose={() => setShowPointSrc(false)} />}
     </div>);
 
 };
@@ -3096,5 +3049,5 @@ Object.assign(window, {
   P9Bag,
   P10Picker, P11Pack, P11PurchaseModal, P11SuccessModal,
   PNormalHome,
-  ShopPurchaseModal, ShopSuccessModal, PointsSourceSheet,
+  ShopPurchaseModal, ShopSuccessModal,
 });
