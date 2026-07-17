@@ -1,12 +1,25 @@
 # ECO BUDDY — Phase 1 動畫交付清單
 
-**版本**：v1.4
-**更新日期**：2026-07-02
+**版本**：v1.5
+**更新日期**：2026-07-17
 **適用對象**：窗口設計師（工作台）、PM（進度確認）
 **維護人**：@idahsueh-cmd
 **外包動畫師**：Anastasiia（Trial 合約 2026-05-27 已簽，P1 驗收通過 2026-06-23，正式合約待簽）
 
 > 技術規格與驗收標準詳見 [ANIMATION_BRIEF.md](ANIMATION_BRIEF.md)
+
+---
+
+## 驗收依據資產清單 Acceptance Basis Asset List（RFP v1.4 新增）
+
+> RFP v1.4 明定：36 種型態之正式視覺定案，**唯一驗收依據**為下列登記檔案；日後任何檔名／日期不符的「36 張 FINAL PNG」版本一律不予認定，須另行書面（含 email）確認納入清單後方生效。
+
+| 項目 | 內容 |
+|------|------|
+| 檔名 | `ECOCO_EcoBuddy_靜態稿_36states_20260716.pdf` |
+| SHA-256 | `efe81c9fabd0495d7701f8e0b01e83ae38038534ed33630cfb3c760b637c0fbc`（2026-07-16 甲方登記） |
+| 存檔位置 | 本機 `assets/animations/drafts/ECOCO_EcoBuddy_靜態稿_36states_20260716.pdf`（15.7MB，已加入 `.gitignore`，不進 git；雲端備份：[Google Drive](https://drive.google.com/file/d/1EbDPc8UNdlsuHJE3RrpwnMOtUV5ASAbR/view?usp=sharing)）。檔名與 RFP v1.4 登記完全一致 |
+| SHA-256 驗證 | ✅ 2026-07-17 本機 `Get-FileHash` 計算值 `EFE81C9FABD0495D7701F8E0B01E83AE38038534ED33630CFB3C760B637C0FBC` 與甲方登記值完全相符 |
 
 ---
 
@@ -19,7 +32,7 @@
 | Idle Loop — 低 mood | 5 秒無縫循環：嘆氣 ＋ 耳朵下垂 | B-3、B-5 |
 | Idle Loop — 中 mood | 4 秒無縫循環：眨眼 ＋ 張望 | B-3、B-5 |
 | Idle Loop — 高 mood | 3 秒無縫循環：搖擺 ＋ 哼歌嘴型 | B-3、B-5 |
-| 命名規範對照截圖 | 對照命名手冊 v1.1，逐一確認 Rive 內部命名 | B-7 |
+| 命名規範對照截圖 | 對照命名手冊 v1.2，逐一確認 Rive 內部命名 | B-7 |
 
 ---
 
@@ -96,7 +109,7 @@
 | .riv 最終發布檔 | < 120KB | A-3 |
 | 音效素材包（22 支 MP3） | 44.1kHz，含商業授權憑證 | E-2 |
 | 壓力測試報告 | 記憶體 ≤15MB、高頻觸發、長時間、響應式 | 效能門檻 |
-| 命名手冊 Mapping List | 對應 NAMING.md v1.1 | E-3 |
+| 命名手冊 Mapping List | 對應 NAMING.md v1.2 | E-3 |
 
 ---
 
@@ -111,7 +124,8 @@
 | FX4 | 金色粒子爆發 Gold Particle Burst | ev_gold_burst（事件型），W4 稀有食物專用 | 金色碎片從身體中心爆發，播放完畢自動歸零，由 ev_gold_burst 獨立觸發 |
 | FX5 | 汗珠粒子 Sweat Drop Particles | #21 樂天胖達專用 | 與 FX2a 同時並存，為 FX2a 之上的附加圖層；驗收時須附 #21 型態標注截圖（≥ 1080px 寬） |
 | FX6 | 發光眼淚粒子 Glowing Tear Particles | #25 悲傷神獸專用 | 藍白發光水珠從眼角緩緩滑落，搭配 H-H-L 莊嚴氛圍 |
-| FX7 | 星漾粒子 Star Shimmer Particles | #09 閃耀精靈專用 | 細小四芒星閃爍，散佈於角色周圍，搭配高光與光暈效果；取代 FX1 |
+| FX7 | 星漾粒子 Star Shimmer Particles | **#09、S3/#29、S4/#34、S10/#35、S6/#36 共用**（RFP v1.4 擴大共用範圍，前版僅 #09 專用） | 細小四芒星閃爍，散佈於角色周圍，搭配高光與光暈效果；**同時僅顯示一份 FX7**，顯示時取代 FX1，不重複疊加 |
 
 > ※ FX4–FX7 均為必要交付項目，驗收時逐項確認。
-> ※ `has_dark=true`（#33 壞滅核心）啟用期間，FX1–FX7 一律抑制不顯示，畫面僅呈現 S5 取代視覺（黑色龜裂＋紅光眼），不受當前三屬性階層之 FX 顯示規則影響（RFP v1.3 §9.1）。
+> ※ `has_dark=true`（#33 壞滅核心）啟用期間，FX1–FX7 一律抑制不顯示，畫面僅呈現 S5 取代視覺（黑色龜裂＋紅光眼），不受當前三屬性階層之 FX 顯示規則影響（RFP v1.4 §9.1）。
+> ※ **C-9 驗收項（RFP v1.4 新增）**：FX7 完整矩陣測試，須分別於 #09、S3/#29、S4/#34、S10/#35、S6/#36 觸發情境下確認：（1）FX7 正確顯示；（2）同時僅顯示一份，不因多重觸發條件同時成立而疊加多份；（3）顯示時取代 FX1，兩者不同時疊加；（4）#27／#36 之 S2 顯示時，FX3 不與 S2/FX7 重複疊加。

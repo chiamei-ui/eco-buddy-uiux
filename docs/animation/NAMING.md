@@ -1,7 +1,7 @@
 # ECO Buddy 命名手冊 Naming Manual
 
-**版本 / Version**: v1.1  
-**對應 xlsx**: `ecoco-private/naming/ECOCO_naming_manual_v1_1_bilingual.xlsx`  
+**版本 / Version**: v1.2  
+**對應 xlsx**: `ecoco-private/naming/ECOCO_naming_manual_v1_2_bilingual_20260716.xlsx`  
 **Owner**: 窗口設計師 @idahsueh-cmd（主寫）/ 前端工程師 @shangchian（技術格式確認）  
 **Commit prefix**: `[anim]`
 
@@ -82,7 +82,7 @@
 | 插槽 | Boolean 變數名 | 配件名稱 | 中文 |
 |------|--------------|---------|------|
 | S1 | `has_armor` | Tech Armor | 科技護甲 |
-| S2 | `has_halo` | Rainbow Halo | 彩虹光暈 ※ |
+| S2 | `has_halo` | Rainbow Halo | 彩虹光暈 ※（背後圓形光圈，非頭頂，RFP v1.4 修訂） |
 | S3 | `has_laurel` | Laurel Wreath | 月桂花環 |
 | S4 | `has_disco` | Disco Ball | 迪斯可球 |
 | S5 | `has_dark` | Dark Core | 黑暗核心 |
@@ -93,13 +93,19 @@
 | 插槽 | Boolean 變數名 | 配件名稱 | 中文 |
 |------|--------------|---------|------|
 | S7 | `has_overfed` | Overfed Overlay | 過飽疊加層 |
-| S8 | `has_frenzy` | Frenzy Overlay | 狂熱疊加層 |
+| S8 | `has_frenzy` | Frenzy Overlay | 狂熱疊加層 ※※（RFP v1.4 改版） |
 | S9 | `has_bottle` | PET Bottle Overlay | PET 瓶疊加層 |
 | S10 | `has_golden` | Golden Overlay | 黃金疊加層 |
 
-#### S2 ※ FX3 共存規則
+#### S2 ※ 視覺規格與 FX3 共存規則（RFP v1.4 §5.1）
 
-當角色處於 **#27 或 #36**（clean 高階 + `has_halo=true`）：S2 彩虹光環**取代** FX3 柔和白色光暈，避免雙層光環疊加。其他 clean 高階型態（#09、#18、#24 等）：FX3 正常顯示。
+**視覺**：背後圓形彩虹漸層光圈，環繞於角色**背後**（非頭頂）。此為 RFP v1.4 修訂項目 —— 前版（v1.3 及以前）位置定義為頭頂，外包若已依舊版位置製作，須主動書面通知修改。
+
+**FX3 共存規則**：當角色處於 **#27 或 #36**（clean 高階 + `has_halo=true`）：S2 彩虹光環**取代** FX3 柔和白色光暈，避免雙層光環疊加。其他 clean 高階型態（#09、#18、#24 等）：FX3 正常顯示。
+
+#### S8 ※※ 視覺規格（RFP v1.4 §5.1 改版）
+
+**視覺**（v1.4 定案，取代舊版「毛髮豎立＋頭頂冒白煙」）：全身電流弧光；愛心形眼睛；**雙手 Click Ripple 光圈**；**手部透明動態殘影**。電流弧光、Click Ripple 光圈與手部殘影須為向量路徑；全數由既有 `has_frenzy` 觸發顯示，不新增 FX、event 或 input。此為明顯重做項目，外包若已依舊版動作邏輯製作，須主動書面通知修改。
 
 #### S6 ※ 四條責任規則（Rive 與後端職責劃分）
 
@@ -159,7 +165,7 @@
 
 ## 備注
 
-- **xlsx 正式版位置**：`ecoco-private/naming/ECOCO_naming_manual_v1_1_bilingual.xlsx`（對外發送用，合約驗收以此版本為準）
+- **xlsx 正式版位置**：`ecoco-private/naming/ECOCO_naming_manual_v1_2_bilingual_20260716.xlsx`（對外發送用，合約驗收以此版本為準）
 - **通知外包**：任何影響外包工作的命名異動，由**窗口設計師**以正式 email 通知 Anastasiia，等書面確認後方可進入正式建構
 - **準據語言**：中英雙語並列，以中文版為準
 
@@ -170,7 +176,8 @@
 > 對應 RFP §3.6 及 4.1 附表 B。命名格式：`state_<NN>_<type>_<descriptor>`；type 限 `prop` / `decor` / `decal` / `mark`。  
 > 元素由 Rive State Machine 依當前基礎狀態自動控制顯示／隱藏，**不使用 `has_*` Boolean，後端不傳值**。  
 > #14 為預設基準狀態，無 3.6 元素，不計入 26 個狀態項目。  
-> 主命名為 Phase 0B-2 對齊建議；最終命名須雙方書面確認。
+> 主命名為 Phase 0B-2 對齊建議；最終命名須雙方書面確認。  
+> RFP v1.4（2026-07-16）已定案下列項目，表中以「RFP v1.4 新增／已鎖定」標註：#05／#11／#13／#16／#23／#27 新增固定命名；#15／#18／#20／#22／#23／#27 由原「二選一」鎖定為單一方案。若外包已依舊版（v1.3 以前）製作對應素材，須主動書面通知修改。
 
 | # | 狀態標籤 ZH / EN | 主命名 element_naming | type | 骨架附著位置 | 備註 |
 |---|---|---|---|---|---|
@@ -178,28 +185,36 @@
 | #02 | 髒髒小可憐 / Dirty Pitiful | `state_02_mark_fly` | mark | head_top_or_side（頭部上方或側邊） | 海龜首版避開帽子位置；月度新角色依相同骨架下對應附著節點與身形比例決定位置 |
 | #03 | 樂觀泥巴球 / Optimistic Mudball | `state_03_decal_mud_splash` | decal | body_surface（身體表面） | 與 FX2a 髒污粒子、FX1 愛心粒子並存 |
 | #04 | 憂鬱紙片人 / Melancholy Paperman | `state_04_decal_paper_fold` | decal | body_surface（身體表面） | — |
-| #05 | 標準初生嬰 / Standard Newborn | `state_05_prop_bib` | prop | chest（胸前） | — |
+| #05 | 標準初生嬰 / Standard Newborn | `state_05_prop_bib` | prop | chest（胸前） | 小圍兜；紅帽與圍兜均保留 |
+| #05 | 標準初生嬰 / Standard Newborn | `state_05_prop_bonnet` | prop | head_top（頭頂） | 白色帽套，套於既有紅帽外側（RFP v1.4 新增） |
 | #06 | 迷你啦啦隊 / Mini Cheerleader | `state_06_prop_pompom` | prop | hands_LR（雙手） | 左右手各一；子圖層命名：`state_06_prop_pompom_L`、`state_06_prop_pompom_R` |
 | #07 | 易碎玻璃心 / Fragile Glass Heart | `state_07_decor_cracked_heart` | decor | chest（胸前） | 與 FX3 發光光暈並存 |
 | #08 | 靜謐水晶 / Tranquil Crystal | `state_08_decor_crystal_facet` | decor | body_surface（身體表面） | 與 FX3 發光光暈並存 |
 | #09 | 閃耀精靈 / Sparkling Sprite | `state_09_decor_star` | decor | head_side（頭部側邊） | 海龜首版避開帽子中心；與 FX3 發光光暈、FX7 星燦粒子並存（FX7 取代 FX1） |
 | #10 | 暴躁泥獸 / Grumpy Mudbeast | `state_10_decor_anger` | decor | character_detail（角色細節） | 彈性全面表達；子圖層由乙方於 Phase 0B-2 時提交；子圖層命名：`state_10_decor_anger_<descriptor>` |
 | #11 | 迷茫拾荒者 / Lost Scavenger | `state_11_prop_salvage_bag` | prop | side（側邊） | 與 FX2a 髒污粒子並存 |
+| #11 | 迷茫拾荒者 / Lost Scavenger | `state_11_mark_confusion` | mark | head_surround（頭部周圍） | 固定問號／混亂符號組，固定圖層，非粒子、無獨立循環（RFP v1.4 新增） |
 | #12 | 樂天泥巴客 / Cheerful Mudfellow | `state_12_decor_scarf` | decor | neck（脖子） | 與 FX2a 髒污粒子、FX1 愛心粒子並存 |
-| #13 | 鬧脾氣市民 / Cranky Citizen | `state_13_decor_tie` | decor | neck_front_center（脖子前方中央） | — |
+| #13 | 鬧脾氣市民 / Cranky Citizen | `state_13_decor_tie` | decor | neck_front_center（脖子前方中央） | 歪斜小領帶 |
+| #13 | 鬧脾氣市民 / Cranky Citizen | `state_13_mark_anger` | mark | head_and_feet（頭部與腳邊） | 固定怒筋＋左右蒸氣＋腳邊跺腳線，同一組固定圖層，非粒子、無獨立循環；子圖層：`state_13_mark_anger_vein`、`state_13_mark_anger_steam_L`、`state_13_mark_anger_steam_R`、`state_13_mark_anger_stomp_L`、`state_13_mark_anger_stomp_R`（RFP v1.4 新增） |
 | #14 | 環保初心 / Eco Initiate | — | — | — | 預設基準狀態，無 3.6 元素 |
-| #15 | 快樂小幫手 / Happy Helper | `state_15_prop_tool_kit` | prop | side_or_hands（側邊或雙手） | 工具包與手套擇一；工具包置側邊，手套置雙手 |
-| #16 | 傲嬌貴族 / Haughty Noble | `state_16_decor_bowtie` | decor | neck_front_center（脖子前方中央） | 位置與 #25 頸部環繞區隔 |
+| #15 | 快樂小幫手 / Happy Helper | `state_15_prop_tool_kit` | prop | side（側邊） | **已鎖定**：固定採工具包方案，不提供手套選項（RFP v1.4 定案） |
+| #16 | 傲嬌貴族 / Haughty Noble | `state_16_decor_bowtie` | decor | neck_front_center（脖子前方中央） | 蝴蝶結；位置與 #25 頸部環繞區隔 |
+| #16 | 傲嬌貴族 / Haughty Noble | `state_16_prop_throne` | prop | behind_body（角色後方） | 紅金王座，固定背景道具，依骨架附著、無獨立動畫循環（RFP v1.4 新增） |
 | #17 | 優雅守護者 / Elegant Guardian | `state_17_decor_shield` | decor | chest（胸前） | 與 FX3 發光光暈並存；位置避免與 #06 雙手道具衝突 |
-| #18 | 科技大使 / Tech Ambassador | `state_18_decor_hologram` | decor | chest（胸前） | 與 FX3 發光光暈、FX1 愛心粒子並存；浮雕風格以區隔 #27 領袖徽章視覺 |
+| #18 | 科技大使 / Tech Ambassador | `state_18_decor_hologram` | decor | chest（胸前） | **已鎖定**：胸前全息 e 浮雕貼花（品牌 e 標誌）；與 FX3 發光光暈、FX1 愛心粒子並存；浮雕風格以區隔 #27 領袖徽章視覺；e 標誌僅為道具美術細節，不建立獨立 Slot 或 input（RFP v1.4 定案） |
 | #19 | 臃腫污染源 / Bloated Polluter | `state_19_decal_pollution` | decal | body_surface（身體表面） | 彈性全面表達；子圖層由乙方於 Phase 0B-2 時提交；子圖層命名：`state_19_decal_pollution_<descriptor>` |
-| #20 | 遲緩巨漢 / Sluggish Giant | `state_20_prop_towel` | prop | shoulder_or_foot（肩膀或腳踝） | 毛巾與腳踝環擇一；毛巾置肩膀，腳踝環置腳踝 |
+| #20 | 遲緩巨漢 / Sluggish Giant | `state_20_prop_towel` | prop | shoulder（肩膀） | **已鎖定**：固定採毛巾方案，不提供腳環選項（RFP v1.4 定案） |
 | #21 | 樂天胖達 / Cheerful Chubby | `state_21_decor_belt` | decor | waist（腰部） | 與 FX2a 髒污粒子、FX5 汗珠粒子、FX1 愛心粒子並存 |
-| #22 | 悶悶不樂巨球 / Sulky Sphere | `state_22_decor_raincloud` | decor | head_top（頭部上方） | 海龜首版置於帽子上方；月度新角色依相同骨架下對應附著節點與身形比例決定位置 |
-| #23 | 溫和巨獸 / Gentle Behemoth | `state_23_decor_flower_bird` | decor | shoulder（肩膀） | — |
+| #22 | 悶悶不樂巨球 / Sulky Sphere | `state_22_decor_raincloud` | decor | head_top（頭部上方） | **已鎖定**：固定含黃色閃電（同一組 decor）；海龜首版置於帽子上方；月度新角色依相同骨架下對應附著節點與身形比例決定位置；閃電為固定圖層，不拆分為粒子、獨立動畫或新 FX（RFP v1.4 定案） |
+| #23 | 溫和巨獸 / Gentle Behemoth | `state_23_decor_flower_bird` | decor | shoulder（肩膀） | **已鎖定**：首版定案採花朵，不採小鳥（RFP v1.4 定案） |
+| #23 | 溫和巨獸 / Gentle Behemoth | `state_23_decor_cape` | decor | shoulders_back（肩背） | 白色短披風，固定圖層（RFP v1.4 新增） |
+| #23 | 溫和巨獸 / Gentle Behemoth | `state_23_mark_sunburst` | mark | behind_body（角色後方） | 頭後放射背板，固定 mark 圖層，不新增 FX（RFP v1.4 新增） |
 | #24 | 彈力大福 / Bouncy Daifuku | `state_24_decal_sugar_dust` | decal | body_surface（身體表面） | 與 FX1 愛心粒子並存 |
 | #25 | 悲傷神獸 / Sorrowful Beast | `state_25_decor_neck_ornament` | decor | neck_around（脖子環繞） | 與 FX3 發光光暈、FX6 發光眼淚粒子並存 |
 | #26 | 沉睡巨像 / Sleeping Titan | `state_26_mark_z` | mark | head_top（頭部上方） | 海龜首版紅帽不取代，置於帽子上方；月度新角色依相同骨架下對應附著節點與身形比例決定位置 |
-| #27 | ECOCO 領袖 / ECOCO Leader | `state_27_decor_leader_badge` | decor | chest_or_sash（胸前或斜肩） | 徽章或斜肩帶擇一；與 FX1 愛心粒子並存；S2 彩虹光環依 9.1 規格取代 FX3 |
+| #27 | ECOCO 領袖 / ECOCO Leader | `state_27_decor_leader_badge` | decor | chest（胸前） | **已鎖定**：固定採徽章＋披風雙件式，不提供斜背肩帶選項；與 FX1 愛心粒子並存；S2 彩虹光環依 §9.1 規格取代 FX3（RFP v1.4 定案） |
+| #27 | ECOCO 領袖 / ECOCO Leader | `state_27_decor_leader_cape` | decor | shoulders_back（肩背） | 紅色領袖披風，固定圖層（RFP v1.4 新增） |
+| #27 | ECOCO 領袖 / ECOCO Leader | `state_27_decor_leader_circle` | decor | underfoot（腳下） | 腳下循環魔法陣，固定圖層；#36 觸發時由 S6 循環之冠的 ECOCO 六角能量圈**升級取代（非疊加）**（RFP v1.4 新增） |
 
 > 最終命名須雙方書面確認後方可進入正式建構。視覺規格詳見 [CHARACTER_TYPES.md §五](CHARACTER_TYPES.md)。

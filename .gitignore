@@ -9,6 +9,9 @@ ecoco-private/
 *.mov
 *.mp4
 
+# 靜態視覺定案稿（本機留存，不進 repo）
+assets/animations/drafts/*.pdf
+
 # Playwright
 node_modules/
 playwright-report/
