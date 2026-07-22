@@ -220,7 +220,7 @@ const P1Home = ({ state, dispatch, setScreen, dragManager, payload, showTutorial
       setTimeout(() => {
         const wrap = turtleWrapRef.current;
         const pos = wrap ? { x: wrap.offsetWidth * 0.55, y: wrap.offsetHeight * 0.25 } : null;
-        addRise(`+${payload.cleanGain}`, pos, '#1F3DBF', 'assets/icon-clean.svg');
+        addRise(`+${payload.cleanGain}`, pos, '#4A90E2', 'assets/icon-clean.svg');
       }, 300);
     }
     const t = setTimeout(() => dismissAmbient(), 10000);
@@ -281,7 +281,7 @@ const P1Home = ({ state, dispatch, setScreen, dragManager, payload, showTutorial
       // good drop → feeding mini animation in place
       setEating(true);
       dispatch({ type: 'FEED', food: payload.id, hpGain: 5 });
-      addRise('+5', pos, '#FF4D63', 'assets/icon-hp.svg');
+      addRise('+5', pos, '#FF5A5F', 'assets/icon-hp.svg');
       showBubble({ text: '好好吃！謝謝你～', error: false });
       setTimeout(() => {
         setEating(false);
@@ -906,7 +906,7 @@ const P2bResult = ({ setScreen, dispatch, state, tweaks = {}, setTweak = () => {
               <img src="assets/icon-clean.svg" alt="" />
             </div>
             <div className="rpc-right">
-              <div className="rpc-label">潔淨值</div>
+              <div className="rpc-label">潔淨</div>
               <div className="rpc-val">+{CLEAN_GAIN}</div>
             </div>
           </div>
@@ -1329,7 +1329,7 @@ const P4Shop = ({ setScreen, state, dispatch, tweaks, payload }) => {
                     <div className="thumb"><Glyph value={it.emoji} alt={it.name} /></div>
                     <h4>{it.name}</h4>
                     <div className="desc">{it.desc}</div>
-                    <div className="price">
+                    <div className={`price${!isPhase2 ? ' price--cosmetic-locked' : ''}`}>
                       {isBought ? (
                         <span style={{ fontWeight: 800, color: '#22A55C', fontSize: 12 }}>✓ 已擁有</span>
                       ) : (
@@ -1554,7 +1554,7 @@ const ShopPurchaseModal = ({ item, state, onClose, onConfirm }) => {
               <b>{quantity}</b>
               <button disabled={quantity >= maxQuantity} onClick={() => setQuantity(q => Math.min(maxQuantity, q + 1))}>＋</button>
             </div>
-            <small>最多可買 {maxQuantity}</small>
+            {quantity >= maxQuantity && <small className="quantity-limit-note">已達購買上限</small>}
           </div>
         )}
 

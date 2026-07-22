@@ -516,9 +516,9 @@ const StatSliders = ({ state, dispatch }) => (
   <>
     <div style={tweakLabel}>三維數值</div>
     {[
-      { kind:'hp',    label:'體力', color:'#D4251C' },
-      { kind:'clean', label:'潔淨', color:'#060E9F' },
-      { kind:'mood',  label:'心情', color:'#FFCE00' },
+      { kind:'hp',    label:'體力', color:'#FF5A5F' },
+      { kind:'clean', label:'潔淨', color:'#4A90E2' },
+      { kind:'mood',  label:'心情', color:'#FFC940' },
     ].map(({ kind, label, color }) => (
       <div key={kind} style={{marginBottom:8}}>
         <div style={{display:'flex',justifyContent:'space-between',fontSize:11,color:'rgba(255,255,255,0.7)',marginBottom:3}}>
