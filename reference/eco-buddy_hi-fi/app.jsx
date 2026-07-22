@@ -1,6 +1,28 @@
 /* ECO BUDDY · main app */
 const { useState, useEffect, useRef, useReducer, useCallback, useMemo } = React;
 
+const WEEKLY_FOOD_LIMIT = 5;
+const MONTHLY_FOOD_BAG_LIMIT = 12;
+
+const canStoreWeeklyFood = (state, amount = 1) => {
+  const bagCount = state.food.reduce((sum, food) => sum + food.stock, 0);
+  return state.foodQuota.weeklyCount + amount <= state.foodQuota.weeklyLimit &&
+    bagCount + amount <= state.foodQuota.bagLimit;
+};
+
+const storeWeeklyFood = (state, amount = 1, source = 'earned') => {
+  if (!canStoreWeeklyFood(state, amount)) return state;
+  const targetIndex = state.food.findIndex(food => food.source === source && (source === 'shop' || food.current));
+  const fallbackIndex = state.food.findIndex(food => food.source === source);
+  const updateIndex = targetIndex >= 0 ? targetIndex : fallbackIndex;
+  if (updateIndex < 0) return state;
+  return {
+    ...state,
+    food: state.food.map((food, index) => index === updateIndex ? { ...food, stock: food.stock + amount, state: 'has' } : food),
+    foodQuota: { ...state.foodQuota, weeklyCount: state.foodQuota.weeklyCount + amount },
+  };
+};
+
 /* ───────── Default state ───────── */
 const DEFAULT_STATE = {
   stats: { hp: 78, clean: 62, mood: 45 },
@@ -13,11 +35,15 @@ const DEFAULT_STATE = {
   sprintPurchased: false,
   ownedCosmetics: [],
   equippedCosmetic: null,
+  // ponytail: hi-fi keeps several monthly leftovers to show the bag UI; production receives schedule data from API.
+  foodQuota: { weeklyCount: 1, weeklyLimit: WEEKLY_FOOD_LIMIT, bagLimit: MONTHLY_FOOD_BAG_LIMIT, nextFood: '蘋果', nextFoodEmoji: 'assets/food/ecobuddy-food___蘋果.webp' },
   food: [
-    { id:'hotdog-w1', name:'漢堡', emoji:'assets/food/ecobuddy-food___漢堡.webp', stock:2,  state:'has',    source:'recycle' },
-    { id:'hotdog-w3', name:'漢堡', emoji:'assets/food/ecobuddy-food___漢堡.webp', stock:2,  state:'low',    source:'recycle' },
-    { id:'hotdog-w2', name:'漢堡', emoji:'assets/food/ecobuddy-food___漢堡.webp', stock:12, state:'has',    source:'shop' },
-    { id:'hotdog-w4', name:'???',  emoji:'assets/food/ecobuddy-food___漢堡.webp', stock:0,  state:'locked', source:'recycle' },
+    { id:'weekly-grape', name:'葡萄', emoji:'assets/food/ecobuddy-food___葡萄.webp', stock:1, state:'has', source:'earned' },
+    { id:'weekly-bread', name:'麵包', emoji:'assets/food/ecobuddy-food___麵包.webp', stock:1, state:'has', source:'earned' },
+    { id:'weekly-salmon', name:'鮭魚', emoji:'assets/food/ecobuddy-food___鮭魚.webp', stock:1, state:'has', source:'earned' },
+    { id:'weekly-cabbage', name:'高麗菜', emoji:'assets/food/ecobuddy-food___高麗菜.webp', stock:1, state:'has', source:'earned' },
+    { id:'weekly-banana', name:'香蕉', emoji:'assets/food/ecobuddy-food___香蕉.webp', stock:1, state:'has', source:'earned', current:true },
+    { id:'shop-burger', name:'漢堡', emoji:'assets/food/ecobuddy-food___漢堡.webp', stock:1, state:'has', source:'shop' },
   ],
   tools: [
     { id:'ball',    name:'小球',   emoji:'assets/toy/ecobuddy-toy____皮球.webp', count:1, hoursLeft:24 },
@@ -26,8 +52,8 @@ const DEFAULT_STATE = {
   ],
   orderHistory: [
     { id: 'ORD-20260501', name: '月度通行證',   thumb: '🎫', price: 149, payMethod: 'Apple Pay',        date: '2026-05-01', status: 'success' },
-    { id: 'ORD-20260515', name: '五月衝刺禮包', thumb: '🎁', price: 199, payMethod: '藍新 NewebPay',    date: '2026-05-15', status: 'pending' },
-    { id: 'ORD-20260520', name: '五月衝刺禮包', thumb: '🎁', price: 199, payMethod: '信用卡',           date: '2026-05-20', status: 'failed', failReason: '信用卡授權失敗，請確認卡片額度是否充足' },
+    { id: 'ORD-20260515', name: '五月陪伴禮包', thumb: '🎁', price: 199, payMethod: 'Apple / Google Pay', date: '2026-05-15', status: 'pending' },
+    { id: 'ORD-20260520', name: '五月陪伴禮包', thumb: '🎁', price: 199, payMethod: 'Apple / Google Pay', date: '2026-05-20', status: 'failed', failReason: '平台付款驗證失敗，請確認付款方式後重試' },
   ],
   pointsOrderHistory: [
     { id: 'PTS-20260601', name: '基礎食物補給包', thumb: 'assets/food/ecobuddy-food___漢堡.webp', pointsCost: 80,  date: '2026-06-01 10:23' },
@@ -44,6 +70,8 @@ const DEFAULT_STATE = {
     { code:'32', name:'彩虹之神', unlocked:false, legendary:true, tint:'hue-rotate(180deg) saturate(1.5)' },
     { code:'34', name:'科技武裝', unlocked:false, tint:'contrast(1.2) saturate(0.6)' },
   ],
+  pendingEvolveCode: null,
+  highlightStateCode: null,
 };
 
 function stateReducer(state, action){
@@ -52,7 +80,7 @@ function stateReducer(state, action){
       return {
         ...state,
         stats:{...state.stats, hp: Math.min(100, state.stats.hp + (action.hpGain||5))},
-        food: action.food ? state.food.map(f => f.id===action.food ? {...f, stock:Math.max(0,f.stock-1)} : f) : state.food,
+        food: action.food ? state.food.map(f => f.id===action.food ? {...f, stock:Math.max(0,f.stock-1), state:Math.max(0,f.stock-1) ? 'has' : 'low'} : f) : state.food,
       };
     case 'USE_TOOL': {
       const effects = {
@@ -78,31 +106,48 @@ function stateReducer(state, action){
     case 'CLEAR_NEW_TOOL':
       return {...state, tools: state.tools.map(t => t.id===action.id ? {...t, isNew:false} : t)};
     case 'COLLECT_BATCH':
-      // 三帳本：體力 / 潔淨 / ECOCO 點數 各自獨立由 P2b 帶入
-      return {
+      // 待決議-3：超額潔淨是否照常累積，正式版以後端 cleanGain 為準。
+      return storeWeeklyFood({
         ...state,
         stats: {
           ...state.stats,
-          hp: Math.min(100, state.stats.hp + (action.hpGain || 0)),
+          hp: Math.min(100, state.stats.hp + (action.quotaFull ? 0 : (action.hpGain || 0))),
           clean: Math.min(100, state.stats.clean + (action.cleanGain || 0)),
         },
-        ...(!action.quotaFull && {
-          food: state.food.map(f => f.source === 'recycle' ? {...f, stock: f.stock + 1} : f),
-        }),
         points: state.points + (action.pointsGain || 0),
-      };
+      }, action.quotaFull ? 0 : 1);
     case 'BUY':
-      if (action.item.id === 'monthly-pass') return { ...state, hasPass: true };
-      if (action.item.id === 'sprint-pack') return { ...state, sprintPurchased: true };
-      if (action.item.type === 'change-count') return { ...state, swapLeft: state.swapLeft + (action.item.qty || 0) };
-      if (action.item.cashChannel === 'platform-iap') return { ...state, ownedCosmetics: [...(state.ownedCosmetics || []), action.item.id] };
-      return {
+      if (action.item.id === 'weekly-food') {
+        const quantity = Math.max(1, action.item.quantity || 1);
+        if (!canStoreWeeklyFood(state, quantity)) return state;
+        const paid = { ...state, points: Math.max(0, state.points - (action.item.pointsCost || 0)) };
+        return storeWeeklyFood(paid, quantity, 'shop');
+      }
+      const paid = {
         ...state,
-        points: Math.max(0, state.points - action.item.price),
-        tools: action.item.id.startsWith('food') || ['hotdog-pack','salad','berry','fish'].includes(action.item.id)
-          ? state.tools
-          : [...state.tools.filter(t=>t.id!==action.item.id), {id:action.item.id, name:action.item.name.split(' ')[0], emoji:action.item.emoji, count:(state.tools.find(t=>t.id===action.item.id)?.count||0)+1, hoursLeft:null}],
+        points: Math.max(0, state.points - (action.item.pointsCost || 0)),
       };
+      if (action.item.id === 'monthly-pass') return { ...paid, hasPass: true };
+      if (action.item.id === 'sprint-pack') return { ...paid, sprintPurchased: true };
+      if (action.item.type === 'change-count') return { ...paid, swapLeft: state.swapLeft + (action.item.qty || 0) };
+      if (action.item.category === 'status-package' && action.item.rewardState) {
+        const reward = action.item.rewardState;
+        const exists = state.dexStates.some(s => s.code === reward.code);
+        return {
+          ...paid,
+          dexStates: exists
+            ? state.dexStates.map(s => s.code === reward.code ? { ...s, unlocked: true } : s)
+            : [...state.dexStates, { code: reward.code, name: reward.name, unlocked: true }],
+          pendingEvolveCode: reward.code,
+          highlightStateCode: reward.code,
+        };
+      }
+      if (action.item.category === 'cosmetic') return { ...paid, ownedCosmetics: [...(state.ownedCosmetics || []), action.item.id] };
+      if (action.item.category === 'tool') return {
+        ...paid,
+        tools: [...state.tools.filter(t=>t.id!==action.item.id), {id:action.item.id, name:action.item.name.split(' ')[0], emoji:action.item.emoji, count:(state.tools.find(t=>t.id===action.item.id)?.count||0)+1, hoursLeft:null}],
+      };
+      return paid;
     case 'REFILL_RESULT':
       // 補充站掃碼只寫入現實購買的 體力 / 潔淨 回饋；App 不收取任何點數或現金
       return {
@@ -128,7 +173,21 @@ function stateReducer(state, action){
       return { ...state, equippedCosmetic: action.id };
     case 'RESET_STATS': return {...state, stats:action.stats};
     case 'SET_STAT': return {...state, stats:{...state.stats, [action.kind]: Math.min(100, Math.max(0, action.value))}};
-    case 'SET_STOCK': return {...state, food: state.food.map((f,i)=>({...f, stock:action.stocks[i] ?? f.stock, state:action.stocks[i]===0?(f.state==='locked'?'locked':'low'):f.state}))};
+    case 'SET_STOCK': return {...state, food: state.food.map((f,i)=>({...f, stock:Math.min(action.stocks[i] ?? f.stock, state.foodQuota.bagLimit), state:(action.stocks[i] ?? f.stock)===0?'low':'has'}))};
+    case 'RESET_WEEKLY_FOOD': return {...state, foodQuota:{...state.foodQuota, weeklyCount:0}};
+    case 'CLEAR_MONTHLY_FOOD': return {...state, food:state.food.map(f=>f.source === 'shop' ? f : {...f,stock:0,state:'low'}), foodQuota:{...state.foodQuota,weeklyCount:0}};
+    case 'CLEAR_PENDING_EVOLVE': return {...state, pendingEvolveCode:null};
+    case 'CLEAR_HIGHLIGHT_STATE': return {...state, highlightStateCode:null};
+    case 'UNLOCK_DEX_STATE': {
+      const exists = state.dexStates.some(s => s.code === action.code);
+      return {
+        ...state,
+        dexStates: exists
+          ? state.dexStates.map(s => s.code === action.code ? { ...s, unlocked: true } : s)
+          : [...state.dexStates, { code: action.code, name: action.name || `狀態 #${action.code}`, unlocked: true }],
+        highlightStateCode: action.code,
+      };
+    }
     case 'CLEAR_BAG': return {...state, tools:[]};
     case 'FILL_TOOLS': return {...state, tools:[
       { id:'toy-d1', name:'小球',     emoji:'assets/toy/ecobuddy-toy____皮球.webp', count:1, hoursLeft:24 },
@@ -165,16 +224,11 @@ function stateReducer(state, action){
         pointsOrderHistory: [{ id: action.id, name: action.name, thumb: action.thumb, pointsCost: action.pointsCost, date: action.date }, ...state.pointsOrderHistory],
       };
     case 'CLAIM_MISSION':
-      // #21 日常任務獎勵：食物 ×1 + 心情 +3（食物加在第一個未鎖食物格）
-      return {
+      // #21：食物併入共用週配額；配額滿時仍發心情 +3。
+      return storeWeeklyFood({
         ...state,
         stats: { ...state.stats, mood: Math.min(100, state.stats.mood + 3) },
-        food: (() => {
-          const idx = state.food.findIndex(f => f.state !== 'locked');
-          if (idx < 0) return state.food;
-          return state.food.map((f, i) => i === idx ? { ...f, stock: f.stock + 1 } : f);
-        })(),
-      };
+      });
     default: return state;
   }
 }
@@ -309,6 +363,8 @@ const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
   "p2DemoType": "recycle",
   "p2ErrKind": null,
   "p2bQuotaFull": false,
+  "p1BagFull": false,
+  "p4FoodQuotaFull": false,
   "p2bEvolve": false,
   "p1Evolve": false,
   "p12Evolve": false,
@@ -377,7 +433,7 @@ const App = () => {
       case 'p4':  return <P4Shop setScreen={setScreen} state={state} dispatch={dispatch} tweaks={tweaks} payload={screenPayload} />;
       case 'p5':  return <P5Missions setScreen={setScreen} state={state} dispatch={dispatch} tweaks={tweaks} />;
       case 'p6':  return <P6Ads setScreen={setScreen} state={state} dispatch={dispatch} payload={screenPayload} />;
-      case 'p7':  return <P7Dex setScreen={setScreen} state={state} dispatch={dispatch} onOpenPicker={() => setDexPickerOpen(true)} tweaks={tweaks} />;
+      case 'p7':  return <P7Dex setScreen={setScreen} state={state} dispatch={dispatch} onOpenPicker={() => setDexPickerOpen(true)} tweaks={tweaks} payload={screenPayload} />;
       case 'p8':         return <P8Profile setScreen={setScreen} state={state} tweaks={tweaks} />;
       case 'p9':  return <P9Bag setScreen={setScreen} state={state} dispatch={dispatch} />;
       case 'wardrobe-manage': return <WardrobeManage setScreen={setScreen} state={state} dispatch={dispatch} />;
@@ -460,9 +516,9 @@ const StatSliders = ({ state, dispatch }) => (
   <>
     <div style={tweakLabel}>三維數值</div>
     {[
-      { kind:'hp',    label:'體力', color:'#D4251C' },
-      { kind:'clean', label:'潔淨', color:'#060E9F' },
-      { kind:'mood',  label:'心情', color:'#FFCE00' },
+      { kind:'hp',    label:'體力', color:'#FF5A5F' },
+      { kind:'clean', label:'潔淨', color:'#4A90E2' },
+      { kind:'mood',  label:'心情', color:'#FFC940' },
     ].map(({ kind, label, color }) => (
       <div key={kind} style={{marginBottom:8}}>
         <div style={{display:'flex',justifyContent:'space-between',fontSize:11,color:'rgba(255,255,255,0.7)',marginBottom:3}}>
@@ -522,6 +578,17 @@ const InlineTweaks = ({ tweaks, setTweak, setScreen, state, dispatch, screen }) 
           <div style={{fontSize:10,color:'rgba(255,255,255,0.3)',marginTop:4,lineHeight:1.4}}>
             Phase 1：禮包/裝扮 Coming Soon，僅點數可購。Phase 2：開放金流。
           </div>
+          {isP4 && (
+            <>
+              <TweakDivider />
+              <div style={tweakLabel}>食物配額</div>
+              <Segmented
+                value={tweaks.p4FoodQuotaFull ? 'full' : 'normal'}
+                onChange={v => setTweak('p4FoodQuotaFull', v === 'full')}
+                options={[{v:'normal',l:'未滿'},{v:'full',l:'本週已領滿'}]}
+              />
+            </>
+          )}
         </>
       )}
 
@@ -614,9 +681,9 @@ const InlineTweaks = ({ tweaks, setTweak, setScreen, state, dispatch, screen }) 
           <div style={{marginTop:10,paddingTop:10,borderTop:'1px solid rgba(255,255,255,0.08)'}}>
             <div style={tweakLabel}>模擬裝扮持有</div>
             <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:6}}>
-              <button onClick={()=>dispatch({ type:'BUY', item:{ id:'star-hat', cashChannel:'platform-iap' } })} style={tweakBtn}>＋⭐ 星辰帽</button>
-              <button onClick={()=>dispatch({ type:'BUY', item:{ id:'crystal-bow', cashChannel:'platform-iap' } })} style={tweakBtn}>＋🎀 蝴蝶結</button>
-              <button onClick={()=>dispatch({ type:'BUY', item:{ id:'rainbow-halo', cashChannel:'platform-iap' } })} style={tweakBtn}>＋🌈 彩虹光暈</button>
+              <button onClick={()=>dispatch({ type:'BUY', item:{ id:'star-hat', category:'cosmetic' } })} style={tweakBtn}>＋⭐ 星辰帽</button>
+              <button onClick={()=>dispatch({ type:'BUY', item:{ id:'crystal-bow', category:'cosmetic' } })} style={tweakBtn}>＋🎀 蝴蝶結</button>
+              <button onClick={()=>dispatch({ type:'BUY', item:{ id:'rainbow-halo', category:'cosmetic' } })} style={tweakBtn}>＋🌈 彩虹光暈</button>
               <button onClick={()=>dispatch({ type:'EQUIP_COSMETIC', id:null })} style={{...tweakBtn, background:'rgba(255,255,255,0.06)'}}>脫下裝扮</button>
             </div>
           </div>
@@ -625,6 +692,21 @@ const InlineTweaks = ({ tweaks, setTweak, setScreen, state, dispatch, screen }) 
             <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:6}}>
               <button onClick={()=>dispatch({ type:'FILL_TOOLS' })} style={tweakBtn}>填入 6 個道具</button>
               <button onClick={()=>dispatch({ type:'CLEAR_BAG' })} style={{...tweakBtn, background:'rgba(255,255,255,0.06)'}}>清空</button>
+            </div>
+          </div>
+          <div style={{marginTop:10,paddingTop:10,borderTop:'1px solid rgba(255,255,255,0.08)'}}>
+            <div style={tweakLabel}>餐袋狀態</div>
+            <Segmented
+              value={tweaks.p1BagFull ? 'full' : 'normal'}
+              onChange={v => setTweak('p1BagFull', v === 'full')}
+              options={[{v:'normal',l:'未達上限'},{v:'full',l:'已達餐袋上限'}]}
+            />
+          </div>
+          <div style={{marginTop:10,paddingTop:10,borderTop:'1px solid rgba(255,255,255,0.08)'}}>
+            <div style={tweakLabel}>餐袋週期</div>
+            <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:6}}>
+              <button onClick={()=>dispatch({ type:'RESET_WEEKLY_FOOD' })} style={tweakBtn}>週三重置</button>
+              <button onClick={()=>dispatch({ type:'CLEAR_MONTHLY_FOOD' })} style={tweakBtn}>月底清空</button>
             </div>
           </div>
           <div style={{marginTop:10,paddingTop:10,borderTop:'1px solid rgba(255,255,255,0.08)'}}>

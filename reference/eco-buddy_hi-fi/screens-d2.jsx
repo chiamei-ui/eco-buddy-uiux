@@ -81,7 +81,7 @@ const P12RefillResult = ({ setScreen, state, dispatch, payload, tweaks = {} }) =
               <img src="assets/icon-hp.svg" alt="" />
             </div>
             <div className="rpc-right">
-              <div className="rpc-label">體力值</div>
+              <div className="rpc-label">體力</div>
               <div className="rpc-val">+{session.hp}</div>
             </div>
           </div>
@@ -90,7 +90,7 @@ const P12RefillResult = ({ setScreen, state, dispatch, payload, tweaks = {} }) =
               <img src="assets/icon-clean.svg" alt="" />
             </div>
             <div className="rpc-right">
-              <div className="rpc-label">潔淨值</div>
+              <div className="rpc-label">潔淨</div>
               <div className="rpc-val">+{session.clean}</div>
             </div>
           </div>

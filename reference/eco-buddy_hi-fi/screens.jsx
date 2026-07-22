@@ -220,7 +220,7 @@ const P1Home = ({ state, dispatch, setScreen, dragManager, payload, showTutorial
       setTimeout(() => {
         const wrap = turtleWrapRef.current;
         const pos = wrap ? { x: wrap.offsetWidth * 0.55, y: wrap.offsetHeight * 0.25 } : null;
-        addRise(`+${payload.cleanGain}`, pos, '#1F3DBF', 'assets/icon-clean.svg');
+        addRise(`+${payload.cleanGain}`, pos, '#4A90E2', 'assets/icon-clean.svg');
       }, 300);
     }
     const t = setTimeout(() => dismissAmbient(), 10000);
@@ -281,7 +281,7 @@ const P1Home = ({ state, dispatch, setScreen, dragManager, payload, showTutorial
       // good drop → feeding mini animation in place
       setEating(true);
       dispatch({ type: 'FEED', food: payload.id, hpGain: 5 });
-      addRise('+5', pos, '#FF4D63', 'assets/icon-hp.svg');
+      addRise('+5', pos, '#FF5A5F', 'assets/icon-hp.svg');
       showBubble({ text: '好好吃！謝謝你～', error: false });
       setTimeout(() => {
         setEating(false);
@@ -322,8 +322,19 @@ const P1Home = ({ state, dispatch, setScreen, dragManager, payload, showTutorial
   const wardrobeIsPhase2 = (tweaks?.shopPhase ?? 1) >= 2;
   const wardrobeOwnedItems = COSMETIC_CATALOG.filter(c => (state.ownedCosmetics || []).includes(c.id));
   const wardrobeHasItems = wardrobeIsPhase2 && wardrobeOwnedItems.length > 0;
-  const dockScrollable = (dockTab === 'wardrobe' && wardrobeHasItems) || (dockTab === 'tools' && state.tools.length > 4) ||
-    (dockTab === 'food' && new Set(state.food.map(f => f.source || 'recycle')).size > 1);
+  const dockScrollable = dockTab === 'food' || (dockTab === 'wardrobe' && wardrobeHasItems) || (dockTab === 'tools' && state.tools.length > 4);
+  const rawFoodBagCount = state.food.reduce((sum, food) => sum + food.stock, 0);
+  const foodBagCount = tweaks?.p1BagFull ? state.foodQuota.bagLimit : rawFoodBagCount;
+  const displayFood = (() => {
+    if (!tweaks?.p1BagFull) return state.food;
+    const fillAmount = Math.max(0, state.foodQuota.bagLimit - rawFoodBagCount);
+    if (!fillAmount) return state.food;
+    const targetIndex = state.food.findIndex(food => food.current);
+    const fallbackIndex = state.food.findIndex(food => food.source !== 'shop');
+    const updateIndex = targetIndex >= 0 ? targetIndex : fallbackIndex;
+    return state.food.map((food, index) => index === updateIndex ? { ...food, stock: food.stock + fillAmount, state: 'has' } : food);
+  })();
+  const visibleFood = displayFood.filter(f => f.stock > 0);
 
   return (
     <div className="screen p1">
@@ -415,12 +426,15 @@ const P1Home = ({ state, dispatch, setScreen, dragManager, payload, showTutorial
           <button className={`dock-tab ${dockTab === 'wardrobe' ? 'active' : ''}`} onClick={() => setDockTab('wardrobe')}>換衣間</button>
         </div>
         <div className={`dock ${dockScrollable ? 'dock-scrollable' : ''}`} style={dockScrollable ? { overflowY: 'auto', paddingBottom: '44px' } : {}}>
-          <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:10 }}>
+          <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', gap:10, marginBottom:10 }}>
             {dockTab !== 'wardrobe' && (
               <button onClick={() => setDockInfoOpen(true)} style={{ display:'flex', alignItems:'center', gap:4, background:'none', border:'none', padding:0, cursor:'pointer' }}>
                 <img src="assets/btn/icon-_info.svg" alt="" width="17" height="17" draggable="false" style={{ display:'block' }} />
                 <span style={{ fontSize:11, fontWeight:700, color:'var(--ecoco-blue)', lineHeight:1 }}>效果說明</span>
               </button>
+            )}
+            {dockTab === 'food' && (
+              <span className="food-bag-count">餐袋 {foodBagCount}/{state.foodQuota.bagLimit}</span>
             )}
             {dockTab === 'tools' && (
               <button onClick={() => setScreen('p9')} style={{ fontSize:11, fontWeight:700, color:'var(--ecoco-blue)', background:'none', border:'none', cursor:'pointer', padding:0 }}>管理 ›</button>
@@ -430,21 +444,22 @@ const P1Home = ({ state, dispatch, setScreen, dragManager, payload, showTutorial
             )}
           </div>
         {dockTab === 'food' ? <>
-          {[
-            { source: 'recycle', label: '帶禮物回家' },
-            { source: 'shop',    label: '商店補給' },
-          ].map(({ source, label }) => {
-            const items = state.food.filter(f => (f.source || 'recycle') === source && (f.state === 'locked' || f.stock > 0));
-            if (!items.length) return null;
-            return (
-              <div key={source} style={{ marginBottom: 10 }}>
-                <div className="food-section-label">{label}</div>
-                <div className="dock-grid">
-                  {items.map(f => <FoodCell key={f.id} food={f} dragManager={dragManager} onDrop={onDrop} showBubble={showBubble} pulsing={pulsingIds.has(f.id)} />)}
-                </div>
-              </div>
-            );
-          })}
+          <div className="dock-grid food-grid">
+            {visibleFood.map(f => <FoodCell key={f.id} food={f} dragManager={dragManager} onDrop={onDrop} showBubble={showBubble} pulsing={pulsingIds.has(f.id)} />)}
+            <FoodCell
+              key="next-week-preview"
+              food={{
+                id: 'next-week-preview',
+                name: state.foodQuota.nextFood,
+                emoji: state.foodQuota.nextFoodEmoji,
+                stock: 0,
+                state: 'locked',
+              }}
+              dragManager={dragManager}
+              onDrop={onDrop}
+              showBubble={showBubble}
+            />
+          </div>
         </> : dockTab === 'tools' ? <>
           <div className="dock-grid">
             {(() => {
@@ -494,7 +509,8 @@ const P1Home = ({ state, dispatch, setScreen, dragManager, payload, showTutorial
               <div style={{ fontSize:13, color:'#444', lineHeight:1.7, marginBottom:12 }}>
                 <div>• 拖曳食物到 Buddy 身上即可餵食</div>
                 <div>• 每次餵食讓 Buddy 體力 +1~5（每次不同）</div>
-                <div>• 每種食物每週有配額，週三 12:00 重置</div>
+                <div>• 當週食物由帶禮物回家、商店與今日陪伴共用每週配額</div>
+                <div>• 週三 12:00 重置當週配額；月底會清空餐袋</div>
                 <div>• 數量 ≤ 2 時卡片變淡，提醒快用完</div>
               </div>
               <div style={{ background:'#FFF3E0', borderRadius:12, padding:'10px 14px', fontSize:12, color:'#7A4800' }}>
@@ -584,10 +600,6 @@ const ItemInfoSheet = ({ onClose, children }) => (
 const FoodCell = ({ food, dragManager, onDrop, showBubble, pulsing }) => {
   const cellRef = useRef(null);
   const handlePointerDown = (e) => {
-    if (food.state === 'locked') {
-      showBubble({ text: DIALOGUES.err.foodLocked, error: true });
-      return;
-    }
     if (food.stock <= 0) {
       showBubble({ text: DIALOGUES.err.foodEmpty, error: true });
       return;
@@ -609,16 +621,24 @@ const FoodCell = ({ food, dragManager, onDrop, showBubble, pulsing }) => {
     window.addEventListener('pointerup', onUp);
   };
   const isEmpty = food.state !== 'locked' && food.stock <= 0;
-  const cls = food.state === 'locked' ? 'locked' : isEmpty ? 'empty' : food.stock <= 2 ? 'low' : 'has-stock';
+  const sourceCls = food.source === 'shop' ? ' shop-food' : '';
+  const cls = `${food.state === 'locked' ? 'locked preview-food' : isEmpty ? 'empty' : food.stock <= 2 ? 'low' : 'has-stock'}${sourceCls}`;
   return (
     <div className="food-slot">
-      <div ref={cellRef} className={`food-cell ${cls}${pulsing ? ' pulsing' : ''}`} onPointerDown={handlePointerDown}>
+      <div ref={cellRef} className={`food-cell ${cls}${pulsing ? ' pulsing' : ''}`} onPointerDown={food.state === 'locked' ? undefined : handlePointerDown}>
         {food.state === 'locked'
           ? <Glyph value={food.emoji} alt={food.name} className="emoji food-preview-emoji" />
           : isEmpty
             ? <span className="empty-plate" aria-hidden="true">🍽️</span>
           : <>
               <Glyph value={food.emoji} alt={food.name} className="emoji" />
+              {food.source === 'shop' && (
+                <span className="shop-badge" aria-label="商店購買">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M4 10.2 5.1 4h13.8l1.1 6.2c-.2 1.5-1.5 2.7-3 2.7-1 0-1.9-.5-2.5-1.2-.6.7-1.5 1.2-2.5 1.2s-1.9-.5-2.5-1.2c-.6.7-1.5 1.2-2.5 1.2-1.5 0-2.8-1.2-3-2.7ZM6 14h12v6H6v-6Zm2 1.8v2.4h8v-2.4H8Z" />
+                  </svg>
+                </span>
+              )}
               {food.stock > 0 && <span className="badge">{food.stock}</span>}
             </>
         }
@@ -748,12 +768,12 @@ const P2Scan = ({ setScreen, dispatch, tweaks = {}, setTweak = () => {} }) => {
 /* ═══════════════ EvolveOverlay · 變身過場（演示用，實際動畫由動畫師執行）═══════════════ */
 const EvolveOverlay = ({ onDone, newFormName = '夏日龜 ☀️' }) => {
   const [phase, setPhase] = useState('flash'); // flash | reveal | hold
+  const [saved, setSaved] = useState(false);
 
   useEffect(() => {
     const t1 = setTimeout(() => setPhase('reveal'), 450);
     const t2 = setTimeout(() => setPhase('hold'), 950);
-    const t3 = setTimeout(onDone, 3200);
-    return () => [t1, t2, t3].forEach(clearTimeout);
+    return () => [t1, t2].forEach(clearTimeout);
   }, []);
 
   return (
@@ -772,13 +792,29 @@ const EvolveOverlay = ({ onDone, newFormName = '夏日龜 ☀️' }) => {
         <div className="evolve-headline">Buddy 變身了！</div>
         <div className="evolve-form">{newFormName}</div>
       </div>
+      {phase === 'hold' && (
+        <div className="evolve-actions">
+          <button className={`evolve-save${saved ? ' saved' : ''}`} onClick={() => setSaved(true)} aria-label={saved ? '已儲存圖卡' : '儲存變身圖卡'}>
+            <svg className="evolve-save-icon" viewBox="0 0 24 24" aria-hidden="true">
+              {saved ? (
+                <path d="M9.2 16.6 4.9 12.3l-1.4 1.4 5.7 5.7L20.8 7.8l-1.4-1.4z" />
+              ) : (
+                <path d="M5 20h14v-2H5v2Zm7-16v9.2l3.6-3.6L17 11l-6 6-6-6 1.4-1.4 3.6 3.6V4h2Z" />
+              )}
+            </svg>
+          </button>
+          <button className="evolve-confirm" onClick={onDone}>確認</button>
+        </div>
+      )}
     </div>
   );
 };
 
 /* ═══════════════ P2b · 回收結果頁（滿版）═══════════════ */
-const P2bResult = ({ setScreen, dispatch, tweaks = {}, setTweak = () => {} }) => {
-  const quotaFull = tweaks.p2bQuotaFull || false;
+const P2bResult = ({ setScreen, dispatch, state, tweaks = {}, setTweak = () => {} }) => {
+  const food = state.food.find(item => item.current) || state.food.find(item => item.source === 'earned') || state.food[0];
+  const quotaFull = tweaks.p2bQuotaFull || state.foodQuota.weeklyCount >= state.foodQuota.weeklyLimit ||
+    state.food.reduce((sum, item) => sum + item.stock, 0) >= state.foodQuota.bagLimit;
   const willEvolve = tweaks.p2bEvolve || false;
   const [showInfo, setShowInfo] = useState(false);
   const [showEvolve, setShowEvolve] = useState(false);
@@ -795,7 +831,7 @@ const P2bResult = ({ setScreen, dispatch, tweaks = {}, setTweak = () => {} }) =>
   };
 
   const handleDone = () => {
-    dispatch({ type: 'COLLECT_BATCH', quotaFull, hpGain: HP_GAIN, cleanGain: CLEAN_GAIN, pointsGain: POINTS_GAIN });
+    dispatch({ type: 'COLLECT_BATCH', quotaFull, hpGain: quotaFull ? 0 : HP_GAIN, cleanGain: CLEAN_GAIN, pointsGain: POINTS_GAIN });
     navigate(() => setScreen('p1', { ...(quotaFull ? {} : { foodStored: true }), cleanGain: CLEAN_GAIN }));
   };
 
@@ -858,10 +894,10 @@ const P2bResult = ({ setScreen, dispatch, tweaks = {}, setTweak = () => {} }) =>
         <div className={`rp-cards${quotaFull ? ' rp-cards--single' : ''}`}>
           {!quotaFull && (
             <div className="rpc rpc--food">
-              <div className="rpc-icon-bg">🌭</div>
+              <div className="rpc-icon-bg"><Glyph value={food.emoji} alt={food.name} className="rpc-food-icon" /></div>
               <div className="rpc-right">
-                <div className="rpc-label">熱狗堡</div>
-                <div className="rpc-val">+99</div>
+                <div className="rpc-label">{food.name}</div>
+                <div className="rpc-val">+1</div>
               </div>
             </div>
           )}
@@ -870,7 +906,7 @@ const P2bResult = ({ setScreen, dispatch, tweaks = {}, setTweak = () => {} }) =>
               <img src="assets/icon-clean.svg" alt="" />
             </div>
             <div className="rpc-right">
-              <div className="rpc-label">潔淨值</div>
+              <div className="rpc-label">潔淨</div>
               <div className="rpc-val">+{CLEAN_GAIN}</div>
             </div>
           </div>
@@ -890,65 +926,43 @@ const P2bResult = ({ setScreen, dispatch, tweaks = {}, setTweak = () => {} }) =>
    殘留路由與側欄入口同步移除。 */
 
 /* ----- P4 IAP Config (模擬後台 CMS/API 設定，前端不寫死任何商品內容) ----- */
-// TODO [上線版] price 欄位須向平台 SDK 查詢本地化價格（App Store: [IAP SKU: sprint_pack_199] / [IAP SKU: eco_pass_monthly]），
-// 不顯示此處 hardcode 的數字。裝扮各款 SKU 待上架後補充。
+// TODO [上線版] price 欄位須向平台 SDK 查詢本地化價格；不顯示此處 hardcode 的數字。
 const SHOP_IAP_CONFIG = {
-  sprintPack: {
-    id: 'sprint-pack', emoji: '🎁', name: '月底衝刺禮包', price: 199, currency: 'cash', cashChannel: 'newebpay',
-    desc: '幫 Buddy 在月底衝到最佳狀態，選出最美的夥伴日誌',
-    activeWindow: '每月 22–28 日',
-    contents: [
-      { emoji: 'assets/food/ecobuddy-food___漢堡.webp', name: '月份限定食物 ×10', sub: '不佔週配額，直接存入餐袋' },
-      { emoji: 'assets/toy/ecobuddy-toy____梳子.webp', name: '精華梳 ×3', sub: '心情 +20' },
-      { emoji: 'assets/food/ecobuddy-food___洋芋片.webp', name: '豪華零食 ×3', sub: '體力 +30 · 心情 +25' },
-      { emoji: '🎀', name: '月份限定裝扮 ×1', sub: '永久穿戴，當月主題' },
-      { emoji: '🎬', name: '廣告道具加速', sub: '本月剩餘天數：每日上限 5→8 次' },
-    ],
-  },
   changePack10: {
     // TODO [上線版] price 讀取平台 SDK [IAP SKU: change_pack_10]，不 hardcode
-    id: 'change-pack-10', emoji: '🎫', name: '10 次｜偶爾想換一下', price: 99,
-    currency: 'cash', cashChannel: 'platform-iap', type: 'change-count',
+    id: 'change-pack-10', emoji: '🎫', name: '10 次｜偶爾想換一下', iapPrice: 99, pointsCost: 90,
+    payment: 'hybrid', cashChannel: 'platform-iap', type: 'change-count',
     qty: 10, desc: '想換掉日誌裡的 Buddy 時用', thumb: '🎫',
     ribbon: null, featured: false,
   },
   changePack50: {
     // TODO [上線版] price 讀取平台 SDK [IAP SKU: change_pack_50]，不 hardcode
-    id: 'change-pack-50', emoji: '🎫', name: '50 次｜換到滿意為止', price: 299,
-    currency: 'cash', cashChannel: 'platform-iap', type: 'change-count',
+    id: 'change-pack-50', emoji: '🎫', name: '50 次｜換到滿意為止', iapPrice: 299, pointsCost: 260,
+    payment: 'hybrid', cashChannel: 'platform-iap', type: 'change-count',
     qty: 50, desc: '換到滿意為止', thumb: '🎫',
     ribbon: '最划算', featured: true,
   },
-  monthlyPass: {
-    id: 'monthly-pass', emoji: '🎫', name: '月度通行證', price: 149, currency: 'cash', cashChannel: 'platform-iap',
-    desc: '整個月都是你和 Buddy 的專屬時光，每天都有小驚喜',
-    validDays: 30,
+  statusPackOne: {
+    id: 'status-pack-one', emoji: '🎁', name: '小禮包', iapPrice: 39, pointsCost: 120,
+    payment: 'hybrid', cashChannel: 'platform-iap', category: 'status-package',
+    statusRange: { min: 1, max: 27, label: '角色狀態' },
+    desc: '盲盒開出 #1–27 狀態之一',
     benefits: [
-      { emoji: '📅', name: '每日通行禮', sub: '登入領月份限定食物 ×1（不佔週配額）' },
-      { emoji: '🎬', name: '廣告道具加碼', sub: '每日上限 5→8 次' },
-      { emoji: 'assets/food/ecobuddy-food___漢堡.webp', name: '週配額加量', sub: '每種食物每週 5→8 個' },
-      { emoji: '🏅', name: '通行者稱號', sub: 'P8 個人頁金邊框 + 通行者稱號' },
-      { emoji: '📖', name: '夥伴日誌禮遇', sub: '月底可選 2 個狀態收入日誌' },
+      { emoji: '🎲', name: '#1–27 狀態盲盒', sub: '購買後隨機開出一個角色狀態' },
+      { emoji: '📖', name: '夥伴日誌收藏', sub: '抽中後立即解鎖收藏' },
+    ],
+  },
+  statusPackTwo: {
+    id: 'status-pack-two', emoji: '🎁', name: '大禮包', iapPrice: 599, pointsCost: 520,
+    payment: 'hybrid', cashChannel: 'platform-iap', category: 'status-package',
+    statusRange: { min: 28, max: 36, label: '特殊狀態' },
+    desc: '盲盒開出 #28–36 特殊狀態之一',
+    benefits: [
+      { emoji: '✨', name: '#28–36 特殊狀態盲盒', sub: '購買後隨機開出一個特殊狀態' },
+      { emoji: '📖', name: '夥伴日誌收藏', sub: '抽中後立即解鎖收藏' },
     ],
   },
 };
-
-/* ----- P4 helper: MonthlyPassCard (月度通行證) ----- */
-const MonthlyPassCard = ({ hasPass, validUntil = '6/30', onClick }) => (
-  <div className={`p4-pass-row${hasPass ? ' active' : ''}`} onClick={!hasPass ? onClick : undefined}>
-    <div className="pass-icon">🎫</div>
-    <div className="pass-body">
-      <h4>月度通行證</h4>
-      <div className="pass-desc">
-        {hasPass ? `啟用中 · 有效至 ${validUntil}` : '每日通行禮 ・ 廣告加碼 ・ 通行者稱號'}
-      </div>
-    </div>
-    {hasPass
-      ? <span className="pass-active-badge">啟用中</span>
-      : <div className="pass-price">NT$ 149</div>
-    }
-  </div>
-);
 
 /* ----- P4 helper: CosmeticDetailModal (裝扮商品詳情 + 試穿 — 彈窗) ----- */
 const CosmeticDetailSheet = ({ item, isPhase2, isOwned, onClose, onBuy }) => {
@@ -1024,11 +1038,11 @@ const CosmeticDetailSheet = ({ item, isPhase2, isOwned, onClose, onBuy }) => {
 
 /* ----- P4 helper: ProductDetailSheet (商品詳情 bottom sheet) ----- */
 const ProductDetailSheet = ({ item, onClose, onBuy }) => {
-  const isSprint = item.id === 'sprint-pack';
-  const rows = isSprint ? (item.contents || []) : (item.benefits || []);
-  const sectionTitle = isSprint ? '禮包內容' : '通行福利';
-  return (
-    <div className="sheet-backdrop" onClick={onClose}>
+  useModalScrollLock();
+  const rows = item.benefits || item.contents || [];
+  const sectionTitle = item.category === 'status-package' ? '盲盒內容' : '禮包內容';
+  return ReactDOM.createPortal((
+    <div className="sheet-backdrop product-sheet-backdrop" onClick={onClose}>
       <div className="sheet-panel scrollable product-detail-inner" onClick={e => e.stopPropagation()}>
         <div className="sheet-grip" />
         <div className="product-detail-head">
@@ -1051,12 +1065,15 @@ const ProductDetailSheet = ({ item, onClose, onBuy }) => {
           ))}
         </div>
         <div className="product-detail-footer">
-          <div className="price-tag">NT$ {item.price}</div>
+          <div className="price-tag">
+            {item.pointsCost ? <><img src="assets/icon-ecoco-point.svg" alt="" />{item.pointsCost} ＋ </> : null}
+            NT$ {item.iapPrice ?? item.price}
+          </div>
           <button className="buy-cta" onClick={() => onBuy(item)}>確認購買</button>
         </div>
       </div>
     </div>
-  );
+  ), document.querySelector('.iphone-screen'));
 };
 
 /* ───── Cosmetic catalogue (shared by P4Shop + P1Home wardrobe tab) ───── */
@@ -1065,6 +1082,31 @@ const COSMETIC_CATALOG = [
   { id: 'crystal-bow',  emoji: '🎀', name: '水晶蝴蝶結', desc: '限定裝扮 · 精緻優雅',       price: 249 },
   { id: 'rainbow-halo', emoji: '🌈', name: '彩虹光暈',   desc: 'Phase 1 預覽款 · 閃耀登場', price: 199 },
 ];
+
+const useModalScrollLock = () => {
+  useEffect(() => {
+    const screen = document.querySelector('.screen.p4');
+    const prevScreenOverflowY = screen?.style.overflowY;
+    const prevBodyOverflow = document.body.style.overflow;
+    if (screen) screen.style.overflowY = 'hidden';
+    document.body.style.overflow = 'hidden';
+    return () => {
+      if (screen) screen.style.overflowY = prevScreenOverflowY;
+      document.body.style.overflow = prevBodyOverflow;
+    };
+  }, []);
+};
+
+const pickStatusPackReward = (item, dexStates = []) => {
+  if (!item.statusRange) return null;
+  const codeNumber = item.statusRange.min + Math.floor(Math.random() * (item.statusRange.max - item.statusRange.min + 1));
+  const code = String(codeNumber).padStart(2, '0');
+  const existing = dexStates.find(s => s.code === code);
+  return {
+    code,
+    name: existing?.name ?? `${item.statusRange.label} #${code}`,
+  };
+};
 
 const WardrobeCell = ({ item, equipped, dispatch }) => {
   const isEquipped = equipped === item.id;
@@ -1097,6 +1139,13 @@ const P4Shop = ({ setScreen, state, dispatch, tweaks, payload }) => {
   const isSprintPeriod = tweaks?.shopSprint ?? false;
   const isPhase2 = (tweaks?.shopPhase ?? 1) >= 2;
   const changeSectionRef = useRef(null);
+  const weeklyFoodPrice = 50;
+  const currentFood = state.food.find(item => item.current) || state.food.find(item => item.source === 'earned') || state.food[0];
+  const foodBagCount = state.food.reduce((sum, food) => sum + food.stock, 0);
+  const foodRemainingWeekly = Math.max(0, state.foodQuota.weeklyLimit - state.foodQuota.weeklyCount);
+  const foodRemainingBag = Math.max(0, state.foodQuota.bagLimit - foodBagCount);
+  const foodRemainingByPoints = Math.floor(state.points / weeklyFoodPrice);
+  const maxFoodBuy = tweaks?.p4FoodQuotaFull ? 0 : Math.max(0, Math.min(foodRemainingWeekly, foodRemainingBag, foodRemainingByPoints));
   useEffect(() => {
     if (payload?.focus === 'change-count-packs' && changeSectionRef.current) {
       setTimeout(() => changeSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 120);
@@ -1112,35 +1161,35 @@ const P4Shop = ({ setScreen, state, dispatch, tweaks, payload }) => {
 
   const items = {
     food: [
-    { id: 'hotdog-pack', emoji: 'assets/food/ecobuddy-food___漢堡.webp', name: '漢堡 ×5', desc: '+5 體力/個', price: 50, ribbon: '熱賣', currency: 'heart' },
-    { id: 'salad', emoji: 'assets/food/ecobuddy-food___高麗菜.webp', name: '蔬菜 ×5', desc: '+5 體力/個', price: 60, currency: 'heart' },
-    { id: 'berry', emoji: 'assets/food/ecobuddy-food___葡萄.webp', name: '葡萄 ×3', desc: '+5 體力/個', price: 80, soldOut: true, currency: 'heart' },
-    { id: 'fish', emoji: 'assets/food/ecobuddy-food___鮭魚.webp', name: '鮭魚 ×5', desc: '+5 體力/個', price: 90, currency: 'heart' },
+    { id: 'weekly-food', emoji: currentFood.emoji, name: `${currentFood.name} ×1`, desc: '加入 Buddy 的餐袋', pointsCost: weeklyFoodPrice, unitPointsCost: weeklyFoodPrice, payment: 'points', category: 'food', maxQuantity: maxFoodBuy, soldOut: maxFoodBuy <= 0 },
     ],
 
     package: [
-    { ...SHOP_IAP_CONFIG.monthlyPass, price: tweaks?.passPrice ?? SHOP_IAP_CONFIG.monthlyPass.price },
-    ...((!isPhase2 || isSprintPeriod) ? [{ ...SHOP_IAP_CONFIG.sprintPack, price: tweaks?.sprintPrice ?? SHOP_IAP_CONFIG.sprintPack.price, daysLeft: tweaks?.sprintDaysLeft ?? 6 }] : []),
+    { ...SHOP_IAP_CONFIG.statusPackOne },
+    { ...SHOP_IAP_CONFIG.statusPackTwo },
     { ...SHOP_IAP_CONFIG.changePack10 },
     { ...SHOP_IAP_CONFIG.changePack50 },
     ],
 
     tool: [
-    { id: 'feather', emoji: 'assets/toy/ecobuddy-toy____逗貓棒.webp', name: '逗貓棒', desc: '心情 +8~15', price: 30, currency: 'heart' },
-    { id: 'brush', emoji: 'assets/toy/ecobuddy-toy____梳子.webp', name: '梳子', desc: '心情 +8~12', price: 35, currency: 'heart' },
-    { id: 'ball', emoji: 'assets/toy/ecobuddy-toy____皮球.webp', name: '小球', desc: '心情 +8~15', price: 25, currency: 'heart' },
-    { id: 'snack', emoji: 'assets/food/ecobuddy-food___洋芋片.webp', name: '零食', desc: '心情 +10~15', price: 20, currency: 'heart' },
-    ...(isPhase2 ? [
-      { id: 'feather-deluxe', emoji: 'assets/toy/ecobuddy-toy____逗貓棒.webp', name: '限定逗貓棒禮盒', desc: '心情 +30 · 限定', price: 99, currency: 'cash', cashChannel: 'platform-iap', category: 'tool' },
-      { id: 'brush-deluxe', emoji: 'assets/toy/ecobuddy-toy____梳子.webp', name: '豪華梳子組', desc: '心情 +20 · 限定', price: 149, currency: 'cash', cashChannel: 'platform-iap', category: 'tool' },
-    ] : [])],
+    { id: 'feather', emoji: 'assets/toy/ecobuddy-toy____逗貓棒.webp', name: '逗貓棒', desc: '心情 +8~15', pointsCost: 30, iapPrice: 39, payment: 'hybrid', cashChannel: 'platform-iap', category: 'tool' },
+    { id: 'brush', emoji: 'assets/toy/ecobuddy-toy____梳子.webp', name: '梳子', desc: '心情 +8~15', pointsCost: 35, iapPrice: 49, payment: 'hybrid', cashChannel: 'platform-iap', category: 'tool' },
+    { id: 'ball', emoji: 'assets/toy/ecobuddy-toy____皮球.webp', name: '小球', desc: '心情 +8~15', pointsCost: 25, iapPrice: 39, payment: 'hybrid', cashChannel: 'platform-iap', category: 'tool' },
+    { id: 'snack', emoji: 'assets/food/ecobuddy-food___洋芋片.webp', name: '零食', desc: '心情 +8~15', pointsCost: 20, iapPrice: 29, payment: 'hybrid', cashChannel: 'platform-iap', category: 'tool' }],
 
-    cosmetic: COSMETIC_CATALOG.map(c => ({ ...c, currency: 'cash', cashChannel: 'platform-iap' })),
+    cosmetic: COSMETIC_CATALOG.map(c => ({ ...c, payment: 'cash', cashChannel: 'platform-iap', category: 'cosmetic' })),
 
     music: []
 
   };
   const visibleCats = cats.filter(c => (items[c.id] || []).length > 0);
+  const renderPrice = (it) => (
+    <b className="shop-price">
+      {it.pointsCost ? <><img src="assets/icon-ecoco-point.svg" alt="" width="14" height="14" />{it.pointsCost}</> : null}
+      {it.payment === 'hybrid' ? <> ＋ NT$ {it.iapPrice}</> : null}
+      {it.payment === 'cash' ? <>NT$ {it.price}</> : null}
+    </b>
+  );
 
   return (
     <div className="screen p4">
@@ -1157,9 +1206,6 @@ const P4Shop = ({ setScreen, state, dispatch, tweaks, payload }) => {
           {visibleCats.map((c) =>
           <button key={c.id} className={`tab-chip ${tab === c.id ? 'active' : ''}`} onClick={() => setTab(c.id)}>
               {c.label}
-              {c.id === 'package' && isSprintPeriod && isPhase2 && (
-                <span className="tab-chip-badge">{tweaks?.sprintDaysLeft ?? 6}天</span>
-              )}
             </button>
           )}
         </div>
@@ -1176,11 +1222,10 @@ const P4Shop = ({ setScreen, state, dispatch, tweaks, payload }) => {
 
         const renderPkgCard = (it) => {
           const hasDetail = !!(it.contents || it.benefits);
-          const isBought = (it.id === 'sprint-pack' && state.sprintPurchased) ||
-                            (it.id === 'monthly-pass' && state.hasPass);
+          const isBought = false;
           const canBuy = isPhase2 && !isBought;
           return (
-            <div key={it.id} className={`shop-card${isBought ? ' purchased' : ''}`}
+            <div key={it.id} className={`shop-card shop-card--hybrid package-card${isBought ? ' purchased' : ''}`}
               onClick={canBuy ? () => hasDetail ? setDetailItem(it) : setPurchasing(it) : undefined}
               style={{ cursor: canBuy ? 'pointer' : 'default' }}>
               <div className="thumb"><Glyph value={it.emoji} alt={it.name} /></div>
@@ -1189,15 +1234,15 @@ const P4Shop = ({ setScreen, state, dispatch, tweaks, payload }) => {
               <div className="price">
                 {isBought ? (
                   <span style={{ fontWeight: 800, color: '#22A55C', fontSize: 12 }}>
-                    {it.id === 'monthly-pass' ? '✓ 啟用中' : '✓ 本月已領'}
+                    ✓ 本月已領
                   </span>
                 ) : (
                   <>
-                    <b style={{ fontFamily: 'var(--font-en)', fontWeight: 900, color: '#060E9F', fontSize: 15 }}>NT$ {it.price}</b>
-                    <button className="buy-btn" disabled={!isPhase2}
+                    {renderPrice(it)}
+                    <button className="buy-btn" disabled={!canBuy}
                       onClick={(e) => { e.stopPropagation(); if (isPhase2) { hasDetail ? setDetailItem(it) : setPurchasing(it); } }}
-                      style={!isPhase2 ? { opacity: 0.45, cursor: 'default' } : {}}>
-                      {!isPhase2 ? '即將開放' : hasDetail ? '查看' : '帶回家'}
+                      style={!canBuy ? { opacity: 0.45, cursor: 'default' } : {}}>
+                      {!isPhase2 ? '尚未開放' : hasDetail ? '查看' : '帶回家'}
                     </button>
                   </>
                 )}
@@ -1208,10 +1253,10 @@ const P4Shop = ({ setScreen, state, dispatch, tweaks, payload }) => {
 
         return (
           <div>
-            {/* 一般禮包：月度通行證 / 月底衝刺 — 有焦點時縮排顯示 */}
+            {/* 狀態禮包 */}
             {regularPkgs.length > 0 && (
               <div style={isFocused ? { opacity: 0.6 } : {}}>
-                <div style={{ fontSize: 13, fontWeight: 800, color: '#888', letterSpacing: '.04em', padding: '10px 18px 4px' }}>現金商品</div>
+                <div style={{ fontSize: 13, fontWeight: 800, color: '#888', letterSpacing: '.04em', padding: '10px 18px 4px' }}>狀態禮包</div>
                 <div className="shop-grid">{regularPkgs.map(renderPkgCard)}</div>
               </div>
             )}
@@ -1229,7 +1274,7 @@ const P4Shop = ({ setScreen, state, dispatch, tweaks, payload }) => {
                 <div className="shop-grid">{changePkgs.map(it => {
                   const canBuy = isPhase2;
                   return (
-                    <div key={it.id} className={`shop-card${it.featured ? ' featured-pack' : ''}`}
+                    <div key={it.id} className={`shop-card shop-card--hybrid package-card${it.featured ? ' featured-pack' : ''}`}
                       onClick={canBuy ? () => setPurchasing(it) : undefined}
                       style={{ cursor: canBuy ? 'pointer' : 'default', position: 'relative' }}>
                       {it.ribbon && (
@@ -1244,7 +1289,7 @@ const P4Shop = ({ setScreen, state, dispatch, tweaks, payload }) => {
                       <h4>{it.name}</h4>
                       <div className="desc">{it.desc}</div>
                       <div className="price">
-                        <b style={{ fontFamily: 'var(--font-en)', fontWeight: 900, color: '#060E9F', fontSize: 15 }}>NT$ {it.price}</b>
+                        {renderPrice(it)}
                         <button className="buy-btn" disabled={!isPhase2}
                           onClick={(e) => { e.stopPropagation(); if (isPhase2) setPurchasing(it); }}
                           style={!isPhase2 ? { opacity: 0.45, cursor: 'default' } : {}}>
@@ -1284,7 +1329,7 @@ const P4Shop = ({ setScreen, state, dispatch, tweaks, payload }) => {
                     <div className="thumb"><Glyph value={it.emoji} alt={it.name} /></div>
                     <h4>{it.name}</h4>
                     <div className="desc">{it.desc}</div>
-                    <div className="price">
+                    <div className={`price${!isPhase2 ? ' price--cosmetic-locked' : ''}`}>
                       {isBought ? (
                         <span style={{ fontWeight: 800, color: '#22A55C', fontSize: 12 }}>✓ 已擁有</span>
                       ) : (
@@ -1308,7 +1353,8 @@ const P4Shop = ({ setScreen, state, dispatch, tweaks, payload }) => {
 
 {/* 玩具 tab — 現金商品 section（Phase 2 才顯示） */}
       {tab === 'tool' && isPhase2 && (() => {
-        const cashItems = (items['tool'] || []).filter(it => it.currency === 'cash');
+        const cashItems = (items['tool'] || []).filter(it => it.payment === 'cash');
+        if (!cashItems.length) return null;
         return (
           <div>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 18px 4px' }}>
@@ -1352,26 +1398,25 @@ const P4Shop = ({ setScreen, state, dispatch, tweaks, payload }) => {
 
       {/* 點數商品 — 2-column grid */}
       {(() => {
-        const heartItems = (items[tab] || []).filter(it => (it.currency || 'heart') === 'heart');
-        if (!heartItems.length) return null;
+        if (tab === 'package') return null;
+        const pricedItems = (items[tab] || []).filter(it => it.payment === 'points' || it.payment === 'hybrid');
+        if (!pricedItems.length) return null;
         return (
           <div>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 18px 4px' }}>
-              <span style={{ fontSize: 13, fontWeight: 800, color: '#888', letterSpacing: '.04em' }}>點數商品</span>
+              <span style={{ fontSize: 13, fontWeight: 800, color: '#888', letterSpacing: '.04em' }}>{tab === 'food' ? '點數商品' : '點數＋現金商品'}</span>
               {tab === 'tool' && !isPhase2 && <button onClick={() => setScreen('p9')} style={{ fontSize: 11, fontWeight: 700, color: 'var(--ecoco-blue)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>查看我的玩具箱 ›</button>}
             </div>
             <div className="shop-grid">
-              {heartItems.map(it => (
-                <div key={it.id} className={`shop-card ${it.soldOut ? 'sold-out' : ''}`}>
+              {pricedItems.map(it => (
+                <div key={it.id} className={`shop-card payment-${it.payment} ${it.soldOut ? 'sold-out' : ''}`}>
                   <div className="thumb"><Glyph value={it.emoji} alt={it.name} /></div>
                   <h4>{it.name}</h4>
                   <div className="desc">{it.desc}</div>
                   <div className="price">
-                    <b style={{ fontWeight: 600, color: '#FF5000' }}>
-                      <img src="assets/icon-ecoco-point.svg" alt="" width="14" height="14" />{it.price}
-                    </b>
-                    <button className="buy-btn" disabled={it.soldOut} onClick={() => !it.soldOut && setPurchasing(it)}>
-                      {it.soldOut ? '售罄' : '購買'}
+                    {renderPrice(it)}
+                    <button className="buy-btn" disabled={it.soldOut || (it.payment === 'hybrid' && !isPhase2)} onClick={() => !it.soldOut && (it.payment !== 'hybrid' || isPhase2) && setPurchasing(it)}>
+                      {it.soldOut ? '本週已領滿' : it.payment === 'hybrid' && !isPhase2 ? '尚未開放' : '購買'}
                     </button>
                   </div>
                 </div>
@@ -1404,21 +1449,26 @@ const P4Shop = ({ setScreen, state, dispatch, tweaks, payload }) => {
           item={purchasing}
           state={state}
           onClose={() => setPurchasing(null)}
-          onConfirm={(method) => {
-            const item = purchasing;
+          onConfirm={(method, quantity = 1) => {
+            const rewardState = purchasing.category === 'status-package'
+              ? pickStatusPackReward(purchasing, state.dexStates)
+              : null;
+            const pointsCost = (purchasing.unitPointsCost || purchasing.pointsCost || 0) * quantity;
+            const item = { ...purchasing, quantity, pointsCost, ...(rewardState ? { rewardState } : {}) };
             dispatch({ type: 'BUY', item });
             let orderId = null;
-            if (method === 'cash') {
+            if (method === 'cash' || method === 'hybrid') {
               orderId = `ORD-${String(Date.now()).slice(-8)}`;
               const thumbMap = { '通行證': '🎫', '禮包': '🎁', '衝刺': '🎁' };
               const thumb = item.thumb ?? Object.entries(thumbMap).find(([k]) => item.name.includes(k))?.[1] ?? '🛍️';
-              const payMethod = item.cashChannel === 'platform-iap' ? 'Apple / Google Pay' : '藍新 NewebPay';
-              dispatch({ type: 'PURCHASE_CASH', id: orderId, name: item.name, thumb, price: item.price, payMethod, date: new Date().toISOString().slice(0, 10) });
-            } else {
-              orderId = `PTS-${String(Date.now()).slice(-8)}`;
+              dispatch({ type: 'PURCHASE_CASH', id: orderId, name: item.name, thumb, price: item.iapPrice ?? item.price, payMethod: 'Apple / Google Pay', date: new Date().toISOString().slice(0, 10) });
+            }
+            if (method === 'points' || method === 'hybrid') {
+              const pointsOrderId = `PTS-${String(Date.now()).slice(-8)}`;
               const now = new Date();
               const dateStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
-              dispatch({ type: 'PURCHASE_POINTS', id: orderId, name: item.name, thumb: item.emoji ?? '🛍️', pointsCost: item.price, date: dateStr });
+              dispatch({ type: 'PURCHASE_POINTS', id: pointsOrderId, name: quantity > 1 ? `${item.name} ×${quantity}` : item.name, thumb: item.emoji ?? '🛍️', pointsCost: item.pointsCost, date: dateStr });
+              orderId = orderId ?? pointsOrderId;
             }
             setPurchasing(null);
             setSuccessItem({ ...item, paidWith: method, orderId });
@@ -1434,8 +1484,8 @@ const P4Shop = ({ setScreen, state, dispatch, tweaks, payload }) => {
           onGoToBag={() => {
             const item = successItem;
             setSuccessItem(null);
-            const isFood = item && ['hotdog-pack','salad','berry','fish'].includes(item.id);
-            const isTool = item && !isFood && item.currency !== 'cash';
+            const isFood = item?.id === 'weekly-food';
+            const isTool = item?.category === 'tool';
             if (item && item.type === 'change-count') {
               setScreen('p10');
             } else if (isTool) {
@@ -1470,10 +1520,14 @@ const ERROR_MESSAGES = {
   network: '網路不穩定，請檢查連線後重試',
 };
 const ShopPurchaseModal = ({ item, state, onClose, onConfirm }) => {
-  const isCash = item.currency === 'cash';
-  const isNewebpay = item.cashChannel === 'newebpay';
+  useModalScrollLock();
+  const isCash = item.payment === 'cash';
+  const isHybrid = item.payment === 'hybrid';
   const isIAP = item.cashChannel === 'platform-iap';
-  const insufficient = !isCash && state.points < item.price;
+  const maxQuantity = item.maxQuantity || 1;
+  const [quantity, setQuantity] = useState(1);
+  const pointsCost = (item.unitPointsCost || item.pointsCost || 0) * quantity;
+  const insufficient = (item.payment === 'points' || isHybrid) && state.points < pointsCost;
   const [demoError, setDemoError] = useState('none');
   const [toast, setToast] = useState(null);
 
@@ -1482,7 +1536,7 @@ const ShopPurchaseModal = ({ item, state, onClose, onConfirm }) => {
       setToast(ERROR_MESSAGES[demoError]);
       return;
     }
-    onConfirm(isCash ? 'cash' : 'points');
+    onConfirm(isHybrid ? 'hybrid' : isCash ? 'cash' : 'points', quantity);
   };
 
   return (
@@ -1492,12 +1546,35 @@ const ShopPurchaseModal = ({ item, state, onClose, onConfirm }) => {
         <h3>{item.name}</h3>
         <p>{item.desc}</p>
 
+        {item.category === 'food' && (
+          <div className="quantity-row">
+            <span>購買數量</span>
+            <div className="quantity-stepper">
+              <button disabled={quantity <= 1} onClick={() => setQuantity(q => Math.max(1, q - 1))}>−</button>
+              <b>{quantity}</b>
+              <button disabled={quantity >= maxQuantity} onClick={() => setQuantity(q => Math.min(maxQuantity, q + 1))}>＋</button>
+            </div>
+            {quantity >= maxQuantity && <small className="quantity-limit-note">已達購買上限</small>}
+          </div>
+        )}
+
         {/* 付款方式 */}
         {!isCash && insufficient ? (
           <div style={{ background: '#FFF3F0', borderRadius: 12, padding: '14px 16px', marginBottom: 14 }}>
             <div style={{ fontWeight: 800, color: '#D9382A', fontSize: 15, marginBottom: 4 }}>ECOCO 點數不足，無法完成購買</div>
             <div style={{ fontSize: 13, color: '#888' }}>再去帶禮物回家給 Buddy</div>
           </div>
+        ) : isHybrid ? (
+          <>
+            <div className="pay-row active" style={{ marginBottom: 8 }}>
+              <span className="lhs"><img src="assets/icon-ecoco-point.svg" alt="" width="18" height="18" />ECOCO</span>
+              <span className="rhs point-price">- <img src="assets/icon-ecoco-point.svg" alt="" width="14" height="14" />{pointsCost}</span>
+            </div>
+            <div className="pay-row active" style={{ marginBottom: 14 }}>
+              <span className="lhs">🍎 App Store / Google Play</span>
+              <span className="rhs">NT$ {item.iapPrice}</span>
+            </div>
+          </>
         ) : !isCash ? (
           <div className="pay-row active" style={{ marginBottom: 14 }}>
             <span className="lhs">
@@ -1505,12 +1582,7 @@ const ShopPurchaseModal = ({ item, state, onClose, onConfirm }) => {
               ECOCO 點數
               <span style={{ color: 'var(--ecoco-orange)', marginLeft: 4 }}>✓</span>
             </span>
-            <span className="rhs">- {item.price} pt</span>
-          </div>
-        ) : isNewebpay ? (
-          <div className="pay-row active" style={{ marginBottom: 14 }}>
-            <span className="lhs">💳 藍新 NewebPay <span style={{ color: 'var(--ecoco-orange)', marginLeft: 4 }}>✓</span></span>
-            <span className="rhs">NT$ {item.price}</span>
+            <span className="rhs point-price">- <img src="assets/icon-ecoco-point.svg" alt="" width="14" height="14" />{pointsCost}</span>
           </div>
         ) : isIAP ? (
           <div className="pay-row active" style={{ marginBottom: 14 }}>
@@ -1520,11 +1592,11 @@ const ShopPurchaseModal = ({ item, state, onClose, onConfirm }) => {
         ) : null}
 
         {/* 退款聲明 */}
-        {isCash && (
+        {(isCash || isHybrid) && (
           <div style={{ fontSize: 11, color: '#AAA', marginBottom: 12, lineHeight: 1.5 }}>
             購買即視為同意
             <span style={{ color: '#060E9F', textDecoration: 'underline', cursor: 'pointer' }}>退款政策</span>
-            。數位商品一經購買恕不退款，{isIAP ? '裝扮類商品退款請洽 App Store / Google Play 客服' : '如有問題請聯繫 ECOCO 客服'}。
+            。數位商品一經購買恕不退款，{isIAP ? '退款請洽 App Store / Google Play 客服' : '如有問題請聯繫 ECOCO 客服'}。
           </div>
         )}
 
@@ -1552,9 +1624,12 @@ const ShopPurchaseModal = ({ item, state, onClose, onConfirm }) => {
 
 /* ----- P4 helper: 購買成功 Modal ----- */
 const ShopSuccessModal = ({ item, state, onClose, onGoToBag, onGoToWardrobe, onGoToManage, setScreen }) => {
+  useModalScrollLock();
   const isCash = item.paidWith === 'cash';
+  const isHybrid = item.paidWith === 'hybrid';
   const isChangeCount = item.type === 'change-count';
-  const isCosmetic = item.cashChannel === 'platform-iap' && item.category !== 'tool' && !isChangeCount;
+  const isStatusPack = item.category === 'status-package';
+  const isCosmetic = item.cashChannel === 'platform-iap' && item.category !== 'tool' && !isChangeCount && !isStatusPack;
   const orderId = item.orderId ?? null;
   return (
     <div className="modal-backdrop" onClick={onClose}>
@@ -1576,9 +1651,11 @@ const ShopSuccessModal = ({ item, state, onClose, onGoToBag, onGoToWardrobe, onG
           <div style={{ display: 'flex', justifyContent: 'space-between', color: '#555' }}>
             <span>付款方式</span>
             <span style={{ fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-              {!isCash
-                ? <><img src="assets/icon-ecoco-point.svg" alt="" width="14" height="14" />ECOCO 點數</>
-                : isCosmetic ? '🍎 App Store / Google Play' : '💳 藍新 NewebPay'}
+              {isHybrid
+                ? <><img src="assets/icon-ecoco-point.svg" alt="" width="14" height="14" />ECOCO ＋ 🍎 App Store</>
+                : !isCash
+                  ? <><img src="assets/icon-ecoco-point.svg" alt="" width="14" height="14" />ECOCO</>
+                  : '🍎 App Store / Google Play'}
             </span>
           </div>
           {!isCash && (
@@ -1586,7 +1663,7 @@ const ShopSuccessModal = ({ item, state, onClose, onGoToBag, onGoToWardrobe, onG
               <span>剩餘 ECOCO 點數</span>
               <span style={{ fontWeight: 800, color: 'var(--ecoco-orange)', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
                 <img src="assets/icon-ecoco-point.svg" alt="" width="14" height="14" />
-                {(state.points - item.price).toLocaleString()} pt
+                {state.points.toLocaleString()}
               </span>
             </div>
           )}
@@ -1594,6 +1671,12 @@ const ShopSuccessModal = ({ item, state, onClose, onGoToBag, onGoToWardrobe, onG
             <div style={{ display: 'flex', justifyContent: 'space-between', color: '#555' }}>
               <span>可用更換次數</span>
               <span style={{ fontWeight: 800, color: 'var(--ecoco-orange)' }}>{state.swapLeft} 次</span>
+            </div>
+          )}
+          {isStatusPack && item.rewardState && (
+            <div style={{ display: 'flex', justifyContent: 'space-between', color: '#555' }}>
+              <span>抽中狀態</span>
+              <span style={{ fontWeight: 800, color: 'var(--ecoco-orange)' }}>#{item.rewardState.code} {item.rewardState.name}</span>
             </div>
           )}
           {orderId && (
@@ -1636,6 +1719,19 @@ const ShopSuccessModal = ({ item, state, onClose, onGoToBag, onGoToWardrobe, onG
                 fontWeight: 700, fontSize: 14, cursor: 'pointer',
               }}>繼續逛</button>
             </>
+          ) : isStatusPack ? (
+            <>
+              <button onClick={() => { onClose(); setScreen('p7', { evolveCode: item.rewardState?.code }); }} style={{
+                flex: 1, background: 'var(--ecoco-orange)', color: '#fff',
+                border: 'none', borderRadius: 999, padding: '13px 0',
+                fontWeight: 800, fontSize: 14, cursor: 'pointer',
+              }}>查看日誌</button>
+              <button onClick={onClose} style={{
+                flex: 1, background: 'var(--gray-light)', color: '#555',
+                border: 'none', borderRadius: 999, padding: '13px 0',
+                fontWeight: 700, fontSize: 14, cursor: 'pointer',
+              }}>繼續逛</button>
+            </>
           ) : (
             <>
               <button onClick={onGoToBag} style={{
@@ -1651,7 +1747,7 @@ const ShopSuccessModal = ({ item, state, onClose, onGoToBag, onGoToWardrobe, onG
             </>
           )}
         </div>
-        {isCash && (
+        {(isCash || isHybrid) && (
           <button
             onClick={() => { onClose(); setScreen('p4-orders', { defaultTab: 'cash' }); }}
             style={{ marginTop: 10, background: 'none', border: 'none', color: '#888', fontSize: 13, cursor: 'pointer', textDecoration: 'underline' }}
@@ -1788,12 +1884,13 @@ const P5Missions = ({ setScreen, state, dispatch, tweaks }) => {
     { id: 'achieve', label: '成就' },
   ];
 
+  const missionFood = state.food[0];
   const missionData = [
-    { id: 'login',   title: '來看看 Buddy',              food: '蘋果', progress: 1, total: 1 },
-    { id: 'tap',     title: '摸摸 Buddy 5 次',           food: '香蕉', progress: 5, total: 5 },
-    { id: 'recycle', title: '到回收機為 Buddy 帶來禮物', food: '麵包', progress: 2, total: 3 },
-    { id: 'refill',  title: '到補充站為 Buddy 補充能量', food: '葡萄', progress: 0, total: 1 },
-    { id: 'feed',    title: '餵食 Buddy 2 次',           food: '香蕉', progress: 2, total: 2 },
+    { id: 'login',   title: '來看看 Buddy',              progress: 1, total: 1 },
+    { id: 'tap',     title: '摸摸 Buddy 5 次',           progress: 5, total: 5 },
+    { id: 'recycle', title: '到回收機為 Buddy 帶來禮物', progress: 2, total: 3 },
+    { id: 'refill',  title: '到補充站為 Buddy 補充能量', progress: 0, total: 1 },
+    { id: 'feed',    title: '餵食 Buddy 2 次',           progress: 2, total: 2 },
   ];
 
   const sortedMissions = [...missionData].sort((a, b) => {
@@ -1827,14 +1924,16 @@ const P5Missions = ({ setScreen, state, dispatch, tweaks }) => {
     setTimeout(() => setBouncingId(null), 320);
     setTimeout(() => {
       setClaimedIds(prev => [...prev, m.id]);
+      const bagCount = state.food.reduce((sum, food) => sum + food.stock, 0);
+      const foodFull = state.foodQuota.weeklyCount >= state.foodQuota.weeklyLimit || bagCount >= state.foodQuota.bagLimit;
       dispatch({ type: 'CLAIM_MISSION' });
-      setToast('一起做到！食物 ×1 ・ 心情 +3 ✨');
+      setToast(foodFull ? '一起做到！心情 +3 ✨' : `一起做到！${missionFood.name} ×1 ・ 心情 +3 ✨`);
     }, 160);
   };
 
   // Show evolution overlay for streak7 before revealing the screen
   if (showEvolve) {
-    return <EvolveOverlay onDone={() => setShowEvolve(false)} />;
+    return <EvolveOverlay onDone={() => { dispatch({ type: 'UNLOCK_DEX_STATE', code: '34', name: '派對動物' }); setShowEvolve(false); }} />;
   }
 
   return (
@@ -1919,8 +2018,8 @@ const P5Missions = ({ setScreen, state, dispatch, tweaks }) => {
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                          <img src={`assets/food/ecobuddy-food___${m.food}.webp`} style={{ width: 18, height: 18, objectFit: 'contain' }} alt={m.food} />
-                          <span style={{ fontSize: 12, fontWeight: 500, color: '#888' }}>{m.food}</span>
+                          <img src={missionFood.emoji} style={{ width: 18, height: 18, objectFit: 'contain' }} alt={missionFood.name} />
+                          <span style={{ fontSize: 12, fontWeight: 500, color: '#888' }}>{missionFood.name}</span>
                           <span style={{ fontSize: 12, fontWeight: 700, color: '#888' }}>×1</span>
                         </div>
                         <span style={{ fontSize: 10, fontWeight: 700, color: '#888' }}>+</span>
@@ -2091,9 +2190,11 @@ const P7DetailOverlay = ({ onClose, children }) => ReactDOM.createPortal(
 );
 
 /* ═══════════════ P7 · Dex ═══════════════ */
-const P7Dex = ({ setScreen, state, dispatch, onOpenPicker, tweaks }) => {
+const P7Dex = ({ setScreen, state, dispatch, onOpenPicker, tweaks, payload }) => {
   const isPhase2 = (tweaks?.shopPhase ?? 1) >= 2;
   const lockedCode = state.lockedMonthCode;
+  const [showEvolve, setShowEvolve] = useState(() => Boolean(payload?.evolveCode || state.pendingEvolveCode));
+  const flashCode = state.highlightStateCode;
 
   // Phase 2 角色清單（Phase 1 只有小海龜）
   const characters = isPhase2 ? [
@@ -2174,6 +2275,12 @@ const P7Dex = ({ setScreen, state, dispatch, onOpenPicker, tweaks }) => {
     }
   }, [overlayOpen]);
 
+  useEffect(() => {
+    if (!flashCode || showEvolve) return;
+    const t = setTimeout(() => dispatch({ type: 'CLEAR_HIGHLIGHT_STATE' }), 5600);
+    return () => clearTimeout(t);
+  }, [flashCode, showEvolve]);
+
   const handleCellClick = (mo) => {
     if (mo.filled) setDetailMo(mo);
     else if (mo.current) onOpenPicker && onOpenPicker();
@@ -2181,6 +2288,7 @@ const P7Dex = ({ setScreen, state, dispatch, onOpenPicker, tweaks }) => {
 
   return (
     <div ref={screenRef} className={`screen p7${overlayOpen ? ' detail-open' : ''}`}>
+      {showEvolve && <EvolveOverlay onDone={() => { setShowEvolve(false); dispatch({ type: 'CLEAR_PENDING_EVOLVE' }); }} />}
       <StatusBar />
       <div className="header">
         <h2>夥伴日誌</h2>
@@ -2257,7 +2365,7 @@ const P7Dex = ({ setScreen, state, dispatch, onOpenPicker, tweaks }) => {
       </div>
       <div className="month-grid" style={{ paddingBottom: 100 }}>
         {states.map((s) =>
-        <div key={s.code} className={`state-card ${s.unlocked ? 'unlocked' : 'locked'} ${s.legendary ? 'legendary' : ''}`} onClick={() => setDetailState({ ...s, character: currentChar })} style={{ cursor: 'pointer' }}>
+        <div key={s.code} className={`state-card ${s.unlocked ? 'unlocked' : 'locked'} ${s.legendary ? 'legendary' : ''} ${flashCode === s.code ? 'flash' : ''}`} onClick={() => setDetailState({ ...s, character: currentChar })} style={{ cursor: 'pointer' }}>
             <span className="code">#{s.code}</span>
             {s.unlocked ? <>
               <img className="turtle" src="assets/sea-turtle.svg" alt="" style={{ filter: s.tint || 'none' }} />
@@ -2763,8 +2871,8 @@ const FAQ_DATA = [
     items: [
       { q: '怎麼取得 ECOCO 點數？', a: '帶禮物回家給 Buddy、在補充站消費，都能獲得 ECOCO 點數。' },
       { q: 'ECOCO 點數會過期嗎？', a: '詳細內容請至 ECOCO 官網常見問題查看。' },
-      { q: '商店可以買什麼？', a: '商店分為食物、玩具、裝扮、禮包四個分類。食物與玩具用 ECOCO 點數購買；裝扮與禮包（月底衝刺禮包、月度通行證等）用現金購買。點數與現金不互換、不互買，每張卡片都會標示「點數」或「NT$」。' },
-      { q: '月底衝刺禮包是什麼？', a: '每月 22–28 日上架，幫 Buddy 在月底前衝一波狀態與日誌收藏的限時禮包，商店頁會置頂顯示倒數天數。' },
+      { q: '商店可以買什麼？', a: '商店分為食物、玩具、裝扮、禮包四個分類。食物只用 ECOCO 點數；玩具與禮包需要 ECOCO 點數和平台付款一起完成。當週食物由帶禮物回家、商店與今日陪伴共用每週數量。' },
+      { q: '禮包可以買什麼？', a: '目前禮包頁放更換次數包與狀態盲盒。其他月度型內容等確認後再放入商店。' },
     ],
   },
 ];

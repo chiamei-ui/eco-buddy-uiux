@@ -30,7 +30,7 @@
 | 建立主頁面框架 | P1 夥伴首頁、P2b 回收結果、P4 商店、P5 今日陪伴、P6 廣告開箱、P9 道具背包、P12 補充站結果 | `UI_SPEC.md` 各頁章節、`USER_FLOW.md` |
 | 建立共用元件 | Buddy 顯示區、狀態條、食物格、道具格、Bottom Sheet、商品卡、訂單卡、空狀態 | `UI_SPEC.md`、`DESIGN_SYSTEM.md` |
 | 套用視覺規範 | 主色、字體、圓角、卡片、CTA、禁用詞檢查 | `DESIGN_SYSTEM.md` |
-| 確保每頁都有 Buddy | 全身、縮圖或對話泡泡至少一種 | `DESIGN_SYSTEM.md`、`UI_SPEC.md` |
+| 判斷 Buddy 呈現 | Buddy 是主角，但不強制每頁出現；若壓縮重要資訊，以畫面資訊層級優先 | `DESIGN_SYSTEM.md`、`UI_SPEC.md` |
 
 ### 1.2 動態數值與 API 串接
 
@@ -55,6 +55,20 @@
 | 開箱動畫 | 暫用簡化轉場 | 正式開箱動畫 |
 
 > placeholder 必須保留正式素材預計尺寸，避免日後換圖造成跑版。
+
+### 1.4 2026-07-22 hi-fi 視覺同步項目
+
+前端切版時請同步以下 prototype 決策：
+
+| 項目 | 前端實作重點 | 對應規格 |
+|---|---|---|
+| P1 Sub-Tab | 餐袋 / 玩具箱 / 換衣間 inactive tab 為透明底；active tab 才用橘色膠囊 | `UI_SPEC.md` P1 Sub-Tab 視覺 |
+| P1 餐袋容量文字 | 右上角 `餐袋 current/limit` 使用 13px、font-weight 500，不做高強調 | `UI_SPEC.md` P1 Sub-Tab 視覺 |
+| P4 商品卡 | 食物 / 玩具 / 裝扮 / 禮包卡片寬度一致；禮包 title / desc 字級與行距跟玩具卡片一致，不裁切標題 | `UI_SPEC.md` P4 商品卡片 |
+| P4 購買數量 | 初始不顯示「最多可買 N」；加到 `maxQuantity` 才顯示紅字「已達購買上限」 | `UI_SPEC.md` P4 購買確認 |
+| P4 裝扮 Phase 1 | disabled「即將開放」按鈕放在價格下一列右側 | `UI_SPEC.md` P4 商品卡片 |
+| System Toast | 中性 toast 使用深灰底白字，不用白底黑字 | `UI_SPEC.md` 錯誤提示原則 |
+| 文案例外 | `ECOCO 點數／點數` 可出現；P1「掃描條碼」與 P8 FAQ 可為精準理解保留原詞 | `DESIGN_SYSTEM.md` |
 
 ---
 

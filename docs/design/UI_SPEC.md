@@ -4,7 +4,7 @@
 **Date**: 2026-06-09
 **Status**: Draft
 **Scope**: Phase 1 上線範圍
-**Changelog**: v1.5 — #29.1 P1 食物欄改名「Buddy 的餐袋」/ #29.5 P2b 電池機潔淨換算補明確數值 + clamp 規則 / P2b・P12 深色底色 `#0A0A0A` 定案
+**Changelog**: v1.6 — 2026-07-22 hi-fi prototype 視覺同步：P1 Sub-Tab / 餐袋上限字重、P4 商品卡 / 禮包卡 / 購買數量提示、System Toast、點數文案與 Buddy 出現例外。
 
 ---
 
@@ -12,14 +12,14 @@
 
 所有畫面遵循 `DESIGN_SYSTEM.md`：
 - 主色 `#FF5000`（橘）/ 次色 `#060E9F`（藍）/ 輔助 `#FFCE00`（黃）
-- 頁面底色 `#FAE0B8`（奶油膚），卡片白 `#FFFFFF`
+- 頁面底色預設 `#FAE0B8`（奶油膚）；hi-fi prototype base screen 白底已通過設計審核，工程依頁面 prototype。
 - 字型 Noto Sans TC（中文）/ Inter（英數）
 - 按鈕 CTA 一律 `rounded-full`，容器 `rounded-2xl`
-- 禁止漸層
+- 不新增不必要漸層；prototype 已通過的少量漸層可保留，主 CTA 維持純色。
 
 錯誤提示原則：
 - P1 / P9 有角色的畫面 → 角色對話泡泡
-- P2（掃碼）/ P4（商店）無角色畫面 → 系統 Toast（中性語氣）
+- P2（掃碼）/ P4（商店）無角色畫面 → 系統 Toast（中性語氣，深灰底白字）
 
 ---
 
@@ -65,6 +65,11 @@
 6. **對話泡泡**：角色右上方，依狀態觸發
 7. **Sub-Tab 區**：Buddy 的餐袋 / 玩具箱 / 換衣間
 8. **Sub-Tab 內容區**（見下方）
+
+### P1 Sub-Tab 視覺
+
+- Tab：active 使用橘色 `#FF5000` 膠囊；inactive 為透明底，不使用灰底。
+- 右上角餐袋上限文字：`餐袋 {current}/{limit}`，字級 13px，字重 500，深灰文字；僅作容量提示，不搶主視覺。
 
 ### P1 Header
 
@@ -226,7 +231,7 @@
 | 穿著中 | 當前已穿上 | 橘色 outline + 「穿著中」badge |
 
 **Phase 1 空狀態**（功能未開放）：
-- 🎀 大 emoji + 「即將推出，敬請期待」文案
+- 🎀 大 emoji + 「Buddy 還在準備新衣服」文案
 - 不顯示「管理 ›」按鈕
 
 **Phase 2 無裝扮狀態**（功能開放但未購買）：
@@ -393,7 +398,11 @@
 ### 商品卡片
 
 - 2 欄 Grid，卡片：圖示 / 品名 / 效果副標 / 貨幣 Badge + 價格 / 購買按鈕
+- Grid 欄寬必須等寬，使用 `repeat(2, minmax(0, 1fr))` 或等效做法；食物 / 玩具 / 裝扮 / 禮包 Tab 的卡片寬度需一致。
+- 商品卡文字規格：標題 13px / 700 / line-height 1.35；描述 11px / line-height 1.4。
+- 禮包卡片文字、行距需與玩具卡片一致；標題可換行，不得被容器裁切。
 - 熱賣 Badge：黃色 `#FFCE00`
+- 裝扮 Tab 在 Phase 1 未開放時，價格保留第一列，「即將開放」disabled button 放在下一列右側。
 
 **售罄狀態**：
 - 卡片整體半透明灰（`opacity-50` + `grayscale`）
@@ -408,6 +417,8 @@
 - 商品圖示 + 名稱 + 副標
 - 當前 ECOCO 點數餘額 + 扣款後剩餘
 - `取消`（ghost）/ `確認購買`（橘色 `rounded-full`）
+- 食物類若可選購買數量：數量列使用淺灰底 `#F0F3F7`，數字使用深灰 `#4B5563`；初始不顯示「最多可買 N」。
+- 當數量加到 `maxQuantity` 時，才在數量列下方顯示紅字「已達購買上限」（`#D9382A`）。
 
 **IAP 版**：
 - 商品圖示 + 名稱 + 平台本地化定價（`[IAP SKU: eco_pass_monthly]` / `[IAP SKU: sprint_pack_199]` 各款；前端向 App Store / Google Play SDK 查詢，顯示回傳的本地化價格字串，不 hardcode NT$ 金額）
