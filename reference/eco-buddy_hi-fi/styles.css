@@ -357,6 +357,9 @@ img,svg{display:block;}
 .dock-hint{font-size:11px;color:var(--gray-text);margin-bottom:12px;}
 .dock-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
 .food-section-label{font-size:11px;font-weight:700;color:#aaa;margin-bottom:6px;letter-spacing:.02em;}
+.food-quota-row{display:flex;justify-content:space-between;gap:8px;margin:0 0 8px;font-size:11px;font-weight:700;color:#777;}
+.food-bag-count{margin-left:auto;font-size:13px;font-weight:800;color:#777;font-family:var(--font-en);}
+.food-grid{gap:12px 10px;}
 .food-cell{
   position:relative;
   width:100%;
@@ -369,13 +372,14 @@ img,svg{display:block;}
   user-select:none;
   overflow:visible;
 }
-.food-cell.has-stock{ background:var(--ecoco-orange-soft); border:1.5px solid #FFB28A; }
+.food-cell.has-stock{ background:#FFF7E8; border:1.5px solid #FFB28A; }
 .food-cell.has-stock.dragging{transform:scale(1.15) translateY(-6px);box-shadow:0 12px 24px rgba(255,80,0,0.3);z-index:30;}
-.food-cell.low{ background:#fff; border:1.5px solid #FFB28A; }
+.food-cell.low{ background:#FFF7E8; border:1.5px solid #FFB28A; }
 .food-cell.empty{background:#F7F7F8;border:1.5px dashed #D7D9DE;cursor:default;}
 .food-cell .empty-plate{font-size:32px;line-height:1;filter:grayscale(1);opacity:.42;}
-.food-cell.locked{ background:#F4F6FA; border:1.5px dashed #D0D5DD; cursor:not-allowed; }
-.food-preview-emoji{ filter:grayscale(0.2) opacity(0.55) drop-shadow(0 3px 8px rgba(0,0,0,0.28)); }
+.food-cell.locked{ background:#FFF7E8; border:1.5px dashed #FFC36C; cursor:default; pointer-events:none; }
+.food-cell.shop-food{background:#FFF7E8;}
+.food-preview-emoji{ filter:grayscale(1) opacity(0.55) drop-shadow(0 3px 8px rgba(0,0,0,0.16)); }
 .food-cell .badge{
   position:absolute;top:-8px;right:-8px;
   background:var(--ecoco-orange);color:#fff;
@@ -385,6 +389,12 @@ img,svg{display:block;}
   border:2px solid #fff;
   z-index:2;
 }
+.food-cell .shop-badge{
+  position:absolute;left:-2px;bottom:-2px;width:31px;height:31px;
+  background:var(--ecoco-orange);color:#fff;border-radius:0 16px 0 16px;
+  display:flex;align-items:center;justify-content:center;z-index:1;
+}
+.food-cell .shop-badge svg{width:17px;height:17px;fill:currentColor;}
 .food-cell .name{font-size:11px;color:#444;font-weight:700;margin-top:2px;}
 .food-cell .emoji{font-size:36px;line-height:1;}
 /* 物品縮圖素材圖：尺寸依所在容器 font-size（1.15em），與原 emoji 視覺對齊 */
@@ -590,6 +600,7 @@ img,svg{display:block;}
   font-size:30px;
 }
 .rpc-icon-bg img{display:block;width:auto;height:auto;}
+.rpc-icon-bg .rpc-food-icon{width:34px;max-height:34px;object-fit:contain;}
 .rpc--hp .rpc-icon-bg img{width:35px;}
 .rpc--clean .rpc-icon-bg img{width:30px;}
 .rpc-right{padding:5px 0;display:flex;flex-direction:column;justify-content:center;}
@@ -676,7 +687,8 @@ img,svg{display:block;}
   box-shadow:0 4px 12px rgba(0,0,0,0.05);
 }
 .p4 .points-pill img{display:block;flex:0 0 auto;}
-.shop-card .price b{
+.shop-card .price b,
+.shop-card .shop-price{
   font-family:var(--font-en);font-weight:900;color:var(--ecoco-orange);font-size:15px;
   display:inline-flex;align-items:center;gap:4px;
 }
@@ -700,10 +712,19 @@ img,svg{display:block;}
 .shop-card .thumb{aspect-ratio:1;background:var(--gray-bg);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:42px;margin-bottom:8px;position:relative;}
 .shop-card .ribbon{position:absolute;top:6px;left:6px;background:var(--ecoco-yellow);color:#1a1a1a;font-size:10px;font-weight:800;padding:3px 9px;border-radius:6px;z-index:5;box-shadow:0 2px 6px rgba(0,0,0,0.12);letter-spacing:.04em;}
 .shop-card h4{font-size:13px;font-weight:700;color:#222;}
-.shop-card .desc{font-size:11px;color:#888;line-height:1.4;margin:2px 0 8px;}
-.shop-card .price{display:flex;align-items:center;justify-content:space-between;}
+.shop-card .desc{font-size:11px;color:#888;line-height:1.4;margin:2px 0 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.shop-card .price{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.shop-card.payment-hybrid .price,
+.shop-card.shop-card--hybrid .price{flex-direction:column;align-items:stretch;}
+.shop-card.payment-hybrid .buy-btn,
+.shop-card.shop-card--hybrid .buy-btn{align-self:flex-end;}
 .shop-card .buy-btn{background:var(--ecoco-orange);color:#fff;padding:5px 12px;border-radius:999px;font-size:11px;font-weight:700;}
 .shop-card .buy-btn:disabled{background:#D5D9DF;color:#888;cursor:not-allowed;}
+.p4 .package-card{height:218px;display:flex;flex-direction:column;}
+.p4 .package-card .thumb{height:96px;aspect-ratio:auto;flex:0 0 auto;}
+.p4 .package-card h4{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.p4 .package-card .price{margin-top:auto;min-height:52px;}
+.p4 .package-card .shop-price{white-space:nowrap;}
 
 /* purchase modal */
 .modal-backdrop{
@@ -724,6 +745,13 @@ img,svg{display:block;}
 .modal .preview{background:var(--gray-bg);border-radius:14px;padding:16px;margin-bottom:14px;font-size:36px;}
 .modal .modal-actions{display:flex;gap:8px;}
 .modal .modal-actions button{flex:1;padding:12px;border-radius:999px;font-weight:700;font-size:14px;}
+.quantity-row{display:grid;grid-template-columns:1fr auto;align-items:center;gap:4px 10px;background:#F7F9FC;border-radius:14px;padding:10px 12px;margin-bottom:12px;text-align:left;}
+.quantity-row span{font-size:13px;font-weight:800;color:#222;}
+.quantity-row small{grid-column:1/-1;font-size:11px;color:#888;}
+.quantity-stepper{display:inline-flex;align-items:center;gap:8px;}
+.quantity-stepper button{width:28px;height:28px;border-radius:50%;background:#fff;border:1.5px solid var(--border);font-size:16px;font-weight:900;color:var(--ecoco-orange);}
+.quantity-stepper button:disabled{opacity:.35;color:#999;}
+.quantity-stepper b{min-width:18px;text-align:center;font-family:var(--font-en);font-size:16px;}
 
 /* ───── P5 missions ───── */
 .p5{background:var(--gray-bg);}
@@ -902,6 +930,11 @@ img,svg{display:block;}
   0%,100%{box-shadow:0 0 0 1px rgba(212,160,0,0.25),0 6px 22px rgba(212,160,0,0.28);}
   50%{box-shadow:0 0 0 3px rgba(212,160,0,0.2),0 6px 28px rgba(212,160,0,0.45);}
 }
+.state-card.flash{animation:state-card-flash 1.1s ease-in-out 5;}
+@keyframes state-card-flash{
+  0%,100%{box-shadow:0 0 0 0 rgba(255,80,0,0.1);border-color:rgba(255,80,0,0.35);}
+  50%{box-shadow:0 0 0 4px rgba(255,80,0,0.28),0 8px 22px rgba(255,80,0,0.22);border-color:var(--ecoco-orange);}
+}
 .state-card .code{position:absolute;top:6px;left:8px;font-family:var(--font-en);font-size:9px;font-weight:800;letter-spacing:.05em;color:#ccc;}
 .state-card .turtle{width:60px;height:60px;margin-bottom:4px;}
 .state-card.unlocked .turtle{filter:drop-shadow(0 2px 6px rgba(255,80,0,0.2));}
@@ -978,6 +1011,8 @@ img,svg{display:block;}
   display:flex;align-items:flex-end;
   animation:fade-in .2s;
 }
+.product-sheet-backdrop{z-index:80;padding:0;}
+.product-sheet-backdrop .sheet-panel{margin-bottom:0;border-radius:24px 24px 0 0;}
 .sheet-panel{
   background:#fff;border-radius:24px 24px 0 0;
   padding:12px 20px 32px;width:100%;
@@ -1111,6 +1146,7 @@ img,svg{display:block;}
 .modal .pay-row .lhs{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:800;color:#222;}
 .modal .pay-row .rhs{font-family:var(--font-en);font-weight:900;color:#222;font-size:15px;}
 .modal .pay-row.active .rhs{color:var(--ecoco-orange);}
+.modal .pay-row .rhs.point-price{display:inline-flex;align-items:center;gap:3px;}
 
 /* P4 modal · DEMO 模擬付款失敗 toggle */
 .modal .p4-demo-row{
@@ -1252,13 +1288,19 @@ img,svg{display:block;}
   color:rgba(255,220,80,1);font-size:14px;font-weight:700;
   padding:4px 14px;border-radius:99px;
 }
+.evolve-actions{display:flex;gap:10px;margin-top:26px;width:78%;max-width:320px;}
+.evolve-actions button{flex:1;border:none;border-radius:999px;padding:13px 10px;font-size:14px;font-weight:800;}
+.evolve-save{flex:0 0 48px!important;display:inline-flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.14);color:#fff;border:1px solid rgba(255,255,255,0.28)!important;padding:0!important;}
+.evolve-save.saved{background:rgba(255,255,255,0.24);color:#FFDC50;}
+.evolve-save-icon{width:21px;height:21px;display:block;fill:currentColor;}
+.evolve-confirm{background:var(--ecoco-orange);color:#fff;}
 
 /* dispenser button big rounds */
 .tap-area{cursor:pointer;-webkit-tap-highlight-color:transparent;}
 
-/* ───── P4 · IAP 商品（月度通行證） ───── */
+/* ───── P4 · IAP 商品狀態列 ───── */
 
-/* 月度通行證 card */
+/* 通行狀態 card */
 .p4-pass-row{
   margin:4px 18px 8px;
   background:linear-gradient(130deg,#FFFBEC 0%,#FFF5CC 100%);
@@ -1325,8 +1367,10 @@ img,svg{display:block;}
   margin-top:4px;
 }
 .product-detail-footer .price-tag{
-  font-family:var(--font-en);font-size:22px;font-weight:900;color:#060E9F;
+  font-family:var(--font-en);font-size:22px;font-weight:900;color:var(--ecoco-orange);
+  display:inline-flex;align-items:center;gap:4px;
 }
+.product-detail-footer .price-tag img{width:16px;height:16px;display:block;}
 .product-detail-footer .buy-cta{
   flex:1;background:var(--ecoco-orange);color:#fff;
   border:none;border-radius:999px;padding:14px;
