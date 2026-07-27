@@ -26,6 +26,23 @@
 - `scripts/update-engineering-changelog.ps1`
 
 <!-- AUTO-ENTRIES -->
+<!-- engineering-change:41e9ee43e6817c23 -->
+## 2026-07-27 14:50:10 +08:00
+
+- Triggered scopes: animation handoff, design spec, engineering handoff, product flow, hi-fi reference
+- Files:
+  - `docs/animation/ANIMATION_BRIEF.md` (animation handoff)
+  - `docs/animation/ANIMATION_LIST.md` (animation handoff)
+  - `docs/animation/MONTHLY_SPEC.md` (animation handoff)
+  - `docs/animation/NAMING.md` (animation handoff)
+  - `docs/design/DESIGN_NOTES.md` (design spec)
+  - `docs/design/GAME_MECHANICS.md` (design spec)
+  - `docs/design/UI_SPEC.md` (design spec)
+  - `docs/dev/FRONTEND_BACKEND_HANDOFF.md` (engineering handoff)
+  - `docs/product/FAQ.md` (product flow)
+  - `docs/product/USER_FLOW.md` (product flow)
+  - `reference/eco-buddy_hi-fi/screens.jsx` (hi-fi reference)
+
 <!-- engineering-change:39c7116d9ab477c5 -->
 ## 2026-07-22 14:18:22 +08:00
 
@@ -205,8 +222,8 @@
 | P1 下週食物預告 | 只顯示食物種類，不顯示數量；資料來自後端 API（阻塞確認項）| `UI_SPEC.md` Buddy的餐袋 |
 | P5 Header | 顯示個人化七日登入進度（非自然週），本月達標顯示派對動物 | `UI_SPEC.md` P5 |
 | P5 補簽 CTA | 昨天未簽到時顯示免費「補簽昨天」，不顯示價格 | `UI_SPEC.md` P5 |
-| P4 商店 IAP | 稀有食物 / 道具禮包的 `cashChannel` 改為 `'platform-iap'`（不走藍新） | `UI_SPEC.md` P4 商店雙軌制 |
-| P4 IAP SKU | 稀有食物 / 道具禮包各款需獨立 SKU，CTA disabled until 平台審核通過 | `UI_SPEC.md` IAP SKU 清單 |
+| P4 商店 IAP | 道具禮包 / 裝扮 / 狀態禮包的現金部分走 `'platform-iap'`；食物排除 IAP | `UI_SPEC.md` P4 商店付費通道 |
+| P4 IAP SKU | 道具禮包 / 裝扮 / 狀態禮包各款需獨立 SKU，CTA disabled until 平台審核通過 | `UI_SPEC.md` IAP SKU 清單 |
 | 一般模式首頁 | 新增 Buddy 臉部懸浮入口（方向確認，設計細節待定） | `USER_FLOW.md` A2 |
 
 ### 後端受影響項目
@@ -216,7 +233,7 @@
 | 簽到 API | 首次開啟 App 自動簽到；補昨天 API；回傳 `login_streak_progress` | `GAME_MECHANICS.md` §9 |
 | `last_actual_app_open_at` | 補簽不得改寫此欄位；供 Rive #33 壞滅核心判定 | `GAME_MECHANICS.md` §9 |
 | `has_disco` | 七日達標後鎖定至月底，進度重算不清除 | `GAME_MECHANICS.md` §9 |
-| IAP entitlement | 擴充至稀有食物、道具禮包；訂單 `cashChannel` 記錄 `'platform-iap'` | `FRONTEND_BACKEND_HANDOFF.md` §7C |
+| IAP entitlement | 擴充至道具禮包 / 裝扮 / 狀態禮包；食物排除 IAP；訂單 `cashChannel` 記錄 `'platform-iap'` | `FRONTEND_BACKEND_HANDOFF.md` §7C |
 | Phase 3 贈禮（預備） | acquisition_source 欄位設計；原子庫存轉移 API 規格 | `GAME_MECHANICS.md` §10、`FRONTEND_BACKEND_HANDOFF.md` §8A |
 | 下週食物排程 API | 需確認欄位是否存在（阻塞確認項） | `UI_SPEC.md` Buddy的餐袋、`GAME_MECHANICS.md` §5 |
 
@@ -234,7 +251,7 @@
 | 項目 | 說明 |
 |------|------|
 | CURRENT.md 同步 | 請 @andrewtainan 將 `meeting/2026-06-23-decisions-draft-for-pm.md` #30–#35、#37 補入 CURRENT.md |
-| IAP SKU 清單 | 稀有食物 / 道具禮包各款 SKU ID 請 PM 確認後補入 `UI_SPEC.md` IAP SKU 清單 |
+| IAP SKU 清單 | 道具禮包 / 裝扮 / 狀態禮包各款 SKU ID 請 PM 確認後補入 `UI_SPEC.md` IAP SKU 清單 |
 | 下週食物排程資料 | 確認後端排程欄位是否存在，填入 FRONTEND_BACKEND_HANDOFF.md §7A |
 | #36 過期食物 | 仍為 ⏳ 待決，本次未寫入規格 |
 
@@ -422,3 +439,4 @@
   - `reference/eco-buddy_hi-fi/app.jsx` (hi-fi reference)
   - `reference/eco-buddy_hi-fi/styles.css` (hi-fi reference)
   - `scripts/update-engineering-changelog.ps1` (handoff automation)
+

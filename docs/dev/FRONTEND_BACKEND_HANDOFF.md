@@ -36,12 +36,12 @@
 
 | 任務 | 前端處理方式 | 對應規格 |
 |---|---|---|
-| 食物格庫存上限 | 使用 `food_slot_max_count`，不可寫死 12 | `UI_SPEC.md` 動態數值規則 |
+| 餐袋整袋上限 | 使用 `food_bag_max_count`，不可寫死 12 | `UI_SPEC.md` 動態數值規則 |
 | 食物效果值 | 使用 `food_hp_effect` 或後端回傳的食物效果欄位 | `UI_SPEC.md` P1 Bottom Sheet、動態數值規則 |
 | 食物週配額 | 使用 `food_weekly_quota` | `UI_SPEC.md` P1 Bottom Sheet |
 | Buddy 點擊互動 | 使用 `tap_mood_gain`、`tap_daily_limit` | `UI_SPEC.md` P1 觸碰互動、`GAME_MECHANICS.md` |
-| 道具效果值 | 使用 `tool_*_effect` 欄位 | `UI_SPEC.md` P1 / P9、動態數值規則 |
-| 道具有效期 | 使用 `tool_warn_threshold_hours`、`tool_free_expire_hours`、`tool_paid_expire_days` | `UI_SPEC.md` P1 / P9 |
+| 玩具效果值 | 使用 `tool_mood_effect_range` 欄位 | `UI_SPEC.md` P1 / P9、動態數值規則 |
+| 道具有效期 | 使用 `tool_warn_threshold_hours`、`tool_free_expire_hours`；付費玩具為永久持有規則 | `UI_SPEC.md` P1 / P9 |
 | 廣告開箱結果 | 前端只送 request、播放動畫、顯示後端回傳結果，不做機率抽取 | `UI_SPEC.md` P6、`GAME_MECHANICS.md` |
 | IAP 商品價格 | 使用 App Store / Google Play SDK 回傳的本地化價格，不寫死 NT$ 金額 | `UI_SPEC.md` P4、IAP SKU 清單 |
 
@@ -91,15 +91,14 @@
 
 | 設定項目 | 說明 | 對應規格 |
 |---|---|---|
-| `food_slot_max_count` | 食物格庫存上限 | `UI_SPEC.md` 動態數值規則 |
+| `food_bag_max_count` | 餐袋整袋總量上限 | `UI_SPEC.md` 動態數值規則 |
 | `food_weekly_quota` | 每種食物每週上限 | `UI_SPEC.md` 動態數值規則 |
 | `food_hp_effect` | 食物體力效果值 | `UI_SPEC.md`、`GAME_MECHANICS.md` |
-| `tool_*_effect` | 各道具效果值 | `UI_SPEC.md`、`GAME_MECHANICS.md` |
+| `tool_mood_effect_range` | 各玩具心情效果區間 | `UI_SPEC.md`、`GAME_MECHANICS.md` |
 | `tap_mood_gain` | 點擊 Buddy 每次增加心情值 | `GAME_MECHANICS.md` |
 | `tap_daily_limit` | 點擊 Buddy 每日上限 | `GAME_MECHANICS.md` |
 | `tool_warn_threshold_hours` | 道具即將過期警示閾值 | `UI_SPEC.md` P1 / P9 |
 | `tool_free_expire_hours` | 免費道具有效期 | `UI_SPEC.md` P6 / P9 |
-| `tool_paid_expire_days` | 付費消耗道具有效期 | `UI_SPEC.md` P9 |
 | 廣告開箱掉落設定 | 機率、保底、掉落池由後端 / 後台處理 | `GAME_MECHANICS.md` |
 | 商店商品上下架 | 商品狀態、庫存、購買限制 | `UI_SPEC.md` P4 |
 
@@ -113,7 +112,7 @@
 | 餵食動畫 | P1 原地播放，餵食後觸發狀態更新與可能變身判斷 | `UI_SPEC.md` P2b / P1 餵食、`USER_FLOW.md` |
 | 點擊反應動畫 | 點擊 Buddy 後歪頭 / 跳一下 / 揮手等反應 | `UI_SPEC.md` P1 觸碰互動 |
 | 變身過場 | 白光、縮放、粒子、overlay 結束後回到指定頁面狀態 | `UI_SPEC.md` 變身動畫章節 |
-| 食物 icon | 普通 / 稀有食物圖像，需符合固定尺寸與狀態顯示 | `UI_SPEC.md` P1 食物欄 |
+| 食物 icon | 當週食物圖像，需符合固定尺寸與狀態顯示；稀有食物已退役 | `UI_SPEC.md` P1 食物欄 |
 | 玩具 / 道具 icon | 逗貓棒、小球、梳子、零食等道具圖像 | `UI_SPEC.md` P1 / P9 |
 | 開箱圖像 / 動畫 | 廣告開箱結果呈現與獎勵圖像 | `UI_SPEC.md` P6 |
 
@@ -185,7 +184,6 @@
 |--------|---------|----------------|-----------------|------------|-----------|
 | `eco_pass_monthly` | 月度通行證 | ⏳ 待建立 | ⏳ 待建立 | — | — |
 | `sprint_pack_199` | 月底衝刺禮包 | ⏳ 待建立 | ⏳ 待建立 | — | — |
-| `rare_food_*` | 稀有食物（各款） | ⏳ 待 PM 確認清單 | ⏳ 待 PM 確認清單 | — | — |
 | `tool_bundle_*` | 道具禮包（各款） | ⏳ 待 PM 確認清單 | ⏳ 待 PM 確認清單 | — | — |
 | 裝扮各款 | — | ⏳ 待 28.3 分批排程 | ⏳ 待 28.3 分批排程 | — | — |
 | `[IAP SKU: change_pack_10]` | 更換次數包 10 次（偶爾想換一下） | ⏳ 待建立 | ⏳ 待建立 | — | — |
@@ -193,7 +191,7 @@
 
 ### 7B. 工程前端任務（IAP）
 
-- [ ] **7B.1** 稀有食物商品卡讀取 `[IAP SKU: rare_food_*]` 平台本地化價格，不顯示 hardcode 金額
+- [ ] **7B.1** 食物商品卡僅支援 ECOCO 點數，不讀取 IAP SKU
 - [ ] **7B.2** 道具禮包商品卡讀取 `[IAP SKU: tool_bundle_*]` 平台本地化價格
 - [ ] **7B.3** 確認商品 data `cashChannel` 正確標注（App 內數位商品 `'platform-iap'`，非 `'newebpay'`）
 - [ ] **7B.4** SKU 查詢失敗時商品 CTA disabled，不顯示任何 hardcode 備援金額
@@ -201,7 +199,7 @@
 
 ### 7C. 工程後端任務（IAP）
 
-- [ ] **7C.1** 後端 entitlement 驗證涵蓋稀有食物與道具禮包的 IAP 交易
+- [ ] **7C.1** 後端 entitlement 驗證涵蓋道具禮包 / 裝扮 / 狀態禮包的 IAP 交易；食物排除 IAP
 - [ ] **7C.2** 訂單資料模型 `cashChannel` 欄位正確記錄 `'platform-iap'` vs `'newebpay'`，不混用
 - [ ] **7C.3** IAP SKU 清單由後台管理，前端 fetch 後顯示，不寫死商品清單
 - [ ] **7C.4** 更換次數包 IAP entitlement 驗證：`change_pack_10` 購買成功 → 永久增加 `swap_count` 餘額 10；`change_pack_50` → 增加 50；次數不過期、不受月底重置影響

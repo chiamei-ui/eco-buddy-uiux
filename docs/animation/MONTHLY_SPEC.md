@@ -17,7 +17,7 @@
 | 素材項目 Asset Item | 數量/月 Qty/Month | 備註 Notes |
 |---|---|---|
 | 角色骨架外觀設計（.rev）/ Character skeleton appearance design (.rev) | 1 套 / 1 set | 新角色外觀；狀態機、插槽、命名規範須與初版完全一致 / New character appearance; state machine, slots, and naming must match initial version exactly |
-| 食物圖示 Food Icons | 4 張（W1–W4）/ 4 images (W1–W4) | 向量格式（SVG）；W4 稀有食物須附金色軌跡掉落動畫 / Vector SVG; W4 rare food must include gold trail drop animation |
+| 食物圖示 Food Icons | 依當月排程 / based on monthly schedule | 向量格式（SVG）；稀有食物 W4 已由 PM #41.6 退役，不再要求金色軌跡掉落動畫 / Vector SVG; W4 rare food retired, no gold trail required |
 | 週期餵食音效 Weekly Feeding SFX | 沿用首版 / Reuse from initial version | 音效於首版 Phase 4 一次交付，後續每月不重新製作；若需更換須另行報價。月底告別音效亦固定沿用首版，不隨每月角色調整重製。 |
 | 月初登場動畫 Monthly Spawn Animation | 1 組 / 1 set | 首次登入時播放；動畫表現依當月角色設計調整 / Played on first login; animation adjusted per monthly character design |
 | 月底告別動畫 Monthly Farewell Animation | 1 組 / 1 set | 揮手告別→走入圖鑑相框；月底最後一日觸發 / Wave farewell → enter gallery frame; triggered on last day of month |

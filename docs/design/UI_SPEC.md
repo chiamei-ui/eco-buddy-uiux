@@ -95,7 +95,7 @@
 
 - 格數：4 格固定（1×4 橫排）
 - 顯示規則：4 格全顯示，未解鎖格顯示灰色虛線佔位（🔒）
-- 庫存數字 Badge：左上角顯示，**每格上限 `[API: food_slot_max_count]` 個**（後台可調，預設 12）
+- 庫存數字 Badge：左上角顯示，**單格當週上限 `[API: food_weekly_quota]` 個**（既有參考值 5）；右上角 `餐袋 {current}/{limit}` 顯示整袋總量（既有參考值 12）
 
 **Badge 視覺三狀態**：
 
@@ -105,7 +105,7 @@
 | 庫存低 | 黃色 `#FFCE00` | 庫存 1–3 |
 | 未解鎖 | 灰色 + 🔒 icon | 該格尚未解鎖 |
 
-**每週配額制**：每種食物每週上限由後台設定（既有參考值 5 個，週三 12:00 重置）；N 個資收物 = N 個食物，達上限後不新增食物格庫存，但潔淨仍需當下結算。週日 12:00 起食物欄底部顯示「下週食物預告」入口。
+**每週配額制**：每週僅一種當週食物；投瓶 / 電池、商店購買、今日陪伴三來源共用同一週配額（既有參考值 5 個，週三 12:00 重置）。達上限後不新增食物、不加體力，但潔淨仍需當下結算。週日 12:00 起食物欄底部顯示「下週食物預告」入口。
 
 **下週食物預告規則**（#31 定案）：
 - **只顯示食物種類，不顯示數量**（個人配額不在預告範圍）
@@ -197,8 +197,8 @@
 |------|------|
 | 大圖 | 道具插圖（放大版） |
 | 名稱 | 道具名稱 |
-| 效果值 | 各道具依 API 欄位顯示：逗貓棒 `[API: tool_cat_wand_mood_effect]` / 小球 `[API: tool_ball_mood_effect]` / 梳子 `[API: tool_brush_clean_effect]`+`[API: tool_brush_mood_effect]` / 零食 `[API: tool_snack_hp_effect]`+`[API: tool_snack_mood_effect]` |
-| 有效期類型 | 免費 `[API: tool_free_expire_hours]`h / 付費 `[API: tool_paid_expire_days]` 日 / 永久 |
+| 效果值 | 所有玩具效果一律只加心情，依 API 回傳區間顯示（如 `[API: tool_mood_effect_range]`）；前端不列固定值、不顯示潔淨或體力效果 |
+| 有效期類型 | 免費 `[API: tool_free_expire_hours]`h / 付費永久 |
 
 **通用規則**：
 - 效果值從資料層動態帶入，與 GAME_MECHANICS.md 保持一致；前端不 hardcode 數值
@@ -374,19 +374,19 @@
 
 橫向滾動 Tab 保留品類結構（食物 / 玩具 / 裝扮 / 氣氛…），以卡片 Badge 區分貨幣，不設雙軌入口 Tab。
 
-### 商店雙軌制（D6）
+### 商店付費通道（#42）
 
-| 貨幣 | `cashChannel` | Badge 樣式 | 典型商品 |
-|------|--------------|-----------|---------|
-| 💎 ECOCO 點數 | — | 橘色文字右上 Badge | 基礎食物補給包、逗貓棒 / 小球 / 梳子 / 零食、清潔用品 |
-| 💳 NT$（平台 IAP） | `platform-iap` | 藍色文字右上 Badge | 裝扮（永久穿戴）、月度通行證、**稀有食物**、**道具禮包**、月底衝刺禮包 |
-| 💳 NT$（藍新） | `newebpay` | 藍色文字右上 Badge | ECOCO 點數儲值、補充站付款、Web 端非 App 內服務 |
+| 商品類型 | 付費方式 | `cashChannel` | 備註 |
+|------|--------------|--------------|------|
+| 食物 | 💎 ECOCO 點數 | — | 只賣當週食物，達配額時 disabled「本週已領滿」 |
+| 玩具 / 禮包 / 裝扮 | 💎 ECOCO 點數 + 💳 NT$ | `platform-iap`（現金部分） | 點＋金合併計價；裝扮現金部分仍走 Apple / Google 平台 IAP |
+| ECOCO 點數儲值 / 補充站 / Web 端付款 | 💳 NT$ | `newebpay` | 非 App 內數位商品 |
 
 **金流路徑規則（#26/#27/#33 定案）**：
-- App 內數位商品（裝扮、月度通行證、稀有食物、道具禮包）：一律 `cashChannel === 'platform-iap'`，前端觸發 StoreKit / Play Billing
+- App 內數位商品的現金部分（玩具、禮包、裝扮）：一律 `cashChannel === 'platform-iap'`，前端觸發 StoreKit / Play Billing
 - 藍新 NewebPay：僅用於 ECOCO 點數儲值、補充站、Web 端付款；**不得**用於 App 內數位商品
-- ECOCO 點數與現金不互換、不互買
-- 點數不足時 Modal 提示點數不足，不自動切換現金選項
+- 食物不可用現金 / IAP 購買；全站無純現金商品
+- 點數不足時 Modal 提示點數不足，不自動改成純現金購買
 
 ### 月底衝刺禮包（22–28 日置頂）
 
@@ -661,9 +661,8 @@
 
 | 來源 | Badge 文字 | 期限規則 |
 |------|-----------|---------|
-| 免費道具 | `24h` | 當日 23:59 消失 |
-| 付費消耗類 | `7 日` | 可帶到下個月 |
-| 付費永久類 | `永久` | 綁定帳號，永久有效 |
+| 免費道具 | `24h` | 到期後消失 |
+| 付費道具 | `永久` | 綁定帳號，永久有效 |
 
 ### 道具效果參考表
 
@@ -671,10 +670,10 @@
 
 | 道具 | 效果 | Rive State |
 |------|------|-----------|
-| 逗貓棒 | 心情 +15 | `JumpCatch` |
-| 小球 | 心情 +15 | `UseItem` |
-| 梳子 | 潔淨 +15 · 心情 +10 | `Clean` |
-| 零食 | 體力 +15 · 心情 +15 | `Feed` |
+| 逗貓棒 | 心情區間（API 回傳） | `JumpCatch` |
+| 小球 | 心情區間（API 回傳） | `UseItem` |
+| 梳子 | 心情區間（API 回傳） | `Clean` |
+| 零食 | 心情區間（API 回傳） | `Feed` |
 
 ### 空背包狀態
 
@@ -800,7 +799,7 @@
 
 | 欄位名稱 | 說明 | UI 顯示位置 |
 |---------|------|-----------|
-| `food_slot_max_count` | 食物格庫存上限 | P1 食物欄 Badge 顯示上限 |
+| `food_bag_max_count` | 餐袋整袋總量上限（既有參考值 12） | P1 餐袋容量文字 / 後端庫存判定 |
 | `food_weekly_quota` | 每種食物每週上限 | P1 食物格 ℹ️ Sheet 週配額 |
 | `food_hp_random_range` | 食物餵食體力效果範圍（預設 +1~5） | P1 食物格 ℹ️ Sheet 效果值 |
 | `feed_hp_delta` | 本次餵食後端回傳體力增量 | P1 餵食結果動畫 / 屬性更新 |
@@ -808,17 +807,11 @@
 | `recycle_machine_type` | 本次機台類型（收瓶機 / 電池機互斥） | P2b 數據細節 |
 | `recycle_clean_delta` | 本次回收潔淨增量 | P2b 潔淨卡 / P1 返回動畫 |
 | `food_awarded_count` | 本次實際入帳食物數 | P2b 食物卡片列 / P1 食物欄 Badge |
-| `tool_cat_wand_mood_effect` | 逗貓棒心情效果值 | P1 / P9 道具格 ℹ️ Sheet 效果值 |
-| `tool_ball_mood_effect` | 小球心情效果值 | P1 / P9 道具格 ℹ️ Sheet 效果值 |
-| `tool_brush_clean_effect` | 梳子潔淨效果值 | P1 / P9 道具格 ℹ️ Sheet 效果值 |
-| `tool_brush_mood_effect` | 梳子心情效果值 | P1 / P9 道具格 ℹ️ Sheet 效果值 |
-| `tool_snack_hp_effect` | 零食體力效果值 | P1 / P9 道具格 ℹ️ Sheet 效果值 |
-| `tool_snack_mood_effect` | 零食心情效果值 | P1 / P9 道具格 ℹ️ Sheet 效果值 |
+| `tool_mood_effect_range` | 玩具心情效果區間（各品項可不同） | P1 / P9 道具格 ℹ️ Sheet 效果值 |
 | `tap_mood_gain` | 每次觸碰 Buddy 心情增量 | P1 觸碰互動 |
 | `tap_daily_limit` | 每日觸碰上限次數 | P1 觸碰互動 |
 | `tool_warn_threshold_hours` | 道具即將過期警示閾值（小時） | P1 / P9 道具格三態切換 |
 | `tool_free_expire_hours` | 免費道具有效期（小時） | P6 結果頁說明 / P9 道具 Badge |
-| `tool_paid_expire_days` | 付費消耗類道具有效期（天） | P9 道具 Badge |
 
 ### IAP SKU 清單
 
@@ -826,8 +819,8 @@
 |--------|---------|------|
 | `eco_pass_monthly` | 月度通行證 | 前端向平台 SDK 查詢本地化價格顯示 |
 | `sprint_pack_199` | 月底衝刺禮包 | 前端向平台 SDK 查詢本地化價格顯示 |
-| `rare_food_*` | 稀有食物（各款） | 各款獨立 SKU，待 PM 確認商品清單後補充 |
 | `tool_bundle_*` | 道具禮包（各款） | 各款獨立 SKU，待 PM 確認商品清單後補充 |
+| 裝扮各款 | 裝扮（各款） | 現金部分讀平台本地化價格；ECOCO 點數部分讀後台 |
 
 > **SKU 上架規範（#33 定案）**：每項 IAP 商品須在 App Store Connect 與 Google Play Console 逐項建立並送審。前端只對平台回傳有效商品資料且後台允許販售的 SKU 開啟購買 CTA，SKU 未通過審核期間 CTA 維持 disabled。裝扮各款 SKU ID 待商品上架後補充。
 
@@ -840,11 +833,11 @@
 
 以下欄位需後端工程師確認已提供或排入計劃：
 
-- [ ] `food_slot_max_count`、`food_weekly_quota`、`food_hp_random_range`、`feed_hp_delta`
+- [ ] `food_bag_max_count`、`food_weekly_quota`、`food_hp_random_range`、`feed_hp_delta`
 - [ ] `recycle_total_count`、`recycle_machine_type`、`recycle_clean_delta`、`food_awarded_count`
-- [ ] `tool_*_effect`（各道具各屬性效果，共 7 個欄位）
+- [ ] `tool_mood_effect_range`（各玩具心情效果區間）
 - [ ] `tap_mood_gain`、`tap_daily_limit`
-- [ ] `tool_warn_threshold_hours`、`tool_free_expire_hours`、`tool_paid_expire_days`
+- [ ] `tool_warn_threshold_hours`、`tool_free_expire_hours`
 - [ ] 廣告開箱 API：後端執行掉落抽取並回傳道具 ID
 - [ ] IAP SKU 清單：`eco_pass_monthly`、`sprint_pack_199`、裝扮各款 SKU
 
@@ -940,10 +933,9 @@
 
 ### §I — 道具
 
-- [ ] P9 卡片有有效期 Badge（24h / 7 日 / 永久）
+- [ ] P9 卡片有有效期 Badge（24h / 永久）
 - [ ] 過期 ≤ 6h：橘色 Banner 警告
-- [ ] 逗貓棒效果：心情 +15（非舊數值）
-- [ ] 梳子效果：潔淨 +15 + 心情 +10（非「潔淨度」）
+- [ ] 玩具效果皆只顯示心情區間（API 回傳），不顯示潔淨 / 體力效果
 - [ ] 空背包：雙 CTA（看廣告 / 去商店）
 
 ### §J — 月底 / 夥伴日誌

@@ -510,7 +510,8 @@ const P1Home = ({ state, dispatch, setScreen, dragManager, payload, showTutorial
                 <div>• 拖曳食物到 Buddy 身上即可餵食</div>
                 <div>• 每次餵食讓 Buddy 體力 +1~5（每次不同）</div>
                 <div>• 當週食物由帶禮物回家、商店與今日陪伴共用每週配額</div>
-                <div>• 週三 12:00 重置當週配額；月底會清空餐袋</div>
+                <div>• 週三 12:00 重置當週配額；月底回收與今日陪伴食物會清空</div>
+                <div>• 商店購買的食物會保留到下個月</div>
                 <div>• 數量 ≤ 2 時卡片變淡，提醒快用完</div>
               </div>
               <div style={{ background:'#FFF3E0', borderRadius:12, padding:'10px 14px', fontSize:12, color:'#7A4800' }}>
@@ -580,9 +581,9 @@ const P1Home = ({ state, dispatch, setScreen, dragManager, payload, showTutorial
 // ball: tool_ball_mood_effect / snack: tool_snack_mood_effect
 const toolEffectMap = {
   feather: { label: '心情 +8~15' },
-  brush:   { label: '心情 +8~12' },
+  brush:   { label: '心情 +8~15' },
   ball:    { label: '心情 +8~15' },
-  snack:   { label: '心情 +10~15' },
+  snack:   { label: '心情 +8~15' },
 };
 
 /* ── 食物/道具 ℹ️ Bottom Sheet ── */
@@ -844,13 +845,8 @@ const P2bResult = ({ setScreen, dispatch, state, tweaks = {}, setTweak = () => {
           <div onClick={e => e.stopPropagation()} style={{ background: '#fff', borderRadius: 20, padding: '24px 22px', width: '78%', maxWidth: 300 }}>
             <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 12, color: '#1a1a1a' }}>換算說明</div>
             <div style={{ fontSize: 13, lineHeight: 1.85, color: '#555' }}>
-              <div style={{ fontWeight: 700, color: '#1a1a1a', marginBottom: 2 }}>體力（收瓶機）</div>
-              <div>PP 杯子 → 體力 +1 / 個</div>
-              <div>PET 寶特瓶 / 鋁罐 / HDPE 牛奶瓶 → 體力 +2 / 個</div>
-              <div style={{ marginBottom: 6 }}>退瓶不計入體力</div>
-              <div style={{ fontWeight: 700, color: '#1a1a1a', marginBottom: 2 }}>體力（電池機）</div>
-              <div>1 號 / 2 號 / 9V 乾電池 → 體力 +10 / 顆</div>
-              <div style={{ marginBottom: 6 }}>3–6 號乾電池 → 體力 +5 / 顆</div>
+              <div style={{ fontWeight: 700, color: '#1a1a1a', marginBottom: 2 }}>體力</div>
+              <div style={{ marginBottom: 6 }}>帶回家的食物先進餐袋，拖給 Buddy 吃才增加體力（每次 +1~5）。</div>
               <div style={{ fontWeight: 700, color: '#1a1a1a', marginBottom: 2 }}>潔淨（收瓶機）</div>
               <div>投入 → 潔淨 +2 / 個</div>
               <div style={{ marginBottom: 6 }}>退瓶 → 潔淨 -1 / 個</div>
@@ -861,7 +857,7 @@ const P2bResult = ({ setScreen, dispatch, state, tweaks = {}, setTweak = () => {
                 潔淨淨值不為負，≤0 顯示 0。
               </div>
               <div style={{ fontSize: 11, color: '#888', marginTop: 4, lineHeight: 1.5 }}>
-                註：體力 / 潔淨 / ECOCO 點數為三條獨立帳本，由同一次投瓶分別計算。
+                註：體力 / 潔淨 / ECOCO 點數為三條獨立帳本；本頁只顯示潔淨結算，體力在餵食時入帳。
               </div>
             </div>
             <button onClick={() => setShowInfo(false)} style={{ marginTop: 18, width: '100%', padding: '10px 0', borderRadius: 99, background: '#FF5000', color: '#fff', border: 'none', fontWeight: 700, fontSize: 14, cursor: 'pointer' }}>知道了</button>
@@ -953,7 +949,7 @@ const SHOP_IAP_CONFIG = {
     ],
   },
   statusPackTwo: {
-    id: 'status-pack-two', emoji: '🎁', name: '大禮包', iapPrice: 599, pointsCost: 520,
+    id: 'status-pack-two', emoji: '🎁', name: '大禮包', iapPrice: 99, pointsCost: 520,
     payment: 'hybrid', cashChannel: 'platform-iap', category: 'status-package',
     statusRange: { min: 28, max: 36, label: '特殊狀態' },
     desc: '盲盒開出 #28–36 特殊狀態之一',
@@ -1021,7 +1017,10 @@ const CosmeticDetailSheet = ({ item, isPhase2, isOwned, onClose, onBuy }) => {
             。裝扮退款請洽平台客服。
           </div>
           <div className="product-detail-footer">
-            <div className="price-tag">NT$ {item.price}</div>
+            <div className="price-tag">
+              {item.pointsCost ? <><img src="assets/icon-ecoco-point.svg" alt="" />{item.pointsCost} ＋ </> : null}
+              NT$ {item.iapPrice ?? item.price}
+            </div>
             {isOwned ? (
               <button className="buy-cta" disabled style={{ background: '#E8F9EE', color: '#22A55C', cursor: 'default' }}>✓ 已擁有</button>
             ) : isPhase2 ? (
@@ -1078,9 +1077,9 @@ const ProductDetailSheet = ({ item, onClose, onBuy }) => {
 
 /* ───── Cosmetic catalogue (shared by P4Shop + P1Home wardrobe tab) ───── */
 const COSMETIC_CATALOG = [
-  { id: 'star-hat',     emoji: '⭐', name: '星辰帽',     desc: '限定裝扮 · 閃閃發光',       price: 299 },
-  { id: 'crystal-bow',  emoji: '🎀', name: '水晶蝴蝶結', desc: '限定裝扮 · 精緻優雅',       price: 249 },
-  { id: 'rainbow-halo', emoji: '🌈', name: '彩虹光暈',   desc: 'Phase 1 預覽款 · 閃耀登場', price: 199 },
+  { id: 'star-hat',     emoji: '⭐', name: '星辰帽',     desc: '限定裝扮 · 閃閃發光',       pointsCost: 30, iapPrice: 299, price: 299 },
+  { id: 'crystal-bow',  emoji: '🎀', name: '水晶蝴蝶結', desc: '限定裝扮 · 精緻優雅',       pointsCost: 25, iapPrice: 249, price: 249 },
+  { id: 'rainbow-halo', emoji: '🌈', name: '彩虹光暈',   desc: 'Phase 1 預覽款 · 閃耀登場', pointsCost: 20, iapPrice: 199, price: 199 },
 ];
 
 const useModalScrollLock = () => {
@@ -1177,7 +1176,7 @@ const P4Shop = ({ setScreen, state, dispatch, tweaks, payload }) => {
     { id: 'ball', emoji: 'assets/toy/ecobuddy-toy____皮球.webp', name: '小球', desc: '心情 +8~15', pointsCost: 25, iapPrice: 39, payment: 'hybrid', cashChannel: 'platform-iap', category: 'tool' },
     { id: 'snack', emoji: 'assets/food/ecobuddy-food___洋芋片.webp', name: '零食', desc: '心情 +8~15', pointsCost: 20, iapPrice: 29, payment: 'hybrid', cashChannel: 'platform-iap', category: 'tool' }],
 
-    cosmetic: COSMETIC_CATALOG.map(c => ({ ...c, payment: 'cash', cashChannel: 'platform-iap', category: 'cosmetic' })),
+    cosmetic: COSMETIC_CATALOG.map(c => ({ ...c, payment: 'hybrid', cashChannel: 'platform-iap', category: 'cosmetic' })),
 
     music: []
 
@@ -1334,7 +1333,7 @@ const P4Shop = ({ setScreen, state, dispatch, tweaks, payload }) => {
                         <span style={{ fontWeight: 800, color: '#22A55C', fontSize: 12 }}>✓ 已擁有</span>
                       ) : (
                         <>
-                          <b style={{ fontFamily: 'var(--font-en)', fontWeight: 900, color: '#060E9F', fontSize: 15 }}>NT$ {it.price}</b>
+                          {renderPrice(it)}
                           <button className="buy-btn" disabled={!isPhase2}
                             onClick={(e) => { e.stopPropagation(); setCosmeticDetail(it); }}
                             style={!isPhase2 ? { background: '#E0E0E0', color: '#999', cursor: 'default' } : {}}>
@@ -1351,51 +1350,6 @@ const P4Shop = ({ setScreen, state, dispatch, tweaks, payload }) => {
         );
       })()}
 
-{/* 玩具 tab — 現金商品 section（Phase 2 才顯示） */}
-      {tab === 'tool' && isPhase2 && (() => {
-        const cashItems = (items['tool'] || []).filter(it => it.payment === 'cash');
-        if (!cashItems.length) return null;
-        return (
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 18px 4px' }}>
-              <span style={{ fontSize: 13, fontWeight: 800, color: '#888', letterSpacing: '.04em' }}>{cashItems.length > 0 ? '現金商品' : ''}</span>
-              {isPhase2 && <button onClick={() => setScreen('p9')} style={{ fontSize: 11, fontWeight: 700, color: 'var(--ecoco-blue)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>查看我的玩具箱 ›</button>}
-            </div>
-            {cashItems.length > 0 && (
-              <div className="cash-strip">
-                {cashItems.map(it => {
-                  const hasDetail = !!(it.contents || it.benefits);
-                  const isBought = (it.id === 'sprint-pack' && state.sprintPurchased) ||
-                                    (it.id === 'monthly-pass' && state.hasPass);
-                  return (
-                    <div key={it.id}
-                      className={`cash-card${isBought ? ' purchased' : ''}`}
-                      onClick={isBought ? undefined : () => hasDetail ? setDetailItem(it) : setPurchasing(it)}
-                      style={isBought ? { cursor: 'default' } : {}}>
-                      <div className="cash-thumb"><Glyph value={it.emoji} alt={it.name} /></div>
-                      <div className="cash-info">
-                        <h4>{it.name}</h4>
-                        <div className="desc">{it.desc}</div>
-                        {isBought ? (
-                          <div style={{ fontWeight: 800, color: '#22A55C', fontSize: 12, marginTop: 6 }}>
-                            {it.id === 'monthly-pass' ? '✓ 啟用中' : '✓ 本月已領'}
-                          </div>
-                        ) : (
-                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 6 }}>
-                            <span style={{ fontWeight: 800, color: '#060E9F', fontSize: 13, fontFamily: 'var(--font-en)' }}>NT$ {it.price}</span>
-                            {hasDetail && <span style={{ fontSize: 10, color: '#888' }}>查看 ›</span>}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        );
-      })()}
-
       {/* 點數商品 — 2-column grid */}
       {(() => {
         if (tab === 'package') return null;
@@ -1404,7 +1358,7 @@ const P4Shop = ({ setScreen, state, dispatch, tweaks, payload }) => {
         return (
           <div>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 18px 4px' }}>
-              <span style={{ fontSize: 13, fontWeight: 800, color: '#888', letterSpacing: '.04em' }}>{tab === 'food' ? '點數商品' : '點數＋現金商品'}</span>
+              <span style={{ fontSize: 13, fontWeight: 800, color: '#888', letterSpacing: '.04em' }}>{tab === 'food' ? '點數商品' : '點數＋平台付款'}</span>
               {tab === 'tool' && !isPhase2 && <button onClick={() => setScreen('p9')} style={{ fontSize: 11, fontWeight: 700, color: 'var(--ecoco-blue)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>查看我的玩具箱 ›</button>}
             </div>
             <div className="shop-grid">
@@ -2061,16 +2015,16 @@ const P5Missions = ({ setScreen, state, dispatch, tweaks }) => {
 
 /* ─── P6 玩具效果常數（資料來源：CURRENT.md #39 效果值 random） ─── */
 const TOOL_PRIMARY = {
-  feather: { icon: '😊', val: '15' },
-  ball:    { icon: '😊', val: '15' },
-  brush:   { icon: '😊', val: '10' },
-  snack:   { icon: '😊', val: '15' },
+  feather: { icon: '😊', val: '8~15' },
+  ball:    { icon: '😊', val: '8~15' },
+  brush:   { icon: '😊', val: '8~15' },
+  snack:   { icon: '😊', val: '8~15' },
 };
 const TOOL_INFO = [
   { id: 'feather', emoji: 'assets/toy/ecobuddy-toy____逗貓棒.webp', name: '逗貓棒', effects: '心情 +8~15' },
   { id: 'ball',    emoji: 'assets/toy/ecobuddy-toy____皮球.webp', name: '小球',   effects: '心情 +8~15' },
-  { id: 'brush',   emoji: 'assets/toy/ecobuddy-toy____梳子.webp', name: '梳子',   effects: '心情 +8~12' },
-  { id: 'snack',   emoji: 'assets/food/ecobuddy-food___洋芋片.webp', name: '零食',   effects: '心情 +10~15' },
+  { id: 'brush',   emoji: 'assets/toy/ecobuddy-toy____梳子.webp', name: '梳子',   effects: '心情 +8~15' },
+  { id: 'snack',   emoji: 'assets/food/ecobuddy-food___洋芋片.webp', name: '零食',   effects: '心情 +8~15' },
 ];
 
 /* ═══════════════ P6 · Ads → box ═══════════════ */
@@ -3011,7 +2965,7 @@ const P4Orders = ({ setScreen, state, payload, tweaks }) => {
       <div style={{ display: 'flex', borderBottom: '1.5px solid #E8DDD0', margin: '0 18px' }}>
         {[
           { id: 'points', label: <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><img src="assets/icon-ecoco-point.svg" width="14" height="14" alt="" />ECOCO 點數</span> },
-          ...(isPhase2 ? [{ id: 'cash', label: '💳 現金' }] : []),
+            ...(isPhase2 ? [{ id: 'cash', label: '💳 平台付款' }] : []),
         ].map(t => (
           <button key={t.id} onClick={() => setActiveTab(t.id)} style={{
             flex: 1, background: 'none', border: 'none', cursor: 'pointer',
