@@ -8,6 +8,11 @@
 > **資料來源**：RFP v1.4 完整版（2026-07-16，2026-07-18 增補工程 Runtime 驗收標準）、命名手冊 v1.2  
 > **相關文件**：[CHARACTER_TYPES.md](CHARACTER_TYPES.md)（36 種型態）、[MONTHLY_SPEC.md](MONTHLY_SPEC.md)（月度合約）、[NAMING.md](NAMING.md)（命名手冊）、[ANIMATION_LIST.md](ANIMATION_LIST.md)（交付清單）
 
+> ⚠️ **W4 稀有食物退役之效力範圍（2026-07-29 註記）**
+> 本檔及 [ANIMATION_LIST.md](ANIMATION_LIST.md)、[MONTHLY_SPEC.md](MONTHLY_SPEC.md)、[NAMING.md](NAMING.md) 中「W4 稀有食物已退役」相關敘述來自 **PM #41.6 產品決議**，**尚未完成合約修訂**。
+> 在合約 ECOCO-ANIM-2026-001 第 11 條 email 修訂生效前，對外包動畫師的**交付與驗收仍以 RFP v1.4 ＋ 命名手冊 v1.2 為準**：22 個 `ev_*`（含 `ev_gold_burst`）為鎖定命名（RFP §3.7(a-3)）、FX4 為 §9.1 必要交付項、驗收項 C-3 與 E-1 仍為必要。
+> 退役敘述僅反映產品端現況，**不得作為免除乙方交付義務或取消驗收項目之依據**。規格效力以 binding RFP 為準，本檔為團隊參考鏡像。
+
 ---
 
 ## 一、專案概述
@@ -265,6 +270,7 @@ Phase 1 試作不要求實作以下規格。正式合約（Phase 2–4）啟動�
 | 月底結算 | ev_farewell_start / ev_farewell_end | 溫馨告別音效，帶有不捨與期待下月感 | 1.0–2.0s |
 
 > ※ ev_gold_burst 因 W4 稀有食物退役，不再作為食物流程必要音效；音效總數需待動畫變更確認後重算。
+> ⚠️ 合約修訂前，乙方交付義務仍為 **22 支音效（含 `ev_gold_burst`）**，見檔頭效力註記。
 
 ---
 

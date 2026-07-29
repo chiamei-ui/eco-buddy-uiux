@@ -23,6 +23,7 @@
 | 月底告別動畫 Monthly Farewell Animation | 1 組 / 1 set | 揮手告別→走入圖鑑相框；月底最後一日觸發 / Wave farewell → enter gallery frame; triggered on last day of month |
 
 > ※ 每月素材之交付時程節點與驗收細節，由甲乙雙方於該次月度獨立合約中另行約定。命名規範不符者於月度合約驗收時視為未完成交付。
+> ⚠️ **效力註記（2026-07-29）**：食物圖示張數屬甲方素材排程，可依 PM #41.6 決議調整。但 W4 退役**不影響乙方（動畫師）之交付義務**——合約修訂完成前，`ev_gold_burst` 與 FX4 仍依 RFP v1.4 為鎖定命名與必要交付項。詳見 [ANIMATION_BRIEF.md](ANIMATION_BRIEF.md) 檔頭效力註記。
 
 ---
 
