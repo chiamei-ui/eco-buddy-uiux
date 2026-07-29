@@ -3,7 +3,7 @@
 **版本 / Version**：v1.0  
 **更新日期**：2026-06-05  
 **Owner**：窗口設計師 @idahsueh-cmd  
-**資料來源**：RFP v1.0（`ecoco-private/specs/ECOCO_RFP_EcoBuddy_v1_0_20260515.docx`）§2.3、§11  
+**資料來源**：RFP v1.4（`specs/ECOCO_RFP_EcoBuddy_v1_4_20260716.docx`）§2.3、§11
 **適用對象**：窗口設計師、外包動畫師、PM
 
 > **⚠ 本文件適用範圍**：適用於「獨立月度合約」，不屬於 Phase 0–4 首版合約範圍。月度合約非每月固定簽署，僅於甲方有執行需求時，雙方另行簽署單次月度專案合約。
@@ -17,13 +17,13 @@
 | 素材項目 Asset Item | 數量/月 Qty/Month | 備註 Notes |
 |---|---|---|
 | 角色骨架外觀設計（.rev）/ Character skeleton appearance design (.rev) | 1 套 / 1 set | 新角色外觀；狀態機、插槽、命名規範須與初版完全一致 / New character appearance; state machine, slots, and naming must match initial version exactly |
-| 食物圖示 Food Icons | 依當月排程 / based on monthly schedule | 向量格式（SVG）；稀有食物 W4 已由 PM #41.6 退役，不再要求金色軌跡掉落動畫 / Vector SVG; W4 rare food retired, no gold trail required |
+| 食物圖示 Food Icons | 4 張（W1–W4）/ 4 images (W1–W4) | 向量格式（SVG）；W4 稀有食物須附金色軌跡掉落動畫 / Vector SVG; W4 rare food must include gold trail drop animation |
 | 週期餵食音效 Weekly Feeding SFX | 沿用首版 / Reuse from initial version | 音效於首版 Phase 4 一次交付，後續每月不重新製作；若需更換須另行報價。月底告別音效亦固定沿用首版，不隨每月角色調整重製。 |
 | 月初登場動畫 Monthly Spawn Animation | 1 組 / 1 set | 首次登入時播放；動畫表現依當月角色設計調整 / Played on first login; animation adjusted per monthly character design |
 | 月底告別動畫 Monthly Farewell Animation | 1 組 / 1 set | 揮手告別→走入圖鑑相框；月底最後一日觸發 / Wave farewell → enter gallery frame; triggered on last day of month |
 
 > ※ 每月素材之交付時程節點與驗收細節，由甲乙雙方於該次月度獨立合約中另行約定。命名規範不符者於月度合約驗收時視為未完成交付。
-> ⚠️ **效力註記（2026-07-29）**：食物圖示張數屬甲方素材排程，可依 PM #41.6 決議調整。但 W4 退役**不影響乙方（動畫師）之交付義務**——合約修訂完成前，`ev_gold_burst` 與 FX4 仍依 RFP v1.4 為鎖定命名與必要交付項。詳見 [ANIMATION_BRIEF.md](ANIMATION_BRIEF.md) 檔頭效力註記。
+> ⚠️ **效力註記（2026-07-29 註記）**：本表為 RFP §2.3 完整轉錄；實際月度交付以雙方另行簽署的單次月度合約為準；PM 內部決議不得自行改寫本 mirror 或已簽約定。W4 稀有食物之產品排程調整屬甲方內部決議，不改變乙方依現行 binding RFP v1.4 之交付義務——`ev_gold_burst` 與 FX4 仍為鎖定命名與必要交付項。詳見 [ANIMATION_BRIEF.md](ANIMATION_BRIEF.md) 檔頭效力註記。
 
 ---
 
@@ -67,4 +67,4 @@
 
 ---
 
-*Based on RFP v1.0 — 2026-05-15。如 RFP 有修訂，本文件同步更新並記錄異動。*
+*Based on RFP v1.4 — 2026-07-16。如 RFP 有修訂，本文件同步更新並記錄異動。*

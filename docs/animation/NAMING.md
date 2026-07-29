@@ -1,7 +1,7 @@
 # ECO Buddy 命名手冊 Naming Manual
 
 **版本 / Version**: v1.2  
-**對應 xlsx**: `ecoco-private/naming/ECOCO_naming_manual_v1_2_bilingual_20260716.xlsx`  
+**對應 xlsx**: `naming/ECOCO_naming_manual_v1_2_bilingual_20260716.xlsx`
 **Owner**: 窗口設計師 @idahsueh-cmd（主寫）/ 前端工程師 @shangchian（技術格式確認）  
 **Commit prefix**: `[anim]`
 
@@ -137,7 +137,7 @@
 | 事件名稱 | 動作群組 | 觸發時機 | 音效 |
 |---------|---------|---------|------|
 | `ev_eat_gulp` | 餵食 | 食物進入口中、開始吞嚥時 | 吞嚥音（Q 彈感）；音效依每週食物週期變化 |
-| `ev_eat_chew` | 餵食 | 咀嚼動畫期間 | 咀嚼音（0.4–0.6s）；稀有食物 W4 已退役，不需稀有版音效 |
+| `ev_eat_chew` | 餵食 | 咀嚼動畫期間 | 咀嚼音（0.4–0.6s）；W4 稀有版需果汁噴濺音 |
 | `ev_scan_start` | 清潔 | 品牌橘色掃描光束從頂部開始時 | 科技掃描音效 |
 | `ev_dirt_pop` | 清潔 | 髒污粒子從毛髮剝落散開時 | 灰塵爆裂音 |
 | `ev_scan_end` | 清潔 | 最終掃描影格、清潔確認完成時 | 無；後端可監聽確認清潔屬性已更新 |
@@ -152,7 +152,7 @@
 | `ev_decay_end` | 每日衰減 | 衰減動畫結束、新 Idle 開始前 | 無；後端可監聽確認衰減數值已寫入 |
 | `ev_evolve_start` | 進化 | 白光包裹角色（第 0 影格）時 | 上升音起始 |
 | `ev_evolve_burst` | 進化 | 品牌色粒子爆發（動畫約 1.0s 處） | 成就爆發音（1–2s） |
-| `ev_gold_burst` | 退役保留名 | 原 W4 稀有食物事件；W4 已由 PM #41.6 移除，未來若轉用到其他狀態需另開動畫變更 | 不作為食物流程必要音效 |
+| `ev_gold_burst` | W4 稀有食物 | W4 稀有食物餵食動畫 timeline 內（內嵌於餵食動畫，非後端獨立呼叫）；金色粒子爆發，播放完自動重置 | 金色粒子爆發音；與 ev_eat 系列獨立 |
 | `ev_spawn_hatch` | 每月發放 | 角色從蛋孵化或從光中現身時 | 孵化音；每月 1 日首次登入觸發，直接接 Idle |
 | `ev_farewell_start` | 每月結束 | 揮手告別動畫開始時 | 溫馨告別音；月末最後一天觸發 |
 | `ev_farewell_end` | 每月結束 | 告別動畫完全結束（約 2.0s 處） | 無；後端可監聽觸發歸檔與下月預告推播 |
@@ -160,13 +160,13 @@
 | `ev_collapse_end` | 崩塌 | 紅眼亮起、崩塌型態完成時 | 深沉衝擊音；接入型態 #33 Idle |
 
 > 所有事件埋點必須與 Rive Editor 關鍵影格同步。音效播放整合由甲方工程師實作；外包只需確保事件名稱與本表完全一致。
-> ⚠️ **效力註記（2026-07-29）**：`ev_gold_burst` 標為「退役保留名」屬 PM #41.6 決議。依 RFP §3.7(a-3)，`ev_*` 命名於首版鎖定、不得新增或改名，**該名稱仍為 22 個鎖定 trigger 之一，乙方仍須埋入**；合約修訂完成前不得視為已免除。詳見 [ANIMATION_BRIEF.md](ANIMATION_BRIEF.md) 檔頭效力註記。
+> ⚠️ **效力註記（2026-07-29 註記）**：命名以正式 XLSX 命名手冊 v1.2 為準。W4 稀有食物退役屬 PM 內部產品決議，**不改動命名手冊 v1.2、不改變乙方現行 naming／trigger 義務**；依 RFP §3.7(a-3)，`ev_*` 命名於首版鎖定、不得新增或改名，`ev_gold_burst` 仍為 22 個鎖定 trigger 之一，乙方仍須埋入。詳見 [ANIMATION_BRIEF.md](ANIMATION_BRIEF.md) 檔頭效力註記。
 
 ---
 
 ## 備注
 
-- **xlsx 正式版位置**：`ecoco-private/naming/ECOCO_naming_manual_v1_2_bilingual_20260716.xlsx`（對外發送用，合約驗收以此版本為準）
+- **xlsx 正式版位置**：`naming/ECOCO_naming_manual_v1_2_bilingual_20260716.xlsx`（對外發送用，合約驗收以此版本為準）
 - **通知外包**：任何影響外包工作的命名異動，由**窗口設計師**以正式 email 通知 Anastasiia，等書面確認後方可進入正式建構
 - **準據語言**：中英雙語並列，以中文版為準
 
@@ -177,7 +177,7 @@
 > 對應 RFP §3.6 及 4.1 附表 B。命名格式：`state_<NN>_<type>_<descriptor>`；type 限 `prop` / `decor` / `decal` / `mark`。  
 > 元素由 Rive State Machine 依當前基礎狀態自動控制顯示／隱藏，**不使用 `has_*` Boolean，後端不傳值**。  
 > #14 為預設基準狀態，無 3.6 元素，不計入 26 個狀態項目。  
-> 主命名為 Phase 0B-2 對齊建議；最終命名須雙方書面確認。  
+> 主命名已於 Phase 0B-2 完成雙方書面確認（2026-07-29），作為 Phase 2 現行命名基準。
 > RFP v1.4（2026-07-16）已定案下列項目，表中以「RFP v1.4 新增／已鎖定」標註：#05／#11／#13／#16／#23／#27 新增固定命名；#15／#18／#20／#22／#23／#27 由原「二選一」鎖定為單一方案。若外包已依舊版（v1.3 以前）製作對應素材，須主動書面通知修改。
 
 | # | 狀態標籤 ZH / EN | 主命名 element_naming | type | 骨架附著位置 | 備註 |
@@ -218,4 +218,4 @@
 | #27 | ECOCO 領袖 / ECOCO Leader | `state_27_decor_leader_cape` | decor | shoulders_back（肩背） | 紅色領袖披風，固定圖層（RFP v1.4 新增） |
 | #27 | ECOCO 領袖 / ECOCO Leader | `state_27_decor_leader_circle` | decor | underfoot（腳下） | 腳下循環魔法陣，固定圖層；#36 觸發時由 S6 循環之冠的 ECOCO 六角能量圈**升級取代（非疊加）**（RFP v1.4 新增） |
 
-> 最終命名須雙方書面確認後方可進入正式建構。視覺規格詳見 [CHARACTER_TYPES.md §五](CHARACTER_TYPES.md)。
+> 命名已於 Phase 0B-2 完成雙方書面確認（2026-07-29），作為 Phase 2 現行命名基準。視覺規格詳見 [CHARACTER_TYPES.md §五](CHARACTER_TYPES.md)。
