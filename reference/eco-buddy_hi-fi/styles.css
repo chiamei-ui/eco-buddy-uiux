@@ -948,20 +948,39 @@ img,svg{display:block;}
 .state-card.unlocked .turtle{filter:drop-shadow(0 2px 6px rgba(255,80,0,0.2));}
 .state-card.legendary .turtle{filter:drop-shadow(0 3px 8px rgba(212,160,0,0.5));}
 .state-card .name{font-size:11px;font-weight:700;text-align:center;color:#333;}
-/* rarity badge */
+/* rarity / 特殊狀態標籤：絕對定位貼頂部置中，不佔文檔流→不會撐開卡片 */
 .state-card .rarity{
+  position:absolute;top:5px;left:50%;transform:translateX(-50%);z-index:3;
   display:inline-flex;align-items:center;gap:3px;
-  margin-top:4px;padding:2px 7px;border-radius:99px;
+  padding:2px 8px;border-radius:99px;
   background:linear-gradient(90deg,#C8960C,#F5C518,#C8960C);
-  font-size:10px;font-weight:900;color:#fff;
+  font-size:9px;font-weight:900;color:#fff;white-space:nowrap;
   letter-spacing:.04em;text-shadow:0 1px 2px rgba(0,0,0,0.2);
   box-shadow:0 2px 6px rgba(200,150,12,0.4);
 }
-/* locked: dark silhouette, still enticing */
+/* 特殊(#28–#35)：藍色標籤，與傳說(金)區隔 */
+.state-card .rarity.special{
+  background:#060E9F;
+  text-shadow:none;
+  box-shadow:0 2px 6px rgba(6,14,159,0.35);
+}
+/* locked: 角色以純灰剪影呈現（看不到內部細節，只剩灰色形體） */
 .state-card.locked{opacity:1;background:#EBEBF0;border-color:transparent;}
-.state-card.locked .turtle{filter:brightness(0) opacity(0.15);}
-.state-card.locked .name{opacity:0.3;color:#555;}
-.state-card.locked .lock{position:absolute;font-size:20px;opacity:0.5;}
+.state-card .state-thumb{position:relative;display:inline-flex;align-items:center;justify-content:center;width:60px;height:60px;margin-bottom:4px;}
+/* 用海龜 SVG 當遮罩，填單一灰色→角色形狀的灰剪影 */
+.state-card .turtle-silhouette{
+  width:60px;height:60px;background:#9AA0A8;
+  -webkit-mask:url('assets/sea-turtle.svg') center/60px 60px no-repeat;
+          mask:url('assets/sea-turtle.svg') center/60px 60px no-repeat;
+}
+/* emoji 角色（Phase 2 預留）：轉為灰剪影 */
+.state-card .thumb-emoji{font-size:36px;line-height:1;}
+.state-card .thumb-emoji.locked{filter:brightness(0) opacity(.4);}
+.state-card.locked .name{opacity:.6;color:#555;}
+/* 未解鎖鎖頭 icon（取代舊 🔒 emoji） */
+.state-card .lock-badge{position:absolute;top:6px;right:6px;width:16px;height:16px;color:#8A8A93;}
+/* 彈窗「尚未解鎖」前的行內鎖頭 icon */
+.lock-inline{display:inline-block;width:12px;height:12px;vertical-align:-2px;margin-right:4px;color:#999;}
 
 /* ───── P7 year-cell detail overlay ───── */
 .year-detail-overlay{position:absolute;inset:0;z-index:50;background:rgba(0,0,0,0.45);display:flex;align-items:center;justify-content:center;padding:24px;}
@@ -973,6 +992,7 @@ img,svg{display:block;}
 .year-detail-name{font-size:22px;font-weight:900;color:#1a1a1a;margin-top:4px;}
 .year-detail-month{font-size:12px;color:#888;margin-top:6px;}
 .year-detail-rarity{margin-top:8px;font-size:12px;font-weight:800;color:#c47b00;background:#FFF8E1;padding:3px 10px;border-radius:999px;}
+.year-detail-rarity.special{color:#060E9F;background:#E7E9FB;}
 .state-detail-turtle{width:240px;height:240px;object-fit:contain;margin-bottom:12px;}
 
 /* ───── P10 month picker (overlay on P7) ───── */

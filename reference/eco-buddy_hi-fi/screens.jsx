@@ -1103,7 +1103,7 @@ const pickStatusPackReward = (item, dexStates = []) => {
   const existing = dexStates.find(s => s.code === code);
   return {
     code,
-    name: existing?.name ?? `${item.statusRange.label} #${code}`,
+    name: existing?.name ?? dexTypeName(code),
   };
 };
 
@@ -1239,9 +1239,8 @@ const P4Shop = ({ setScreen, state, dispatch, tweaks, payload }) => {
                   <>
                     {renderPrice(it)}
                     <button className="buy-btn" disabled={!canBuy}
-                      onClick={(e) => { e.stopPropagation(); if (isPhase2) { hasDetail ? setDetailItem(it) : setPurchasing(it); } }}
-                      style={!canBuy ? { opacity: 0.45, cursor: 'default' } : {}}>
-                      {!isPhase2 ? '尚未開放' : hasDetail ? '查看' : '帶回家'}
+                      onClick={(e) => { e.stopPropagation(); if (isPhase2) { hasDetail ? setDetailItem(it) : setPurchasing(it); } }}>
+                      {!isPhase2 ? '即將開放' : hasDetail ? '查看' : '帶回家'}
                     </button>
                   </>
                 )}
@@ -1290,8 +1289,7 @@ const P4Shop = ({ setScreen, state, dispatch, tweaks, payload }) => {
                       <div className="price">
                         {renderPrice(it)}
                         <button className="buy-btn" disabled={!isPhase2}
-                          onClick={(e) => { e.stopPropagation(); if (isPhase2) setPurchasing(it); }}
-                          style={!isPhase2 ? { opacity: 0.45, cursor: 'default' } : {}}>
+                          onClick={(e) => { e.stopPropagation(); if (isPhase2) setPurchasing(it); }}>
                           {!isPhase2 ? '即將開放' : '帶回家'}
                         </button>
                       </div>
@@ -2138,6 +2136,21 @@ const P6Ads = ({ setScreen, state, dispatch }) => {
 
 };
 
+/* 特殊狀態標籤：#36 傳說（金）、#28–#35 特殊（藍）。絕對定位不撐開卡片 */
+const DexTag = ({ state }) => state.legendary
+  ? <span className="rarity">傳說</span>
+  : state.tag ? <span className="rarity special">{state.tag}</span> : null;
+
+/* 鎖頭 icon（取代 🔒 emoji）：卡片角標與彈窗內文皆共用此向量圖 */
+const LockGlyph = ({ className }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" aria-hidden="true">
+    <rect x="5" y="10.5" width="14" height="9.5" rx="2.4" fill="currentColor" />
+    <path d="M8 10.5V7.5a4 4 0 0 1 8 0v3" stroke="currentColor" strokeWidth="2.2" fill="none" strokeLinecap="round" />
+    <circle cx="12" cy="15.2" r="1.5" fill="#fff" />
+  </svg>
+);
+const DexLockBadge = () => <LockGlyph className="lock-badge" />;
+
 const P7DetailOverlay = ({ onClose, children }) => ReactDOM.createPortal(
   <div className="year-detail-overlay" onClick={onClose}>{children}</div>,
   document.querySelector('.iphone-screen')
@@ -2179,29 +2192,33 @@ const P7Dex = ({ setScreen, state, dispatch, onOpenPicker, tweaks, payload }) =>
   { m: 12, locked: true }];
 
 
-  // Phase 2：每角色 36 種狀態（小海龜用既有 9 種解鎖資料 + 27 種預留鎖定；其他角色全鎖定）
-  const dexTotal = isPhase2 ? 36 : 9;
+  // 夥伴日誌完整呈現官方 36 型態（27 基礎 + 9 隱藏），不受商店上線階段影響。
+  // 小海龜的解鎖狀態與 tint 取自 state.dexStates；其他角色（Phase 2）為全鎖定預留。
+  const dexTotal = 36;
   const baseStates = state.dexStates;
   const states = (() => {
-    if (!isPhase2) return baseStates;
-    if (charId !== 'turtle') {
-      // 其他角色：全部鎖定預留
-      return Array.from({ length: 36 }, (_, i) => ({
-        code: String(i + 1).padStart(2, '0'),
-        name: '???',
+    if (isPhase2 && charId !== 'turtle') {
+      return DEX_TYPE_CATALOG.map(t => ({
+        code: t.code,
+        name: t.name,
+        legendary: Boolean(t.legendary),
+        tag: t.tag,
         unlocked: false,
         character: charId,
       }));
     }
-    // 小海龜 Phase 2：原 9 格 + 27 格鎖定預留
-    const knownCodes = new Set(baseStates.map(s => s.code));
-    const padded = [];
-    for (let i = 1; i <= 36; i++) {
-      const code = String(i).padStart(2, '0');
-      if (knownCodes.has(code)) padded.push(baseStates.find(s => s.code === code));
-      else padded.push({ code, name: '???', unlocked: false });
-    }
-    return padded;
+    const known = new Map(baseStates.map(s => [s.code, s]));
+    return DEX_TYPE_CATALOG.map(t => {
+      const owned = known.get(t.code);
+      return {
+        code: t.code,
+        name: t.name,
+        legendary: Boolean(t.legendary),
+        tag: t.tag,
+        unlocked: owned ? owned.unlocked : false,
+        tint: owned?.tint,
+      };
+    });
   })();
   const stripRef = useRef(null);
   const currentCellRef = useRef(null);
@@ -2279,7 +2296,7 @@ const P7Dex = ({ setScreen, state, dispatch, onOpenPicker, tweaks, payload }) =>
               <div className="year-detail-collected">已收藏 ✓</div>
               <div className="year-detail-emoji">{detailMo.icon}</div>
               <div className="year-detail-code">#{detailMo.code}</div>
-              <div className="year-detail-name">{charState?.name || '???'}</div>
+              <div className="year-detail-name">{charState?.name || dexTypeName(detailMo.code)}</div>
               <div className="year-detail-month">{String(detailMo.m).padStart(2, '0')} 月 · 2026 年度</div>
               {charState?.legendary && <div className="year-detail-rarity">傳說</div>}
             </div>
@@ -2324,15 +2341,21 @@ const P7Dex = ({ setScreen, state, dispatch, onOpenPicker, tweaks, payload }) =>
             {s.unlocked ? <>
               <img className="turtle" src="assets/sea-turtle.svg" alt="" style={{ filter: s.tint || 'none' }} />
               <span className="name">{s.name}</span>
-              {s.legendary && <span className="rarity">傳說</span>}
+              <DexTag state={s} />
             </> : (charId === 'turtle' ? <>
-              <img className="turtle" src="assets/sea-turtle.svg" alt="" />
-              <span className="name">??? ???</span>
-              <span className="lock" style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)' }}>🔒</span>
+              <span className="state-thumb">
+                <span className="turtle-silhouette" />
+              </span>
+              <span className="name">{s.name}</span>
+              <DexTag state={s} />
+              <DexLockBadge />
             </> : <>
-              <div style={{ width: 60, height: 60, marginBottom: 4, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 36, opacity: 0.18 }}>{currentChar.icon}</div>
-              <span className="name">??? ???</span>
-              <span className="lock" style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)' }}>🔒</span>
+              <span className="state-thumb">
+                <span className="thumb-emoji locked">{currentChar.icon}</span>
+              </span>
+              <span className="name">{s.name}</span>
+              <DexTag state={s} />
+              <DexLockBadge />
             </>)}
           </div>
         )}
@@ -2344,7 +2367,7 @@ const P7Dex = ({ setScreen, state, dispatch, onOpenPicker, tweaks, payload }) =>
             <button className="year-detail-close" onClick={() => setDetailState(null)}>✕</button>
             {detailState.unlocked
               ? <div className="year-detail-collected">已解鎖 ✓</div>
-              : <div className="year-detail-collected" style={{ background: 'rgba(0,0,0,0.06)', color: '#999' }}>🔒 尚未解鎖</div>
+              : <div className="year-detail-collected" style={{ background: 'rgba(0,0,0,0.06)', color: '#999' }}><LockGlyph className="lock-inline" />尚未解鎖</div>
             }
             {detailState.character && detailState.character.id !== 'turtle' ? (
               <div style={{ width: 120, height: 120, margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 72, opacity: detailState.unlocked ? 1 : 0.25 }}>{detailState.character.icon}</div>
@@ -2356,9 +2379,11 @@ const P7Dex = ({ setScreen, state, dispatch, onOpenPicker, tweaks, payload }) =>
               />
             )}
             <div className="year-detail-code">#{detailState.code}</div>
-            <div className="year-detail-name">{detailState.unlocked ? detailState.name : '??? ???'}</div>
-            <div className="year-detail-month">本月 6 月 · {detailState.character?.name || '小海龜'}</div>
-            {detailState.legendary && detailState.unlocked && <div className="year-detail-rarity">傳說</div>}
+            <div className="year-detail-name">{detailState.name}</div>
+            <div className="year-detail-month">觸發條件：{dexTypeTrigger(detailState.code)}</div>
+            {detailState.legendary
+              ? <div className="year-detail-rarity">傳說</div>
+              : detailState.tag ? <div className="year-detail-rarity special">{detailState.tag}</div> : null}
           </div>
         </P7DetailOverlay>
       )}
@@ -2379,7 +2404,7 @@ const P8Profile = ({ setScreen, state, tweaks }) => {
       title: '', en: 'BUDDY',
       items: [
         { icon: '🐢', label: '夥伴狀態', sub: `體力 ${state.stats.hp} · 潔淨 ${state.stats.clean} · 心情 ${state.stats.mood}`, go: 'p1' },
-        { icon: '📖', label: '夥伴日誌', sub: `認識了 ${state.dexStates.filter(s => s.unlocked).length} / 9 個樣子`, go: 'p7' },
+        { icon: '📖', label: '夥伴日誌', sub: `認識了 ${state.dexStates.filter(s => s.unlocked).length} / 36 個樣子`, go: 'p7' },
       ],
     },
     {
@@ -2676,7 +2701,7 @@ const P10Picker = ({ setScreen, state, dispatch, onClose }) => {
               <img className="turtle" src="assets/sea-turtle.svg" alt="" style={{ filter: s.tint || 'none' }} />
               {s.unlocked ? <>
                 <span className="name">{s.name}</span>
-                {s.legendary && <span className="rarity">傳說</span>}
+                <DexTag state={s} />
               </> : <>
                 <span className="lock" style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)' }}>🔒</span>
               </>}

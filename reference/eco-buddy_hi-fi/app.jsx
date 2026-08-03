@@ -23,6 +23,60 @@ const storeWeeklyFood = (state, amount = 1, source = 'earned') => {
   };
 };
 
+/* ───────── 角色型態總表（來源：docs/animation/CHARACTER_TYPES.md v1.3 / RFP v1.4）─────────
+   #01–#27 基礎型態、#28–#36 特殊隱藏型態，共 36 種。name 為官方定案中文標籤。
+   P7 夥伴日誌無論解鎖與否都顯示此名稱。#36 循環之神為傳說級。 */
+const DEX_TYPE_CATALOG = [
+  { code:'01', name:'瀕危史萊姆' },
+  { code:'02', name:'髒髒小可憐' },
+  { code:'03', name:'樂觀泥巴球' },
+  { code:'04', name:'憂鬱紙片人' },
+  { code:'05', name:'標準初生嬰' },
+  { code:'06', name:'迷你啦啦隊' },
+  { code:'07', name:'易碎玻璃心' },
+  { code:'08', name:'靜謐水晶' },
+  { code:'09', name:'閃耀精靈' },
+  { code:'10', name:'暴躁泥獸' },
+  { code:'11', name:'迷茫拾荒者' },
+  { code:'12', name:'樂天泥巴客' },
+  { code:'13', name:'鬧脾氣市民' },
+  { code:'14', name:'環保初心' },
+  { code:'15', name:'快樂小幫手' },
+  { code:'16', name:'傲嬌貴族' },
+  { code:'17', name:'優雅守護者' },
+  { code:'18', name:'科技大使' },
+  { code:'19', name:'臃腫污染源' },
+  { code:'20', name:'遲緩巨漢' },
+  { code:'21', name:'樂天胖達' },
+  { code:'22', name:'悶悶不樂巨球' },
+  { code:'23', name:'溫和巨獸' },
+  { code:'24', name:'彈力大福' },
+  { code:'25', name:'悲傷神獸' },
+  { code:'26', name:'沉睡巨像' },
+  { code:'27', name:'ECOCO 領袖' },
+  { code:'28', name:'暴食過載者', tag:'特殊', trigger:'體力 ≥ 95 且當週餵食滿 5 次' },
+  { code:'29', name:'潔癖大師',   tag:'特殊', trigger:'潔淨連續 7 天 ≥ 90' },
+  { code:'30', name:'瘋狂點擊狂', tag:'特殊', trigger:'心情 ≥ 95 且當日觸碰達上限' },
+  { code:'31', name:'寶特瓶國王', tag:'特殊', trigger:'累計帶回寶特瓶 ≥ 500' },
+  { code:'32', name:'電能機甲',   tag:'特殊', trigger:'累計帶回電池 ≥ 200' },
+  { code:'33', name:'壞滅核心',   tag:'特殊', trigger:'三維同時歸零後首次登入' },
+  { code:'34', name:'派對動物',   tag:'特殊', trigger:'連續登入滿 7 天' },
+  { code:'35', name:'黃金暴發戶', tag:'特殊', trigger:'首次完成儲值' },
+  { code:'36', name:'循環之神', legendary:true, trigger:'三維同時滿值累計 7 天' },
+];
+const DEX_NAME_BY_CODE = Object.fromEntries(DEX_TYPE_CATALOG.map(t => [t.code, t.name]));
+const dexTypeName = (code) => DEX_NAME_BY_CODE[code] || `狀態 #${code}`;
+const dexTypeLegendary = (code) => Boolean(DEX_TYPE_CATALOG.find(t => t.code === code)?.legendary);
+// 觸發條件：#28–#36 讀總表 trigger；#01–#27 由三維 低/中/高 組合推導（來源 CHARACTER_TYPES.md §一 Combo）
+const DEX_LV = ['低', '中', '高'];
+const dexTypeTrigger = (code) => {
+  const t = DEX_TYPE_CATALOG.find(x => x.code === code);
+  if (t?.trigger) return t.trigger;
+  const n = parseInt(code, 10) - 1;
+  if (n < 0 || n > 26) return '';
+  return `體力${DEX_LV[Math.floor(n / 9)]} · 潔淨${DEX_LV[Math.floor(n / 3) % 3]} · 心情${DEX_LV[n % 3]}`;
+};
+
 /* ───────── Default state ───────── */
 const DEFAULT_STATE = {
   stats: { hp: 78, clean: 62, mood: 45 },
@@ -60,15 +114,15 @@ const DEFAULT_STATE = {
     { id: 'PTS-20260605', name: '逗貓棒',         thumb: 'assets/toy/ecobuddy-toy____逗貓棒.webp', pointsCost: 120, date: '2026-06-05 15:47' },
   ],
   dexStates: [
-    { code:'01', name:'瀕死邊緣', unlocked:true,  tint:'grayscale(0.5) brightness(0.7)' },
-    { code:'07', name:'潔癖徹底', unlocked:true,  tint:'brightness(1.05) saturate(0.7)' },
-    { code:'08', name:'高冷貴婦', unlocked:true,  tint:'hue-rotate(-10deg)' },
-    { code:'13', name:'生活壓力', unlocked:true,  tint:'saturate(0.85)' },
-    { code:'17', name:'都市精英', unlocked:true,  tint:'sepia(0.2)' },
-    { code:'26', name:'雍容華貴', unlocked:false, tint:'hue-rotate(30deg) saturate(1.2)' },
-    { code:'30', name:'芝芭大舞', unlocked:false },
-    { code:'32', name:'彩虹之神', unlocked:false, legendary:true, tint:'hue-rotate(180deg) saturate(1.5)' },
-    { code:'34', name:'科技武裝', unlocked:false, tint:'contrast(1.2) saturate(0.6)' },
+    { code:'01', name:'瀕危史萊姆', unlocked:true,  tint:'grayscale(0.5) brightness(0.7)' },
+    { code:'07', name:'易碎玻璃心', unlocked:true,  tint:'brightness(1.05) saturate(0.7)' },
+    { code:'08', name:'靜謐水晶',   unlocked:true,  tint:'hue-rotate(-10deg)' },
+    { code:'13', name:'鬧脾氣市民', unlocked:true,  tint:'saturate(0.85)' },
+    { code:'17', name:'優雅守護者', unlocked:true,  tint:'sepia(0.2)' },
+    { code:'26', name:'沉睡巨像',   unlocked:false, tint:'hue-rotate(30deg) saturate(1.2)' },
+    { code:'30', name:'瘋狂點擊狂', unlocked:false },
+    { code:'36', name:'循環之神',   unlocked:false, legendary:true, tint:'hue-rotate(180deg) saturate(1.5)' },
+    { code:'34', name:'派對動物',   unlocked:false, tint:'contrast(1.2) saturate(0.6)' },
   ],
   pendingEvolveCode: null,
   highlightStateCode: null,
@@ -184,7 +238,7 @@ function stateReducer(state, action){
         ...state,
         dexStates: exists
           ? state.dexStates.map(s => s.code === action.code ? { ...s, unlocked: true } : s)
-          : [...state.dexStates, { code: action.code, name: action.name || `狀態 #${action.code}`, unlocked: true }],
+          : [...state.dexStates, { code: action.code, name: action.name || dexTypeName(action.code), unlocked: true, legendary: dexTypeLegendary(action.code) }],
         highlightStateCode: action.code,
       };
     }
