@@ -26,6 +26,13 @@
 - `scripts/update-engineering-changelog.ps1`
 
 <!-- AUTO-ENTRIES -->
+## 2026-08-03（手動補記）
+
+- Triggered scopes: hi-fi reference
+- Files:
+  - `reference/eco-buddy_hi-fi/screens.jsx` (hi-fi reference)
+  - `reference/eco-buddy_hi-fi/index.html` (hi-fi reference)
+- 說明：P10 月末選擇彈窗改為只顯示已解鎖型態（濾除鎖住卡），對應 commit `ba6074b`。
 <!-- engineering-change:41e9ee43e6817c23 -->
 ## 2026-07-27 14:50:10 +08:00
 
