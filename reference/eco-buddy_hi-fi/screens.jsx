@@ -1333,8 +1333,7 @@ const P4Shop = ({ setScreen, state, dispatch, tweaks, payload }) => {
                         <>
                           {renderPrice(it)}
                           <button className="buy-btn" disabled={!isPhase2}
-                            onClick={(e) => { e.stopPropagation(); setCosmeticDetail(it); }}
-                            style={!isPhase2 ? { background: '#E0E0E0', color: '#999', cursor: 'default' } : {}}>
+                            onClick={(e) => { e.stopPropagation(); setCosmeticDetail(it); }}>
                             {!isPhase2 ? '即將開放' : '查看'}
                           </button>
                         </>
@@ -1368,7 +1367,7 @@ const P4Shop = ({ setScreen, state, dispatch, tweaks, payload }) => {
                   <div className="price">
                     {renderPrice(it)}
                     <button className="buy-btn" disabled={it.soldOut || (it.payment === 'hybrid' && !isPhase2)} onClick={() => !it.soldOut && (it.payment !== 'hybrid' || isPhase2) && setPurchasing(it)}>
-                      {it.soldOut ? '本週已領滿' : it.payment === 'hybrid' && !isPhase2 ? '尚未開放' : '購買'}
+                      {it.soldOut ? '本週已領滿' : it.payment === 'hybrid' && !isPhase2 ? '即將開放' : '購買'}
                     </button>
                   </div>
                 </div>
