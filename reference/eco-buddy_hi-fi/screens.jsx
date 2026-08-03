@@ -2692,18 +2692,14 @@ const P10Picker = ({ setScreen, state, dispatch, onClose }) => {
           )}
         </div>
         <div className="grid">
-          {states.map((s) =>
+          {states.filter((s) => s.unlocked).map((s) =>
           <div key={s.code}
-          className={`state-card ${s.unlocked ? 'unlocked' : 'locked'} ${s.legendary ? 'legendary' : ''} ${selected === s.code ? 'selected' : ''}`}
-          onClick={() => s.unlocked && setSelected(s.code)}>
+          className={`state-card unlocked ${s.legendary ? 'legendary' : ''} ${selected === s.code ? 'selected' : ''}`}
+          onClick={() => setSelected(s.code)}>
               <span className="code">#{s.code}</span>
               <img className="turtle" src="assets/sea-turtle.svg" alt="" style={{ filter: s.tint || 'none' }} />
-              {s.unlocked ? <>
-                <span className="name">{s.name}</span>
-                <DexTag state={s} />
-              </> : <>
-                <span className="lock" style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)' }}>🔒</span>
-              </>}
+              <span className="name">{s.name}</span>
+              <DexTag state={s} />
             </div>
           )}
         </div>
