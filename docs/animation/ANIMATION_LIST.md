@@ -32,7 +32,7 @@
 | Idle Loop — 低 mood | 5 秒無縫循環：嘆氣 ＋ 耳朵下垂 | B-3、B-5 |
 | Idle Loop — 中 mood | 4 秒無縫循環：眨眼 ＋ 張望 | B-3、B-5 |
 | Idle Loop — 高 mood | 3 秒無縫循環：搖擺 ＋ 哼歌嘴型 | B-3、B-5 |
-| 命名規範對照截圖 | 對照命名手冊 v1.2，逐一確認 Rive 內部命名 | B-7 |
+| 命名規範對照截圖 | 對照命名手冊 v1.3，逐一確認 Rive 內部命名、16 個 inbound Trigger input 與 6 個 outbound Rive Event | B-7 |
 
 ---
 
