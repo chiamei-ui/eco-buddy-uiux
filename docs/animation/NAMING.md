@@ -163,13 +163,13 @@
 
 > Inbound Trigger 必須以 State Machine input 存在並可由 App 呼叫；Outbound Rive Event 必須在正確 timeline keyframe 拋出並可由 App 監聽，不得要求 App 以同名 Trigger 呼叫。音效播放整合由甲方工程師實作；乙方須確保名稱、方向、類型、事件時機及 keyframe 同步與本表一致。
 >
-> ⚠️ **效力註記（2026-09-22）**：甲方內部受控命名依 XLSX Naming Manual v1.3；對外合約附件效力待 Amendment-03 經雙方依合約第 11(1) 條書面確認。W4 內部產品流程不改變乙方既有 `ev_gold_burst`／FX4／音效交付義務；`ev_gold_burst` 仍是 22 個鎖定事件介面之一，但類型為 outbound Rive Event，而非 App-callable inbound Trigger。
+> ⚠️ **效力註記（2026-09-22）**：甲方內部受控命名依 XLSX Naming Manual v1.3，尚未正式生效，生效前仍以 v1.2 為準。W4 內部產品流程不改變乙方既有 `ev_gold_burst`／FX4／音效交付義務；`ev_gold_burst` 仍是 22 個鎖定事件介面之一，但類型為 outbound Rive Event，而非 App-callable inbound Trigger。
 
 ---
 
 ## 備注
 
-- **xlsx 正式版位置**：`naming/ECOCO_naming_manual_v1_3_bilingual_20260922.xlsx`（對外發送用；RFP v1.4 受影響驗收文字另依正式 RFP 修訂／Addendum 處理）
+- **xlsx 正式版位置**：`naming/ECOCO_naming_manual_v1_3_bilingual_20260922.xlsx`（尚未正式生效）
 - **通知外包**：任何影響外包工作的命名異動，由**窗口設計師**以正式 email 通知 Anastasiia，等書面確認後方可進入正式建構
 - **準據語言**：中英雙語並列，以中文版為準
 

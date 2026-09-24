@@ -10,8 +10,8 @@
 
 > ⚠️ **W4 稀有食物退役之效力範圍（2026-07-29 註記）**
 > 本檔及 [ANIMATION_LIST.md](ANIMATION_LIST.md)、[MONTHLY_SPEC.md](MONTHLY_SPEC.md)、[NAMING.md](NAMING.md) 相關敘述中的「W4 稀有食物退役」屬 **PM 內部產品決議**（餐袋機制、食物圖示排程），僅影響甲方素材供應，**不改變乙方現行交付／naming／trigger／驗收義務**。
-> 現行 binding RFP 仍為 v1.4；事件介面方向依 2026-09-22 已書面確認並整併至甲方內部受控命名手冊 v1.3：22 個 `ev_*` 識別名稱維持鎖定，分類為 16 個 inbound triggers 與 6 個 outbound Rive Events。Naming v1.3 與 RFP v1.4 衝突段落的對外合約效力待 Amendment-03 經雙方書面確認；正式修訂尚未生效。FX4、E-1、22 支音效及其他既有義務均未取消。
-> 本次不取消 FX4，也不因事件方向分類而減少 binding 交付。RFP 是否採完整 v1.5 或較窄的雙方書面 Addendum，依受控修訂紀錄另行決定；正式發布前不預先宣告變更生效，也不預判是否涉及議價。
+> 現行 binding RFP 仍為 v1.4；事件介面方向依 2026-09-22 已書面確認並整併至甲方內部受控命名手冊 v1.3：22 個 `ev_*` 識別名稱維持鎖定，分類為 16 個 inbound triggers 與 6 個 outbound Rive Events。v1.3 尚未正式生效，生效前仍以命名手冊 v1.2 為準。FX4、E-1、22 支音效及其他既有義務均未取消。
+> 本次不取消 FX4，也不因事件方向分類而減少 binding 交付。
 > 規格效力以 binding RFP 為準，本檔為團隊參考鏡像。
 
 ---
@@ -284,7 +284,7 @@ Phase 1 試作不要求實作以下規格。正式合約（Phase 2–4）啟動�
 |------|---------|------|------|
 | C-0B2-1 | 3.6 元素圖層拆分計畫確認：乙方提交 26 個狀態項目逐一清單，含主命名、預計子圖層、骨架附著位置（對應實際 Rive 節點命名）、與 S1–S10 插槽及 9.1 FX 可能衝突說明。通過標準：甲方書面確認。 | 必要 | Phase 0B-2 |
 | C-0B2-2 | State Machine 名稱與必要 input 確認：（1）SM 名稱 `BuddyMachine`；（2）`hp_level` / `clean_level` / `mood_level`（Number, 0–100）；（3）與命名手冊 v1.3 完全一致，無誤植。通過標準：甲方書面確認。 | 必要 | Phase 0B-2 |
-| C-0B2-3 | 事件介面命名、方向與存在性：依命名手冊 v1.3 檢查 16 個 inbound Trigger input 名稱／型別／可呼叫性，以及 6 個 outbound Rive Event 的 timeline keyframe／可監聽性；不得要求 outbound 名稱另有同名 Trigger node。通過標準：22 個名稱 100% 一致，方向／型別正確，代表性 inbound 與 outbound PoC 均無靜默失敗。※ RFP v1.4 原條文仍待正式 v1.5／Addendum 排除衝突。 | 必要 | Phase 0B-2 |
+| C-0B2-3 | 事件介面命名、方向與存在性：依命名手冊 v1.3 檢查 16 個 inbound Trigger input 名稱／型別／可呼叫性，以及 6 個 outbound Rive Event 的 timeline keyframe／可監聽性；不得要求 outbound 名稱另有同名 Trigger node。通過標準：22 個名稱 100% 一致，方向／型別正確，代表性 inbound 與 outbound PoC 均無靜默失敗。※ RFP v1.4 原條文待 v1.3 正式生效時一併更正。 | 必要 | Phase 0B-2 |
 | C-0B2-4 | 代表性架構可行性 PoC：得以簡易佔位素材（非最終美術）驗證：（1）任一 mood Idle 與狀態專屬演出疊加無互相覆蓋衝突；（2）任一特殊型態 has_* 觸發後骨架附著與覆寫機制正確；（3）#27→#36 銜接與 #33 壞滅轉場→S5 取代→Low mood Idle 邏輯正確；（4）任一狀態播放核心動作事件後可正確返回原狀態。通過標準：無錯誤控制同一骨架／屬性、無多餘 Key 覆蓋基礎 Idle、無骨架拉扯／穿模／位置跳動／裁切／錯誤 Draw Order、無新增後端 input/event/Slot/FX/狀態編號、.riv < 120KB。**僅驗證架構與邏輯可行性，不要求最終美術品質**；#28–#36 完整最終美術與全狀態組合測試留待 Phase 3 C-P3-4 驗收。（RFP v1.4 新增） | 必要 | Phase 0B-2 |
 | C-0B2-5 | Pivot／Bounds／Draw Order 基準表確認：乙方提交每一狀態之 pivot 錨點、bounds 邊界與 draw order 圖層排序規格表（依 §3.7(c)），作為月度替換安全範圍判定基準。通過標準：甲方以書面（含 email）確認後，始得作為 C-P2-6 及月度驗收之基準依據；**未經確認前不得引用「首版基準」作為驗收依據**。（RFP v1.4 新增） | 必要 | Phase 0B-2 |
 
