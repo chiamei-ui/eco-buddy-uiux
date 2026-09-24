@@ -10,7 +10,7 @@
 
 > ⚠️ **W4 稀有食物退役之效力範圍（2026-07-29 註記）**
 > 本檔及 [ANIMATION_LIST.md](ANIMATION_LIST.md)、[MONTHLY_SPEC.md](MONTHLY_SPEC.md)、[NAMING.md](NAMING.md) 相關敘述中的「W4 稀有食物退役」屬 **PM 內部產品決議**（餐袋機制、食物圖示排程），僅影響甲方素材供應，**不改變乙方現行交付／naming／trigger／驗收義務**。
-> 現行 binding RFP 仍為 v1.4；事件介面方向依 2026-09-22 已書面確認並整併至甲方內部受控命名手冊 v1.3：22 個 `ev_*` 識別名稱維持鎖定，分類為 16 個 inbound triggers 與 6 個 outbound Rive Events。v1.3 尚未正式生效，生效前仍以命名手冊 v1.2 為準。FX4、E-1、22 支音效及其他既有義務均未取消。
+> 現行 RFP 為 v1.4，命名手冊為 **v1.3（2026-09-23 起生效）**：22 個 `ev_*` 識別名稱維持鎖定，分類為 16 個 inbound triggers 與 6 個 outbound Rive Events；RFP v1.4 中涉及事件方向或類型的文字，以命名手冊 v1.3 為準。FX4、E-1、22 支音效及其他既有義務均未取消。
 > 本次不取消 FX4，也不因事件方向分類而減少 binding 交付。
 > 規格效力以 binding RFP 為準，本檔為團隊參考鏡像。
 
