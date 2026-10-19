@@ -1,7 +1,7 @@
 # ECO Buddy 命名手冊 Naming Manual
 
-**版本 / Version**: v1.3
-**對應 xlsx**: `naming/ECOCO_naming_manual_v1_3_bilingual_20260922.xlsx`
+**版本 / Version**: v1.4
+**對應 xlsx**: `naming/ECOCO_naming_manual_v1_4_bilingual_20261007.xlsx`
 **Owner**: 窗口設計師 @idahsueh-cmd（主寫）/ 前端工程師 @shangchian（技術格式確認）  
 **Commit prefix**: `[anim]`
 
@@ -70,7 +70,7 @@
 |------|------|
 | `BuddyMachine` | State Machine 名稱固定，不得改名 |
 | `hp_level` / `clean_level` / `mood_level` | 三個必要 input 名稱固定，不得更名 |
-| `ev_*` event interface | 22 個事件介面識別名稱鎖定，不得新增或改名；方向與類型依第三節分為 16 個 inbound triggers 與 6 個 outbound Rive Events |
+| `ev_*` event interface | 22 個事件介面識別名稱鎖定，不得新增或改名；方向與類型依第三節分為 13 個 App 送出事件與 9 個 Rive 發出通知，皆為 ViewModel Trigger |
 | `morph_01`–`morph_27` | Rive SM 內部型態對應，**非**後端傳入的 input，不出現於後端 API |
 
 ---
@@ -134,42 +134,42 @@
 
 ## 三、Event Interfaces 事件介面
 
-本節保留既有 22 個 `ev_*` 識別名稱，不新增或刪除名稱；正式分類為 **16 個 inbound triggers** 與 **6 個 outbound Rive Events**。
+本節保留既有 22 個 `ev_*` 識別名稱，不新增或刪除名稱；正式分類為 **13 個 App 送出事件** 與 **9 個 Rive 發出通知**，皆以 ViewModel Trigger 實作。
 
 | 事件名稱 | 動作群組 | 方向與類型 | 發起／接收 | 事件時機 | 音效／備註 |
 |---------|---------|-----------|-----------|---------|-----------|
-| `ev_eat_chew` | 餵食 | Inbound Trigger | App → Rive | App 於所選食物 drag/drop/release 後單次送出，啟動完整 1.5 秒序列並於結束後回 Idle | 咀嚼音（0.4–0.6s）；W4 稀有版需果汁噴濺音；不得建立第二個無關食物物件 |
-| `ev_eat_gulp` | 餵食 | Outbound Rive Event | Rive → App | 食物進入口中咽喉之吞嚥關鍵影格由 Rive timeline 拋出；不保留同名 inbound Trigger | 吞嚥音（Q 彈感）；音效依每週食物週期變化；供 App 監聽以觸發吞嚥音效及執行後端數據結算（扣除食物道具） |
-| `ev_scan_start` | 清潔 | Inbound Trigger | App → Rive | 啟動品牌橘色掃描光並進入穩定掃描待命 | 科技掃描音效 |
-| `ev_dirt_pop` | 清潔 | Inbound Trigger | App → Rive | 結算清潔時啟動擦拭與髒污剝落消散 | 灰塵爆裂音 |
-| `ev_scan_end` | 清潔 | Inbound Trigger | App → Rive | 正常路徑於最終掃描影格／清潔完成時送出；亦可自 `ev_scan_start` 階段用於取消或退出掃描流程 | 光圈淡出並回到當前潔淨值所對應 Idle |
-| `ev_pet_react` | 觸摸 | Inbound Trigger | App → Rive | 角色對觸摸做出反應時送出 | 角色音／環境音；音調依心情段位變化 |
-| `ev_pet_jump` | 觸摸 | Inbound Trigger | App → Rive | 高心情撒嬌／跳躍動作時送出 | 輕盈跳躍音 |
-| `ev_item_open` | 道具使用 | Inbound Trigger | App → Rive | 禮盒開啟、閃光出現時送出 | 開箱閃光音 |
-| `ev_item_react` | 道具使用 | Inbound Trigger | App → Rive | 角色與道具互動開始時送出 | 依道具種類變化 |
-| `ev_ad_charge` | 廣告獎勵 | Inbound Trigger | App → Rive | 充能粒子環繞角色時送出 | 充能上升音 |
-| `ev_ad_glow` | 廣告獎勵 | Inbound Trigger | App → Rive | 角色發光收尾時送出 | 光暈閃爍音 |
-| `ev_decay_start` | 每日衰減 | Inbound Trigger | App → Rive | 登入時啟動顫抖收縮動畫 | 顫抖音 |
-| `ev_decay_look` | 每日衰減 | Inbound Trigger | App → Rive | 角色以悲傷表情望向鏡頭時送出 | 輕嘆氣音 |
-| `ev_decay_end` | 每日衰減 | Outbound Rive Event | Rive → App | 衰減動畫結束、新 Idle 開始前由 Rive timeline 拋出 | App 可監聽確認衰減流程完成 |
-| `ev_evolve_start` | 進化 | Inbound Trigger | App → Rive | 白光包裹角色的第 0 影格前送出 | 上升音起始 |
-| `ev_evolve_burst` | 進化 | Outbound Rive Event | Rive → App | 品牌色粒子爆發關鍵影格（約 1.0s）由 Rive timeline 拋出 | 成就爆發音（1–2s） |
-| `ev_gold_burst` | W4 稀有食物 | Outbound Rive Event | Rive → App | W4 餵食 timeline 的金色粒子爆發關鍵影格由 Rive 拋出；非 App 獨立呼叫入口 | 金色粒子爆發音；與 ev_eat 系列獨立，義務不因正式 App 不使用 W4 而移除 |
-| `ev_spawn_hatch` | 每月發放 | Inbound Trigger | App → Rive | 每月 1 日首次登入時送出，啟動孵化並直接接 Idle | 孵化音 |
-| `ev_farewell_start` | 每月結束 | Inbound Trigger | App → Rive | 月末最後一天送出，啟動揮手告別 | 溫馨告別音 |
-| `ev_farewell_end` | 每月結束 | Outbound Rive Event | Rive → App | 告別動畫完全結束（約 2.0s）由 Rive timeline 拋出 | App 可監聽後執行歸檔與下月預告推播 |
-| `ev_collapse_start` | 崩塌 | Inbound Trigger | App → Rive | 三大屬性同時歸零、後端標記壞滅待觸發後，於下次登入送出 | 裂縫蔓延低頻音；不是固定 30 天未登入 |
-| `ev_collapse_end` | 崩塌 | Outbound Rive Event | Rive → App | 紅眼亮起、崩塌型態完成時由 Rive timeline 拋出 | 深沉衝擊音；接入型態 #33 Idle |
+| `ev_eat_chew` | 餵食 | Inbound Trigger（ViewModel） | App → Rive | App 於所選食物 drag/drop/release 後單次送出，啟動完整 1.5 秒序列並於結束後回 Idle | 咀嚼音（0.4–0.6s）；W4 稀有版需果汁噴濺音；不得建立第二個無關食物物件 |
+| `ev_eat_gulp` | 餵食 | Outbound 通知（ViewModel Trigger） | Rive → App | 食物進入口中咽喉之吞嚥關鍵影格由 Rive timeline 拋出；App 不送出同名 Trigger | 吞嚥音（Q 彈感）；音效依每週食物週期變化；供 App 監聽以觸發吞嚥音效及執行後端數據結算（扣除食物道具） |
+| `ev_scan_start` | 清潔 | Inbound Trigger（ViewModel） | App → Rive | 啟動品牌橘色掃描光並進入穩定掃描待命 | 科技掃描音效 |
+| `ev_dirt_pop` | 清潔 | Inbound Trigger（ViewModel） | App → Rive | 結算清潔時啟動擦拭與髒污剝落消散 | 灰塵爆裂音 |
+| `ev_scan_end` | 清潔 | Inbound Trigger（ViewModel） | App → Rive | 正常路徑於最終掃描影格／清潔完成時送出；亦可自 `ev_scan_start` 階段用於取消或退出掃描流程 | 光圈淡出並回到當前潔淨值所對應 Idle |
+| `ev_pet_react` | 觸摸 | Inbound Trigger（ViewModel） | App → Rive | 角色對觸摸做出反應時送出 | 角色音／環境音；音調依心情段位變化 |
+| `ev_pet_jump` | 觸摸 | Inbound Trigger（ViewModel） | App → Rive | 高心情撒嬌／跳躍動作時送出 | 輕盈跳躍音 |
+| `ev_item_open` | 道具使用 | Inbound Trigger（ViewModel） | App → Rive | 玩家使用道具時由 App 單次送出；Rive 播放完整道具動畫（開箱閃光→角色互動），並於互動開始時發出 `ev_item_react` | 開箱閃光音 |
+| `ev_item_react` | 道具使用 | Outbound 通知（ViewModel Trigger） | Rive → App | 在「角色與道具專屬互動開始」的關鍵影格，由 Rive 回傳一次，供 App 同步音效；App 不送出同名 Trigger | 依道具種類變化 |
+| `ev_ad_charge` | 廣告獎勵 | Inbound Trigger（ViewModel） | App → Rive | 廣告觀看完成時由 App 單次送出；Rive 播放完整廣告獎勵動畫（充能→發光收尾），並於發光收尾時發出 `ev_ad_glow` | 充能上升音 |
+| `ev_ad_glow` | 廣告獎勵 | Outbound 通知（ViewModel Trigger） | Rive → App | 在「角色發光收尾」的關鍵影格，由 Rive 回傳一次，供 App 同步音效；App 不送出同名 Trigger | 光暈閃爍音 |
+| `ev_decay_start` | 每日衰減 | Inbound Trigger（ViewModel） | App → Rive | 登入時啟動顫抖收縮動畫 | 顫抖音 |
+| `ev_decay_look` | 每日衰減 | Outbound 通知（ViewModel Trigger） | Rive → App | 在「角色看向鏡頭並呈現委屈表情」的關鍵影格，由 Rive 回傳一次，供 App 同步音效；App 不送出同名 Trigger | 輕嘆氣音 |
+| `ev_decay_end` | 每日衰減 | Outbound 通知（ViewModel Trigger） | Rive → App | 衰減動畫結束、新 Idle 開始前由 Rive timeline 拋出 | App 可監聽確認衰減流程完成 |
+| `ev_evolve_start` | 進化 | Inbound Trigger（ViewModel） | App → Rive | 白光包裹角色的第 0 影格前送出 | 上升音起始 |
+| `ev_evolve_burst` | 進化 | Outbound 通知（ViewModel Trigger） | Rive → App | 品牌色粒子爆發關鍵影格（約 1.0s）由 Rive timeline 拋出 | 成就爆發音（1–2s） |
+| `ev_gold_burst` | W4 稀有食物 | Outbound 通知（ViewModel Trigger） | Rive → App | W4 餵食 timeline 的金色粒子爆發關鍵影格由 Rive 拋出；非 App 獨立呼叫入口 | 金色粒子爆發音；與 ev_eat 系列獨立，義務不因正式 App 不使用 W4 而移除 |
+| `ev_spawn_hatch` | 每月發放 | Inbound Trigger（ViewModel） | App → Rive | 每月 1 日首次登入時送出，啟動孵化並直接接 Idle | 孵化音 |
+| `ev_farewell_start` | 每月結束 | Inbound Trigger（ViewModel） | App → Rive | 月末最後一天送出，啟動揮手告別 | 溫馨告別音 |
+| `ev_farewell_end` | 每月結束 | Outbound 通知（ViewModel Trigger） | Rive → App | 告別動畫完全結束（約 2.0s）由 Rive timeline 拋出 | App 可監聽後執行歸檔與下月預告推播 |
+| `ev_collapse_start` | 崩塌 | Inbound Trigger（ViewModel） | App → Rive | 三大屬性同時歸零、後端標記壞滅待觸發後，於下次登入送出 | 裂縫蔓延低頻音；不是固定 30 天未登入 |
+| `ev_collapse_end` | 崩塌 | Outbound 通知（ViewModel Trigger） | Rive → App | 紅眼亮起、崩塌型態完成時由 Rive timeline 拋出 | 深沉衝擊音；接入型態 #33 Idle |
 
-> Inbound Trigger 必須以 State Machine input 存在並可由 App 呼叫；Outbound Rive Event 必須在正確 timeline keyframe 拋出並可由 App 監聽，不得要求 App 以同名 Trigger 呼叫。音效播放整合由甲方工程師實作；乙方須確保名稱、方向、類型、事件時機及 keyframe 同步與本表一致。
+> App 送出事件須以 ViewModel 同名 Trigger 存在並可由 App 呼叫；Rive 發出通知須以 ViewModel Trigger 於正確時間軸關鍵影格發出並可由 App 監聽，不要求以 State Machine input 或原生 Rive Event 實作。部分 App 送出事件播放中的同名回音（`ev_eat_chew`、`ev_dirt_pop`、`ev_scan_end`、`ev_item_open`、`ev_ad_charge`、`ev_spawn_hatch`）不列入 22 個介面，App 不得據以結算或推進流程，得予保留。音效播放整合由甲方工程師實作；乙方須確保名稱、方向、類型、事件時機及 keyframe 同步與本表一致。
 >
-> ⚠️ **效力註記（2026-09-23）**：命名手冊 v1.3 自 2026-09-23 起生效，取代 v1.2。W4 內部產品流程不改變乙方既有 `ev_gold_burst`／FX4／音效交付義務；`ev_gold_burst` 仍是 22 個鎖定事件介面之一，但類型為 outbound Rive Event，而非 App-callable inbound Trigger。
+> ⚠️ **效力註記（2026-10-09）**：命名手冊 v1.4 自 2026-10-09 起生效，取代 v1.3（v1.3 自 2026-09-23 起取代 v1.2）。W4 內部產品流程不改變乙方既有 `ev_gold_burst`／FX4／音效交付義務；`ev_gold_burst` 仍是 22 個鎖定事件介面之一，類型為 Rive 發出通知，而非 App 可呼叫的 Trigger。
 
 ---
 
 ## 備注
 
-- **xlsx 正式版位置**：`naming/ECOCO_naming_manual_v1_3_bilingual_20260922.xlsx`（2026-09-23 起生效）
+- **xlsx 正式版位置**：`naming/ECOCO_naming_manual_v1_4_bilingual_20261007.xlsx`（2026-10-09 起生效）
 - **通知外包**：任何影響外包工作的命名異動，由**窗口設計師**以正式 email 通知 Anastasiia，等書面確認後方可進入正式建構
 - **準據語言**：中英雙語並列，以中文版為準
 
